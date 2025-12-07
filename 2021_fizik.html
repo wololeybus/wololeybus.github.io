@@ -1,0 +1,806 @@
+<!DOCTYPE html>
+<html lang="tr" data-theme="light">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>İYTE Fizik GPA Calculator</title>
+    <style>
+        :root {
+            --iyte-red: #b30000;
+            --bg-color: #f0f2f5;
+            --sidebar-bg: #ffffff;
+            --card-bg: #ffffff;
+            --text-main: #2c3e50;
+            --text-sub: #7f8c8d;
+            --border-color: #e9ecef;
+            --input-bg: #ffffff;
+            --input-border: #ced4da;
+            --shadow: 0 4px 6px rgba(0,0,0,0.05);
+            --hover-bg: #f8f9fa;
+            --danger-bg: #f8d7da;
+            --danger-text: #721c24;
+            --success-bg: #d4edda;
+            --success-text: #155724;
+            --warning-bg: #fff3cd;
+            --warning-text: #856404;
+        }
+
+        [data-theme="dark"] {
+            --iyte-red: #ff4d4d;
+            --bg-color: #121212;
+            --sidebar-bg: #1e1e1e;
+            --card-bg: #1e1e1e;
+            --text-main: #e0e0e0;
+            --text-sub: #a0a0a0;
+            --border-color: #333333;
+            --input-bg: #2d2d2d;
+            --input-border: #444444;
+            --shadow: 0 4px 6px rgba(0,0,0,0.3);
+            --hover-bg: #2c2c2c;
+            --danger-bg: #3e1216;
+            --danger-text: #ff8b94;
+            --success-bg: #0e2e16;
+            --success-text: #81c784;
+            --warning-bg: #3e3006;
+            --warning-text: #ffda6a;
+        }
+
+        * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+            background-color: var(--bg-color);
+            color: var(--text-main);
+            margin: 0;
+            padding: 0;
+            height: 100%; 
+            min-height: 100vh;
+            overflow-x: hidden;
+        }
+
+        .app-layout { display: flex; height: 100vh; width: 100%; overflow: hidden; }
+
+        .sidebar-left, .sidebar-right {
+            width: 300px; background: var(--sidebar-bg); display: flex; flex-direction: column;
+            padding: 20px; z-index: 10; overflow-y: auto; flex-shrink: 0;
+            -webkit-overflow-scrolling: touch; border-right: 1px solid var(--border-color);
+            position: relative;
+        }
+        .sidebar-right { border-left: 1px solid var(--border-color); border-right: none; }
+
+        .main-content { 
+            flex: 1; padding: 30px; overflow-y: auto; scroll-behavior: smooth; 
+            -webkit-overflow-scrolling: touch; padding-bottom: 100px; 
+        }
+        .content-container { max-width: 850px; margin: 0 auto; }
+
+        /* UI Elements */
+        .brand-title { font-size: 1.3rem; font-weight: 800; color: var(--iyte-red); text-align: center; margin-bottom: 5px; letter-spacing: 1px; }
+        .brand-subtitle { font-size: 0.75rem; color: var(--text-sub); text-align: center; padding-bottom: 15px; border-bottom: 1px solid var(--border-color); margin-bottom: 20px; }
+        
+        .theme-toggle { 
+            position: absolute; top: 10px; right: 10px; 
+            background: var(--card-bg); border: 1px solid var(--border-color); 
+            border-radius: 50%; cursor: pointer; color: var(--text-main); 
+            font-size: 1.2rem; width: 35px; height: 35px;
+            display: flex; align-items: center; justify-content: center;
+            z-index: 200; 
+        }
+
+        .stat-card { background: var(--card-bg); border: 2px solid var(--iyte-red); color: var(--iyte-red); border-radius: 12px; padding: 20px; text-align: center; margin-bottom: 15px; }
+        .gpa-fail { background: var(--danger-bg); color: var(--danger-text); border-color: var(--danger-text); }
+        .gpa-ok { background: var(--card-bg); color: var(--text-main); border-color: var(--text-main); }
+        .gpa-honor { background: var(--success-bg); color: var(--success-text); border-color: var(--success-text); }
+        .gpa-high { background: var(--warning-bg); color: var(--warning-text); border-color: var(--warning-text); } 
+        .stat-value { font-size: 2.8rem; font-weight: 700; line-height: 1.2; }
+        .stat-status { font-size: 0.8rem; font-weight: bold; margin-top: 5px; }
+        
+        .credits-card { background: var(--card-bg); border: 1px solid var(--border-color); border-radius: 8px; padding: 15px; text-align: center; margin-bottom: 15px; }
+        .credits-val { font-size: 1.5rem; font-weight: bold; }
+
+        .reg-box { background: var(--card-bg); border: 1px solid var(--border-color); border-radius: 8px; margin-bottom: 15px; overflow: hidden; }
+        .reg-header { padding: 12px; font-weight: bold; font-size: 0.85rem; cursor: pointer; display: flex; justify-content: space-between; align-items: center; background: var(--hover-bg); }
+        .reg-content { display: none; padding: 12px; font-size: 0.8rem; }
+        .reg-box.open .reg-content { display: block; }
+        .reg-raw-text { font-size: 0.7rem; color: var(--text-sub); white-space: pre-line; line-height: 1.3; max-height: 200px; overflow-y: auto; background: var(--bg-color); padding: 8px; border-radius: 4px; border: 1px solid var(--border-color); }
+        .reg-alert { color: var(--danger-text); font-weight: bold; margin-bottom: 5px; }
+        .reg-warn { color: var(--warning-text); font-weight: bold; margin-bottom: 5px; }
+        .reg-ok { color: var(--success-text); font-weight: bold; margin-bottom: 5px; }
+
+        .profile-switcher { display: flex; gap: 5px; margin-bottom: 10px; }
+        .profile-btn { flex: 1; padding: 8px 5px; font-size: 0.75rem; border: 1px solid var(--border-color); background: var(--card-bg); color: var(--text-sub); cursor: pointer; border-radius: 4px; }
+        .profile-btn.active { background: var(--iyte-red); color: white; border-color: var(--iyte-red); font-weight: bold; }
+        
+        .panel-header { font-size: 0.8rem; font-weight: bold; color: var(--text-sub); text-transform: uppercase; margin-bottom: 10px; border-bottom: 1px solid var(--border-color); margin-top: 15px; padding-bottom: 5px; }
+        .tool-box { background: var(--card-bg); padding: 15px; border-radius: 8px; border: 1px solid var(--border-color); margin-bottom: 10px; }
+        .tool-input { width: 100%; padding: 10px; margin-bottom: 8px; border: 1px solid var(--input-border); border-radius: 4px; background: var(--input-bg); color: var(--text-main); font-size: 0.95rem; }
+        .tool-btn { width: 100%; padding: 12px; border: none; border-radius: 4px; cursor: pointer; font-weight: bold; font-size: 0.9rem; margin-bottom: 5px; }
+        .btn-backup { background: #6CB753; color: white; }
+        .btn-magic { background: #9b59b6; color: white; }
+        .btn-restore { background: #3899D1; color: white; display: block; text-align: center; padding: 12px; border-radius: 4px; cursor: pointer; font-size: 0.9rem; font-weight: bold;}
+        .btn-reset { background: transparent; border: 1px solid #e74c3c; color: #e74c3c; margin-top: 20px; }
+        .btn-undo { background: #f39c12; color: white; display: none; }
+        
+        .semester-block { background: var(--card-bg); border-radius: 10px; margin-bottom: 20px; border: 1px solid var(--border-color); box-shadow: var(--shadow); overflow: hidden; }
+        .semester-header { padding: 15px 20px; display: flex; justify-content: space-between; align-items: center; background: var(--card-bg); cursor: pointer; border-bottom: 1px solid transparent; user-select: none; }
+        .semester-block.open .semester-header { border-bottom-color: var(--border-color); }
+        .semester-title { font-weight: 700; font-size: 1rem; }
+        .semester-spa { font-size: 0.8rem; background: var(--bg-color); padding: 2px 8px; border-radius: 4px; color: var(--text-main); font-weight: 600; border: 1px solid var(--border-color); margin-left: 10px;}
+        .semester-content { display: none; padding: 0 20px 20px 20px; }
+        .semester-block.open .semester-content { display: block; }
+        .chevron { font-size: 0.8rem; color: var(--text-sub); margin-right: 8px;}
+
+        table { width: 100%; border-collapse: collapse; margin-top: 10px; }
+        th { text-align: left; font-size: 0.75rem; color: var(--text-sub); text-transform: uppercase; padding: 8px; }
+        td { padding: 8px; border-top: 1px solid var(--border-color); vertical-align: middle; }
+        
+        input, select { width: 100%; padding: 8px; border: 1px solid var(--input-border); border-radius: 6px; background: var(--input-bg); color: var(--text-main); -webkit-appearance: none; appearance: none; }
+        select { background-image: url("data:image/svg+xml;charset=UTF-8,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%237f8c8d' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3e%3cpolyline points='6 9 12 15 18 9'%3e%3c/polyline%3e%3c/svg%3e"); background-repeat: no-repeat; background-position: right 5px center; background-size: 12px; padding-right: 20px; }
+        
+        .grade-select { min-width: 65px; font-weight: bold; text-align: center;} 
+        .credit-input { text-align: center; font-weight: bold; }
+        .add-course-btn { background: var(--text-main); color: var(--card-bg); border: none; padding: 6px 14px; border-radius: 15px; font-size: 0.75rem; cursor: pointer; }
+        .remove-btn { color: #e74c3c; cursor: pointer; font-weight: bold; font-size: 1.5rem; text-align: center; padding: 0 10px;}
+        .prereq-fail { background-color: rgba(231, 76, 60, 0.1); border-left: 4px solid #e74c3c; }
+        .fail-msg { font-size: 0.7rem; color: #c0392b; font-weight: bold; display: block; margin-top: 2px; }
+
+        /* --- ENVER EASTER EGG STYLE --- */
+        #enverModal {
+            display: none; 
+            position: fixed; 
+            top: 0; left: 0; 
+            width: 100%; height: 100%; 
+            background: rgba(0,0,0,0.85); 
+            z-index: 10000; 
+            justify-content: center; 
+            align-items: center;
+            backdrop-filter: blur(5px);
+            animation: fadeIn 0.3s ease;
+        }
+        .enver-content {
+            position: relative;
+            max-width: 90%;
+            max-height: 80%;
+            text-align: center;
+        }
+        .enver-content img {
+            max-width: 100%;
+            max-height: 70vh;
+            border-radius: 15px;
+            box-shadow: 0 0 30px rgba(255, 255, 255, 0.2);
+            border: 2px solid white;
+        }
+        .close-egg {
+            position: absolute;
+            top: -20px;
+            right: -20px;
+            background: var(--iyte-red);
+            color: white;
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            font-size: 24px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.5);
+            font-weight: bold;
+        }
+
+        @media (max-width: 1100px) {
+            input, select, textarea { font-size: 16px !important; }
+            select { background-image: none !important; -webkit-appearance: menulist !important; appearance: menulist !important; padding-right: 0 !important; }
+            
+            body { height: auto; overflow-x: hidden; overflow-y: auto; position: relative; }
+            .app-layout { display: block; height: auto; overflow: visible; }
+            
+            /* MOBILE SIDEBAR LAYOUT FIX */
+            .sidebar-left { 
+                width: 100%; height: auto; position: -webkit-sticky; position: sticky; top: 0; 
+                background: var(--bg-color); z-index: 100; box-shadow: 0 4px 10px rgba(0,0,0,0.1); 
+                border-bottom: 1px solid var(--border-color); padding: 10px; 
+                display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between;
+            }
+            
+            .sidebar-left > div:first-child { text-align: left; padding-left: 5px; flex: 1; }
+            .brand-title { text-align: left; font-size: 1.1rem; }
+            .brand-subtitle { display: none; }
+
+            .theme-toggle {
+                position: static; margin-left: 10px; background: var(--card-bg);
+                box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+            }
+
+            .stat-card { 
+                width: 100%; margin-top: 15px; padding: 10px; 
+                display: flex; flex-direction: row; align-items: center; 
+                justify-content: space-between; text-align: left; order: 3; 
+            }
+            .stat-value { font-size: 1.8rem; margin: 0; }
+            .stat-status { margin: 0; font-size: 0.9rem; }
+            
+            .credits-card { display: none; }
+            .reg-box { width: 100%; margin-top: 10px; order: 4;}
+            .panel-header { display: none; } #statsBox { display: none !important; }
+            .main-content { padding: 15px 10px; overflow: visible; min-height: auto; }
+            .sidebar-right { width: 100%; height: auto; padding: 15px; margin-top: 20px; background: var(--card-bg); }
+            .semester-content { padding: 10px; overflow-x: auto; -webkit-overflow-scrolling: touch; }
+            table { min-width: 100%; }
+            th, td { font-size: 0.9rem; padding: 10px 5px; }
+            .grade-select { width: 100%; }
+            input[placeholder="Ders Adı"] { width: 100%; min-width: 120px; }
+            .tool-btn, .profile-btn { padding: 15px; font-size: 1rem; }
+        }
+    </style>
+</head>
+<body>
+
+<div id="enverModal">
+    <div class="enver-content">
+        <div class="close-egg" onclick="closeEnver()">×</div>
+        <img src="enver.jpg" alt="Enver Modu">
+        <div style="color:white; margin-top:10px; font-weight:bold; font-size:1.2rem; text-shadow:0 2px 4px black;">SYLLABUS</div>
+    </div>
+</div>
+
+<div class="app-layout">
+    <aside class="sidebar-left">
+        <div>
+            <div class="brand-title">İYTE FİZİK</div>
+            <div class="brand-subtitle" style="margin-bottom:0; padding-bottom:5px;">GPA ASİSTANI PRO</div>
+        </div>
+        
+        <button class="theme-toggle" onclick="toggleTheme()" aria-label="Temayı Değiştir">☾</button>
+
+        <div class="stat-card" id="gpaCard">
+            <div>
+                 <div class="stat-value" id="gpaResult">0.00</div>
+                 <div class="stat-status" id="gpaStatus">Başlangıç</div>
+            </div>
+            <div style="flex:1;"></div> 
+        </div>
+
+        <div class="credits-card">
+            <div style="font-size:0.7rem; color:var(--text-sub);">TOPLAM KREDİ</div>
+            <div class="credits-val" id="totalCredits">0</div>
+        </div>
+
+        <div class="reg-box" id="regBox">
+            <div class="reg-header" onclick="toggleRegs()">
+                <span>🎓 Akademik Durum</span>
+                <span id="regChevron">▼</span>
+            </div>
+            <div class="reg-content" id="regContent">
+                <div class="reg-dynamic" id="regDynamicStatus"></div>
+                <div style="font-size:0.7rem; font-weight:bold; color:var(--text-main); margin-bottom:5px;">Yönetmelik Maddeleri:</div>
+                <div class="reg-raw-text">Genel not ortalaması 2,00’ın altında olan öğrenciler başarısız sayılır...</div>
+            </div>
+        </div>
+        
+        <div class="panel-header clickable-header" onclick="toggleStats()" style="margin-top:20px;">
+            <span>İstatistikler</span> <span id="statsChevron">▼</span>
+        </div>
+        <div class="tool-box" id="statsBox" style="padding:10px; display:none;">
+            <div class="stats-list" id="statsContainer"></div>
+        </div>
+    </aside>
+
+    <main class="main-content">
+        <div class="content-container">
+            <form id="gpaForm">
+                <div class="semester-block open" id="sem1">
+                    <div class="semester-header" onclick="toggleSemester('sem1')"><div><span class="chevron">▼</span><span class="semester-title">1. Yarıyıl (Güz)</span><span class="semester-spa" id="sem1-spa">0.00</span></div><button type="button" class="add-course-btn" onclick="event.stopPropagation(); addCourse('sem1')">+ Ders</button></div>
+                    <div class="semester-content">
+                        <table>
+                            <thead><tr><th style="width:15%">Kod</th><th>Ders Adı</th><th style="text-align:center">Kr</th><th>Not</th><th style="width:20px"></th></tr></thead>
+                            <tbody class="course-list">
+                                <tr data-static="true"><td class="c-code">PHYS 101</td><td>General Physics I</td><td><input type="number" value="3" readonly class="credit-input"></td><td><select class="grade-select"><option value="">-</option><option value="AA">AA</option><option value="BA">BA</option><option value="BB">BB</option><option value="CB">CB</option><option value="CC">CC</option><option value="DC">DC</option><option value="DD">DD</option><option value="FD">FD</option><option value="FF">FF</option><option value="NA">NA</option></select></td><td></td></tr>
+                                <tr data-static="true"><td class="c-code">PHYS 111</td><td>General Physics Lab I</td><td><input type="number" value="1" readonly class="credit-input"></td><td><select class="grade-select"><option value="">-</option><option value="AA">AA</option><option value="BA">BA</option><option value="BB">BB</option><option value="CB">CB</option><option value="CC">CC</option><option value="DC">DC</option><option value="DD">DD</option><option value="FD">FD</option><option value="FF">FF</option><option value="NA">NA</option></select></td><td></td></tr>
+                                <tr data-static="true"><td class="c-code">MATH 145</td><td>Calculus I</td><td><input type="number" value="5" readonly class="credit-input"></td><td><select class="grade-select"><option value="">-</option><option value="AA">AA</option><option value="BA">BA</option><option value="BB">BB</option><option value="CB">CB</option><option value="CC">CC</option><option value="DC">DC</option><option value="DD">DD</option><option value="FD">FD</option><option value="FF">FF</option><option value="NA">NA</option></select></td><td></td></tr>
+                                <tr data-static="true"><td class="c-code">CHEM 121</td><td>General Chemistry I</td><td><input type="number" value="3" readonly class="credit-input"></td><td><select class="grade-select"><option value="">-</option><option value="AA">AA</option><option value="BA">BA</option><option value="BB">BB</option><option value="CB">CB</option><option value="CC">CC</option><option value="DC">DC</option><option value="DD">DD</option><option value="FD">FD</option><option value="FF">FF</option><option value="NA">NA</option></select></td><td></td></tr>
+                                <tr data-static="true"><td class="c-code">CHEM 141</td><td>Gen. Chem Lab I</td><td><input type="number" value="1" readonly class="credit-input"></td><td><select class="grade-select"><option value="">-</option><option value="AA">AA</option><option value="BA">BA</option><option value="BB">BB</option><option value="CB">CB</option><option value="CC">CC</option><option value="DC">DC</option><option value="DD">DD</option><option value="FD">FD</option><option value="FF">FF</option><option value="NA">NA</option></select></td><td></td></tr>
+                                <tr data-static="true"><td class="c-code">ENG 101</td><td>Reading & Writing I</td><td><input type="number" value="3" readonly class="credit-input"></td><td><select class="grade-select"><option value="">-</option><option value="AA">AA</option><option value="BA">BA</option><option value="BB">BB</option><option value="CB">CB</option><option value="CC">CC</option><option value="DC">DC</option><option value="DD">DD</option><option value="FD">FD</option><option value="FF">FF</option><option value="NA">NA</option></select></td><td></td></tr>
+                                <tr data-static="true"><td class="c-code">MBG 101</td><td>Biology I</td><td><input type="number" value="3" readonly class="credit-input"></td><td><select class="grade-select"><option value="">-</option><option value="AA">AA</option><option value="BA">BA</option><option value="BB">BB</option><option value="CB">CB</option><option value="CC">CC</option><option value="DC">DC</option><option value="DD">DD</option><option value="FD">FD</option><option value="FF">FF</option><option value="NA">NA</option></select></td><td></td></tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+                <div class="semester-block open" id="sem2">
+                    <div class="semester-header" onclick="toggleSemester('sem2')"><div><span class="chevron">▼</span><span class="semester-title">2. Yarıyıl (Bahar)</span><span class="semester-spa" id="sem2-spa">0.00</span></div><button type="button" class="add-course-btn" onclick="event.stopPropagation(); addCourse('sem2')">+ Ders</button></div>
+                    <div class="semester-content">
+                        <table>
+                             <thead><tr><th style="width:15%">Kod</th><th>Ders Adı</th><th style="text-align:center">Kr</th><th>Not</th><th style="width:20px"></th></tr></thead>
+                            <tbody class="course-list">
+                                <tr data-static="true"><td class="c-code">PHYS 102</td><td>General Physics II</td><td><input type="number" value="3" readonly class="credit-input"></td><td><select class="grade-select"><option value="">-</option><option value="AA">AA</option><option value="BA">BA</option><option value="BB">BB</option><option value="CB">CB</option><option value="CC">CC</option><option value="DC">DC</option><option value="DD">DD</option><option value="FD">FD</option><option value="FF">FF</option><option value="NA">NA</option></select></td><td></td></tr>
+                                <tr data-static="true"><td class="c-code">PHYS 112</td><td>General Physics Lab II</td><td><input type="number" value="1" readonly class="credit-input"></td><td><select class="grade-select"><option value="">-</option><option value="AA">AA</option><option value="BA">BA</option><option value="BB">BB</option><option value="CB">CB</option><option value="CC">CC</option><option value="DC">DC</option><option value="DD">DD</option><option value="FD">FD</option><option value="FF">FF</option><option value="NA">NA</option></select></td><td></td></tr>
+                                <tr data-static="true"><td class="c-code">PHYS 114</td><td>Intro. Programming</td><td><input type="number" value="3" readonly class="credit-input"></td><td><select class="grade-select"><option value="">-</option><option value="AA">AA</option><option value="BA">BA</option><option value="BB">BB</option><option value="CB">CB</option><option value="CC">CC</option><option value="DC">DC</option><option value="DD">DD</option><option value="FD">FD</option><option value="FF">FF</option><option value="NA">NA</option></select></td><td></td></tr>
+                                <tr data-static="true"><td class="c-code">MATH 146</td><td>Calculus II</td><td><input type="number" value="5" readonly class="credit-input"></td><td><select class="grade-select"><option value="">-</option><option value="AA">AA</option><option value="BA">BA</option><option value="BB">BB</option><option value="CB">CB</option><option value="CC">CC</option><option value="DC">DC</option><option value="DD">DD</option><option value="FD">FD</option><option value="FF">FF</option><option value="NA">NA</option></select></td><td></td></tr>
+                                <tr data-static="true"><td class="c-code">CHEM 122</td><td>General Chemistry II</td><td><input type="number" value="3" readonly class="credit-input"></td><td><select class="grade-select"><option value="">-</option><option value="AA">AA</option><option value="BA">BA</option><option value="BB">BB</option><option value="CB">CB</option><option value="CC">CC</option><option value="DC">DC</option><option value="DD">DD</option><option value="FD">FD</option><option value="FF">FF</option><option value="NA">NA</option></select></td><td></td></tr>
+                                <tr data-static="true"><td class="c-code">CHEM 142</td><td>Gen. Chem Lab II</td><td><input type="number" value="1" readonly class="credit-input"></td><td><select class="grade-select"><option value="">-</option><option value="AA">AA</option><option value="BA">BA</option><option value="BB">BB</option><option value="CB">CB</option><option value="CC">CC</option><option value="DC">DC</option><option value="DD">DD</option><option value="FD">FD</option><option value="FF">FF</option><option value="NA">NA</option></select></td><td></td></tr>
+                                <tr data-static="true"><td class="c-code">ENG 102</td><td>Reading & Writing II</td><td><input type="number" value="3" readonly class="credit-input"></td><td><select class="grade-select"><option value="">-</option><option value="AA">AA</option><option value="BA">BA</option><option value="BB">BB</option><option value="CB">CB</option><option value="CC">CC</option><option value="DC">DC</option><option value="DD">DD</option><option value="FD">FD</option><option value="FF">FF</option><option value="NA">NA</option></select></td><td></td></tr>
+                                <tr data-static="true"><td class="c-code">GCC 101</td><td>Career Plan (NC)</td><td><input type="number" value="0" readonly class="credit-input" style="opacity:0.5"></td><td><select class="grade-select"><option value="">-</option><option value="AA">AA</option><option value="BA">BA</option><option value="BB">BB</option><option value="CB">CB</option><option value="CC">CC</option><option value="DC">DC</option><option value="DD">DD</option><option value="FD">FD</option><option value="FF">FF</option><option value="NA">NA</option></select></td><td></td></tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+                <div class="semester-block open" id="sem3">
+                    <div class="semester-header" onclick="toggleSemester('sem3')"><div><span class="chevron">▼</span><span class="semester-title">3. Yarıyıl (Güz)</span><span class="semester-spa" id="sem3-spa">0.00</span></div><button type="button" class="add-course-btn" onclick="event.stopPropagation(); addCourse('sem3')">+ Ders</button></div>
+                    <div class="semester-content">
+                        <table>
+                             <thead><tr><th style="width:15%">Kod</th><th>Ders Adı</th><th style="text-align:center">Kr</th><th>Not</th><th style="width:20px"></th></tr></thead>
+                            <tbody class="course-list">
+                                <tr data-static="true"><td class="c-code">PHYS 201</td><td>Waves and Optics</td><td><input type="number" value="4" readonly class="credit-input"></td><td><select class="grade-select"><option value="">-</option><option value="AA">AA</option><option value="BA">BA</option><option value="BB">BB</option><option value="CB">CB</option><option value="CC">CC</option><option value="DC">DC</option><option value="DD">DD</option><option value="FD">FD</option><option value="FF">FF</option><option value="NA">NA</option></select></td><td></td></tr>
+                                <tr data-static="true"><td class="c-code">PHYS 203</td><td>Classical Mech I</td><td><input type="number" value="3" readonly class="credit-input"></td><td><select class="grade-select"><option value="">-</option><option value="AA">AA</option><option value="BA">BA</option><option value="BB">BB</option><option value="CB">CB</option><option value="CC">CC</option><option value="DC">DC</option><option value="DD">DD</option><option value="FD">FD</option><option value="FF">FF</option><option value="NA">NA</option></select></td><td></td></tr>
+                                <tr data-static="true"><td class="c-code">MATH 255</td><td>Diff. Equations</td><td><input type="number" value="4" readonly class="credit-input"></td><td><select class="grade-select"><option value="">-</option><option value="AA">AA</option><option value="BA">BA</option><option value="BB">BB</option><option value="CB">CB</option><option value="CC">CC</option><option value="DC">DC</option><option value="DD">DD</option><option value="FD">FD</option><option value="FF">FF</option><option value="NA">NA</option></select></td><td></td></tr>
+                                <tr data-static="true"><td class="c-code">MATH 265</td><td>Linear Algebra</td><td><input type="number" value="3" readonly class="credit-input"></td><td><select class="grade-select"><option value="">-</option><option value="AA">AA</option><option value="BA">BA</option><option value="BB">BB</option><option value="CB">CB</option><option value="CC">CC</option><option value="DC">DC</option><option value="DD">DD</option><option value="FD">FD</option><option value="FF">FF</option><option value="NA">NA</option></select></td><td></td></tr>
+                                <tr data-static="true"><td class="c-code">ELS I</td><td><input type="text" value="Seçmeli Ders I"></td><td><input type="number" value="3" class="credit-input"></td><td><select class="grade-select"><option value="">-</option><option value="AA">AA</option><option value="BA">BA</option><option value="BB">BB</option><option value="CB">CB</option><option value="CC">CC</option><option value="DC">DC</option><option value="DD">DD</option><option value="FD">FD</option><option value="FF">FF</option><option value="NA">NA</option></select></td><td></td></tr>
+                                <tr data-static="true"><td class="c-code">HIST 201</td><td>Atatürk I (NC)</td><td><input type="number" value="0" readonly class="credit-input" style="opacity:0.5"></td><td><select class="grade-select"><option value="">-</option><option value="AA">AA</option><option value="BA">BA</option><option value="BB">BB</option><option value="CB">CB</option><option value="CC">CC</option><option value="DC">DC</option><option value="DD">DD</option><option value="FD">FD</option><option value="FF">FF</option><option value="NA">NA</option></select></td><td></td></tr>
+                                <tr data-static="true"><td class="c-code">TURK 201</td><td>Turkish I (NC)</td><td><input type="number" value="0" readonly class="credit-input" style="opacity:0.5"></td><td><select class="grade-select"><option value="">-</option><option value="AA">AA</option><option value="BA">BA</option><option value="BB">BB</option><option value="CB">CB</option><option value="CC">CC</option><option value="DC">DC</option><option value="DD">DD</option><option value="FD">FD</option><option value="FF">FF</option><option value="NA">NA</option></select></td><td></td></tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+                <div class="semester-block open" id="sem4">
+                    <div class="semester-header" onclick="toggleSemester('sem4')"><div><span class="chevron">▼</span><span class="semester-title">4. Yarıyıl (Bahar)</span><span class="semester-spa" id="sem4-spa">0.00</span></div><button type="button" class="add-course-btn" onclick="event.stopPropagation(); addCourse('sem4')">+ Ders</button></div>
+                    <div class="semester-content">
+                        <table>
+                             <thead><tr><th style="width:15%">Kod</th><th>Ders Adı</th><th style="text-align:center">Kr</th><th>Not</th><th style="width:20px"></th></tr></thead>
+                            <tbody class="course-list">
+                                <tr data-static="true"><td class="c-code">PHYS 204</td><td>Classical Mech II</td><td><input type="number" value="3" readonly class="credit-input"></td><td><select class="grade-select"><option value="">-</option><option value="AA">AA</option><option value="BA">BA</option><option value="BB">BB</option><option value="CB">CB</option><option value="CC">CC</option><option value="DC">DC</option><option value="DD">DD</option><option value="FD">FD</option><option value="FF">FF</option><option value="NA">NA</option></select></td><td></td></tr>
+                                <tr data-static="true"><td class="c-code">PHYS 212</td><td>Waves Optics Lab</td><td><input type="number" value="2" readonly class="credit-input"></td><td><select class="grade-select"><option value="">-</option><option value="AA">AA</option><option value="BA">BA</option><option value="BB">BB</option><option value="CB">CB</option><option value="CC">CC</option><option value="DC">DC</option><option value="DD">DD</option><option value="FD">FD</option><option value="FF">FF</option><option value="NA">NA</option></select></td><td></td></tr>
+                                <tr data-static="true"><td class="c-code">PHYS 222</td><td>Modern Physics</td><td><input type="number" value="4" readonly class="credit-input"></td><td><select class="grade-select"><option value="">-</option><option value="AA">AA</option><option value="BA">BA</option><option value="BB">BB</option><option value="CB">CB</option><option value="CC">CC</option><option value="DC">DC</option><option value="DD">DD</option><option value="FD">FD</option><option value="FF">FF</option><option value="NA">NA</option></select></td><td></td></tr>
+                                <tr data-static="true"><td class="c-code">PHYS 266</td><td>Math. Methods</td><td><input type="number" value="4" readonly class="credit-input"></td><td><select class="grade-select"><option value="">-</option><option value="AA">AA</option><option value="BA">BA</option><option value="BB">BB</option><option value="CB">CB</option><option value="CC">CC</option><option value="DC">DC</option><option value="DD">DD</option><option value="FD">FD</option><option value="FF">FF</option><option value="NA">NA</option></select></td><td></td></tr>
+                                <tr data-static="true"><td class="c-code">ELS II</td><td><input type="text" value="Seçmeli Ders II"></td><td><input type="number" value="3" class="credit-input"></td><td><select class="grade-select"><option value="">-</option><option value="AA">AA</option><option value="BA">BA</option><option value="BB">BB</option><option value="CB">CB</option><option value="CC">CC</option><option value="DC">DC</option><option value="DD">DD</option><option value="FD">FD</option><option value="FF">FF</option><option value="NA">NA</option></select></td><td></td></tr>
+                                                            <tr data-static="true"><td class="c-code">HIST 202</td><td>Atatürk II (NC)</td><td><input type="number" value="0" readonly class="credit-input" style="opacity:0.5"></td><td><select class="grade-select"><option value="">-</option><option value="AA">AA</option><option value="BA">BA</option><option value="BB">BB</option><option value="CB">CB</option><option value="CC">CC</option><option value="DC">DC</option><option value="DD">DD</option><option value="FD">FD</option><option value="FF">FF</option><option value="NA">NA</option></select></td><td></td></tr>
+                                <tr data-static="true"><td class="c-code">TURK 202</td><td>Turkish II (NC)</td><td><input type="number" value="0" readonly class="credit-input" style="opacity:0.5"></td><td><select class="grade-select"><option value="">-</option><option value="AA">AA</option><option value="BA">BA</option><option value="BB">BB</option><option value="CB">CB</option><option value="CC">CC</option><option value="DC">DC</option><option value="DD">DD</option><option value="FD">FD</option><option value="FF">FF</option><option value="NA">NA</option></select></td><td></td></tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+                <div class="semester-block open" id="sem5">
+                    <div class="semester-header" onclick="toggleSemester('sem5')"><div><span class="chevron">▼</span><span class="semester-title">5. Yarıyıl</span><span class="semester-spa" id="sem5-spa">0.00</span></div><button type="button" class="add-course-btn" onclick="event.stopPropagation(); addCourse('sem5')">+ Ders</button></div>
+                    <div class="semester-content">
+                        <table>
+                            <thead><tr><th style="width:15%">Kod</th><th>Ders Adı</th><th style="text-align:center">Kr</th><th>Not</th><th style="width:20px"></th></tr></thead>
+                            <tbody class="course-list">
+                                <tr data-static="true"><td class="c-code">PHYS 301</td><td>EM Theory I</td><td><input type="number" value="4" readonly class="credit-input"></td><td><select class="grade-select"><option value="">-</option><option value="AA">AA</option><option value="BA">BA</option><option value="BB">BB</option><option value="CB">CB</option><option value="CC">CC</option><option value="DC">DC</option><option value="DD">DD</option><option value="FD">FD</option><option value="FF">FF</option><option value="NA">NA</option></select></td><td></td></tr>
+                                <tr data-static="true"><td class="c-code">PHYS 305</td><td>Exp. Modern Phys</td><td><input type="number" value="2" readonly class="credit-input"></td><td><select class="grade-select"><option value="">-</option><option value="AA">AA</option><option value="BA">BA</option><option value="BB">BB</option><option value="CB">CB</option><option value="CC">CC</option><option value="DC">DC</option><option value="DD">DD</option><option value="FD">FD</option><option value="FF">FF</option><option value="NA">NA</option></select></td><td></td></tr>
+                                <tr data-static="true"><td class="c-code">PHYS 315</td><td>Numerical Meth.</td><td><input type="number" value="3" readonly class="credit-input"></td><td><select class="grade-select"><option value="">-</option><option value="AA">AA</option><option value="BA">BA</option><option value="BB">BB</option><option value="CB">CB</option><option value="CC">CC</option><option value="DC">DC</option><option value="DD">DD</option><option value="FD">FD</option><option value="FF">FF</option><option value="NA">NA</option></select></td><td></td></tr>
+                                <tr data-static="true"><td class="c-code">PHYS 321</td><td>Quant. Mech I</td><td><input type="number" value="4" readonly class="credit-input"></td><td><select class="grade-select"><option value="">-</option><option value="AA">AA</option><option value="BA">BA</option><option value="BB">BB</option><option value="CB">CB</option><option value="CC">CC</option><option value="DC">DC</option><option value="DD">DD</option><option value="FD">FD</option><option value="FF">FF</option><option value="NA">NA</option></select></td><td></td></tr>
+                                                        </tbody>
+                        </table>
+                    </div>
+                </div>
+                <div class="semester-block open" id="sem6">
+                    <div class="semester-header" onclick="toggleSemester('sem6')"><div><span class="chevron">▼</span><span class="semester-title">6. Yarıyıl</span><span class="semester-spa" id="sem6-spa">0.00</span></div><button type="button" class="add-course-btn" onclick="event.stopPropagation(); addCourse('sem6')">+ Ders</button></div>
+                    <div class="semester-content">
+                        <table>
+                            <thead><tr><th style="width:15%">Kod</th><th>Ders Adı</th><th style="text-align:center">Kr</th><th>Not</th><th style="width:20px"></th></tr></thead>
+                            <tbody class="course-list">
+                                <tr data-static="true"><td class="c-code">PHYS 302</td><td>EM Theory II</td><td><input type="number" value="4" readonly class="credit-input"></td><td><select class="grade-select"><option value="">-</option><option value="AA">AA</option><option value="BA">BA</option><option value="BB">BB</option><option value="CB">CB</option><option value="CC">CC</option><option value="DC">DC</option><option value="DD">DD</option><option value="FD">FD</option><option value="FF">FF</option><option value="NA">NA</option></select></td><td></td></tr>
+                                <tr data-static="true"><td class="c-code">PHYS 320</td><td>Intro. Circuits</td><td><input type="number" value="3" readonly class="credit-input"></td><td><select class="grade-select"><option value="">-</option><option value="AA">AA</option><option value="BA">BA</option><option value="BB">BB</option><option value="CB">CB</option><option value="CC">CC</option><option value="DC">DC</option><option value="DD">DD</option><option value="FD">FD</option><option value="FF">FF</option><option value="NA">NA</option></select></td><td></td></tr>
+                                <tr data-static="true"><td class="c-code">PHYS 322</td><td>Quant. Mech II</td><td><input type="number" value="4" readonly class="credit-input"></td><td><select class="grade-select"><option value="">-</option><option value="AA">AA</option><option value="BA">BA</option><option value="BB">BB</option><option value="CB">CB</option><option value="CC">CC</option><option value="DC">DC</option><option value="DD">DD</option><option value="FD">FD</option><option value="FF">FF</option><option value="NA">NA</option></select></td><td></td></tr>
+                                <tr data-static="true"><td class="c-code">PHYS 326</td><td>Stat. Thermodyn.</td><td><input type="number" value="4" readonly class="credit-input"></td><td><select class="grade-select"><option value="">-</option><option value="AA">AA</option><option value="BA">BA</option><option value="BB">BB</option><option value="CB">CB</option><option value="CC">CC</option><option value="DC">DC</option><option value="DD">DD</option><option value="FD">FD</option><option value="FF">FF</option><option value="NA">NA</option></select></td><td></td></tr>
+                                                        </tbody>
+                        </table>
+                    </div>
+                </div>
+                <div class="semester-block open" id="sem7">
+                    <div class="semester-header" onclick="toggleSemester('sem7')"><div><span class="chevron">▼</span><span class="semester-title">7. Yarıyıl</span><span class="semester-spa" id="sem7-spa">0.00</span></div><button type="button" class="add-course-btn" onclick="event.stopPropagation(); addCourse('sem7')">+ Ders</button></div>
+                    <div class="semester-content">
+                        <table>
+                            <thead><tr><th style="width:15%">Kod</th><th>Ders Adı</th><th style="text-align:center">Kr</th><th>Not</th><th style="width:20px"></th></tr></thead>
+                            <tbody class="course-list">
+                                <tr data-static="true"><td class="c-code">PHYS 431</td><td>Cond. Mat. I</td><td><input type="number" value="3" readonly class="credit-input"></td><td><select class="grade-select"><option value="">-</option><option value="AA">AA</option><option value="BA">BA</option><option value="BB">BB</option><option value="CB">CB</option><option value="CC">CC</option><option value="DC">DC</option><option value="DD">DD</option><option value="FD">FD</option><option value="FF">FF</option><option value="NA">NA</option></select></td><td></td></tr>
+                                <tr data-static="true"><td class="c-code">PHYS 452</td><td>Elem. Particles</td><td><input type="number" value="3" readonly class="credit-input"></td><td><select class="grade-select"><option value="">-</option><option value="AA">AA</option><option value="BA">BA</option><option value="BB">BB</option><option value="CB">CB</option><option value="CC">CC</option><option value="DC">DC</option><option value="DD">DD</option><option value="FD">FD</option><option value="FF">FF</option><option value="NA">NA</option></select></td><td></td></tr>
+                                <tr data-static="true"><td class="c-code">ELT I</td><td><input type="text" value="Tech. Elective I"></td><td><input type="number" value="3" class="credit-input"></td><td><select class="grade-select"><option value="">-</option><option value="AA">AA</option><option value="BA">BA</option><option value="BB">BB</option><option value="CB">CB</option><option value="CC">CC</option><option value="DC">DC</option><option value="DD">DD</option><option value="FD">FD</option><option value="FF">FF</option><option value="NA">NA</option></select></td><td></td></tr>
+                                <tr data-static="true"><td class="c-code">ELT II</td><td><input type="text" value="Tech. Elective II"></td><td><input type="number" value="3" class="credit-input"></td><td><select class="grade-select"><option value="">-</option><option value="AA">AA</option><option value="BA">BA</option><option value="BB">BB</option><option value="CB">CB</option><option value="CC">CC</option><option value="DC">DC</option><option value="DD">DD</option><option value="FD">FD</option><option value="FF">FF</option><option value="NA">NA</option></select></td><td></td></tr>
+                                                        </tbody>
+                        </table>
+                    </div>
+                </div>
+                <div class="semester-block open" id="sem8">
+                    <div class="semester-header" onclick="toggleSemester('sem8')"><div><span class="chevron">▼</span><span class="semester-title">8. Yarıyıl</span><span class="semester-spa" id="sem8-spa">0.00</span></div><button type="button" class="add-course-btn" onclick="event.stopPropagation(); addCourse('sem8')">+ Ders</button></div>
+                    <div class="semester-content">
+                        <table>
+                            <thead><tr><th style="width:15%">Kod</th><th>Ders Adı</th><th style="text-align:center">Kr</th><th>Not</th><th style="width:20px"></th></tr></thead>
+                            <tbody class="course-list">
+                                <tr data-static="true"><td class="c-code">PHYS 432</td><td>Cond. Mat. II</td><td><input type="number" value="3" readonly class="credit-input"></td><td><select class="grade-select"><option value="">-</option><option value="AA">AA</option><option value="BA">BA</option><option value="BB">BB</option><option value="CB">CB</option><option value="CC">CC</option><option value="DC">DC</option><option value="DD">DD</option><option value="FD">FD</option><option value="FF">FF</option><option value="NA">NA</option></select></td><td></td></tr>
+                                <tr data-static="true"><td class="c-code">ELT III</td><td><input type="text" value="Tech. Elective III"></td><td><input type="number" value="3" class="credit-input"></td><td><select class="grade-select"><option value="">-</option><option value="AA">AA</option><option value="BA">BA</option><option value="BB">BB</option><option value="CB">CB</option><option value="CC">CC</option><option value="DC">DC</option><option value="DD">DD</option><option value="FD">FD</option><option value="FF">FF</option><option value="NA">NA</option></select></td><td></td></tr>
+                                <tr data-static="true"><td class="c-code">ELT IV</td><td><input type="text" value="Tech. Elective IV"></td><td><input type="number" value="3" class="credit-input"></td><td><select class="grade-select"><option value="">-</option><option value="AA">AA</option><option value="BA">BA</option><option value="BB">BB</option><option value="CB">CB</option><option value="CC">CC</option><option value="DC">DC</option><option value="DD">DD</option><option value="FD">FD</option><option value="FF">FF</option><option value="NA">NA</option></select></td><td></td></tr>
+                                <tr data-static="true"><td class="c-code">ELT V</td><td><input type="text" value="Tech. Elective V"></td><td><input type="number" value="3" class="credit-input"></td><td><select class="grade-select"><option value="">-</option><option value="AA">AA</option><option value="BA">BA</option><option value="BB">BB</option><option value="CB">CB</option><option value="CC">CC</option><option value="DC">DC</option><option value="DD">DD</option><option value="FD">FD</option><option value="FF">FF</option><option value="NA">NA</option></select></td><td></td></tr>
+                                <tr data-static="true"><td class="c-code">ELS III</td><td><input type="text" value="Sosyal Seçmeli III"></td><td><input type="number" value="3" class="credit-input"></td><td><select class="grade-select"><option value="">-</option><option value="AA">AA</option><option value="BA">BA</option><option value="BB">BB</option><option value="CB">CB</option><option value="CC">CC</option><option value="DC">DC</option><option value="DD">DD</option><option value="FD">FD</option><option value="FF">FF</option><option value="NA">NA</option></select></td><td></td></tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </form>
+            <div style="height: 80px;"></div>
+        </div>
+    </main>
+
+    <aside class="sidebar-right">
+        <div class="panel-header" style="margin-top:0;">Profil / Senaryo</div>
+        <div class="tool-box">
+             <div class="profile-switcher">
+                 <button class="profile-btn active" onclick="switchProfile('default', this)">Varsayılan</button>
+                 <button class="profile-btn" onclick="switchProfile('p1', this)">Senaryo A</button>
+                 <button class="profile-btn" onclick="switchProfile('p2', this)">Senaryo B</button>
+             </div>
+        </div>
+
+        <div class="panel-header">Veri & Yedekleme</div>
+        <div class="tool-box">
+             <button class="tool-btn btn-backup" onclick="exportData()"> Yedek İndir (.json)</button>
+             <label for="importFile" class="btn-restore"> Yedeği Geri Yükle</label>
+             <input type="file" id="importFile" style="display:none;" onchange="importData(this)">
+        </div>
+
+        <div class="panel-header">Hedef Hesaplayıcı</div>
+        <div class="tool-box">
+            <input type="number" id="targetGPA" class="tool-input" placeholder="Hedef Ort. (3.00)" step="0.01">
+            <div id="targetResult" style="text-align:center; font-weight:bold; font-size:0.9rem; margin:5px 0;">-</div>
+            <button class="tool-btn btn-magic" onclick="autoFillTarget()"> Hedefe Göre Doldur</button>
+            <button class="tool-btn btn-undo" id="btnUndo" onclick="undoLastAction()"> Geri Al</button>
+        </div>
+        
+        <button class="tool-btn btn-reset" onclick="resetAll()">Bu Profili Sıfırla</button>
+    </aside>
+
+</div>
+
+<script>
+    // --- EASTER EGG LOGIC ---
+    let keySequence = [];
+    const konamiCode = "enver";
+
+    document.addEventListener('keydown', (e) => {
+        keySequence.push(e.key.toLowerCase());
+        if (keySequence.length > konamiCode.length) {
+            keySequence.shift();
+        }
+        if (keySequence.join('') === konamiCode) {
+            document.getElementById('enverModal').style.display = 'flex';
+            keySequence = [];
+        }
+    });
+
+    window.closeEnver = function() {
+        document.getElementById('enverModal').style.display = 'none';
+    }
+
+    // --- STANDARD VARIABLES ---
+    window.grades = { "AA": 4.0, "BA": 3.5, "BB": 3.0, "CB": 2.5, "CC": 2.0, "DC": 1.5, "DD": 1.0, "FD": 0.5, "FF": 0.0, "NA": 0.0 };
+    window.gradeKeys = ["DD", "DC", "CC", "CB", "BB", "BA", "AA"];
+    window.failingGrades = ["FF", "FD", "NA"];
+    window.optionsHTML = '<option value="">-</option>' + Object.keys(grades).map(g => `<option value="${g}">${g}</option>`).join('');
+    
+    window.prerequisites = {
+        "PHYS 204": "PHYS 203", "PHYS 212": "PHYS 201", "PHYS 305": "PHYS 222",
+        "PHYS 302": "PHYS 301", "PHYS 322": "PHYS 321", "PHYS 432": "PHYS 431"
+    };
+
+    window.gradeHistory = [];
+    window.currentProfile = "default"; 
+
+    // --- MAIN INITIALIZATION ---
+    document.addEventListener('DOMContentLoaded', () => {
+        try {
+            loadTheme();
+            loadData(); 
+            const form = document.getElementById('gpaForm');
+            form.addEventListener('change', (e) => {
+                if(e.target.tagName === 'SELECT' || e.target.tagName === 'INPUT') { calculateGPA(); }
+            });
+            form.addEventListener('input', (e) => {
+                if(e.target.tagName === 'INPUT') { calculateGPA(); }
+            });
+        } catch (error) {
+            console.error("Critical Load Error: ", error);
+            localStorage.removeItem(getStorageKey());
+            alert("Sistem yenilendi.");
+            location.reload();
+        }
+    });
+
+    window.loadTheme = function() {
+        const theme = localStorage.getItem('iyte_gpa_theme');
+        if(theme) document.documentElement.setAttribute('data-theme', theme);
+    }
+
+    window.toggleTheme = function() { 
+        const h = document.documentElement; 
+        const n = h.getAttribute('data-theme') === 'dark' ? 'light' : 'dark'; 
+        h.setAttribute('data-theme', n); 
+        localStorage.setItem('iyte_gpa_theme', n);
+    }
+
+    window.switchProfile = function(profileName, btnElement) {
+        saveData();
+        window.currentProfile = profileName;
+        document.querySelectorAll('.profile-btn').forEach(b => b.classList.remove('active'));
+        btnElement.classList.add('active');
+        clearFormDisplay();
+        try { loadData(); } catch(e) { }
+    }
+
+    window.getStorageKey = function() { return 'iyte_gpa_v2_' + window.currentProfile; }
+
+    window.clearFormDisplay = function() {
+        document.querySelectorAll('.grade-select').forEach(s => s.value = "");
+        document.querySelectorAll('.semester-block').forEach(b => b.classList.add('open'));
+        document.querySelectorAll('.course-list tr:not([data-static="true"])').forEach(r => r.remove());
+    }
+
+    window.calculateGPA = function() {
+        let totalPoints = 0, totalCredits = 0, semesterData = {};
+        let courseGrades = {}; 
+        let stats = { filledCount: 0, gradeCounts: {} };
+        Object.keys(grades).forEach(g => stats.gradeCounts[g] = 0);
+        
+        const rows = document.getElementById('gpaForm').querySelectorAll('tbody tr');
+        rows.forEach(row => {
+            const crIn = row.querySelector('.credit-input');
+            const grSel = row.querySelector('.grade-select');
+            
+            let code = "";
+            const staticCode = row.querySelector('.c-code');
+            const dynamicCode = row.querySelector('input[placeholder="Kod"]');
+            if(staticCode) code = staticCode.innerText.trim();
+            else if(dynamicCode) code = dynamicCode.value.trim().toUpperCase();
+
+            if(code && grSel) courseGrades[code] = grSel.value;
+
+            const semId = row.closest('.semester-block').id;
+            if(!semesterData[semId]) semesterData[semId] = {pts:0, cr:0};
+
+            if (crIn && grSel) {
+                const credit = parseFloat(crIn.value);
+                const grade = grSel.value;
+                if (grade && grade !== "" && !isNaN(credit) && credit > 0) {
+                    const pts = credit * grades[grade];
+                    totalPoints += pts; totalCredits += credit;
+                    semesterData[semId].pts += pts; semesterData[semId].cr += credit;
+                    stats.filledCount++;
+                    if(stats.gradeCounts[grade] !== undefined) stats.gradeCounts[grade]++;
+                }
+            }
+        });
+
+        const gpa = totalCredits > 0 ? (totalPoints / totalCredits).toFixed(2) : "0.00";
+        document.getElementById('gpaResult').innerText = gpa;
+        document.getElementById('totalCredits').innerText = totalCredits;
+        
+        for(const [id, data] of Object.entries(semesterData)) {
+            const spa = data.cr > 0 ? (data.pts / data.cr).toFixed(2) : "0.00";
+            const badge = document.getElementById(id + '-spa');
+            if(badge) badge.innerText = spa;
+        }
+
+        updateStatus(parseFloat(gpa));
+        checkPrerequisites(courseGrades);
+        updateRegulations(parseFloat(gpa));
+        updateStatsPanel(stats);
+        saveData();
+    }
+    
+    window.updateStatsPanel = function(stats) {
+        const container = document.getElementById('statsContainer');
+        let html = `<div style="display:flex; justify-content:space-between; margin-bottom:5px; border-bottom:1px dashed #ccc;"><span>Toplam Ders:</span> <b>${stats.filledCount}</b></div>`;
+        Object.keys(stats.gradeCounts).forEach(g => {
+            if(stats.gradeCounts[g] > 0) html += `<div style="display:flex; justify-content:space-between; margin-bottom:5px; border-bottom:1px dashed #eee;"><span>${g}:</span> <b>${stats.gradeCounts[g]}</b></div>`;
+        });
+        container.innerHTML = html;
+    }
+
+    window.checkPrerequisites = function(courseGrades) {
+        document.querySelectorAll('.prereq-fail').forEach(el => {
+            el.classList.remove('prereq-fail');
+            const msg = el.querySelector('.fail-msg');
+            if(msg) msg.remove();
+        });
+
+        document.querySelectorAll('tbody tr').forEach(row => {
+            let code = "";
+            const staticCode = row.querySelector('.c-code');
+            if(staticCode) code = staticCode.innerText.trim();
+            else {
+                const inp = row.querySelector('input[placeholder="Kod"]');
+                if(inp) code = inp.value.trim().toUpperCase();
+            }
+
+            if(code && prerequisites[code]) {
+                const prereqCode = prerequisites[code];
+                const prereqGrade = courseGrades[prereqCode];
+                if(prereqGrade && failingGrades.includes(prereqGrade)) {
+                    row.classList.add('prereq-fail');
+                    if(!row.querySelector('.fail-msg')) {
+                        const cell = row.querySelector('td:nth-child(2)');
+                        cell.innerHTML += `<span class='fail-msg'> Ön şart: ${prereqCode} başarısız!</span>`;
+                    }
+                }
+            }
+        });
+    }
+
+    window.updateRegulations = function(gpa) {
+        const box = document.getElementById('regDynamicStatus');
+        let html = "";
+        if(gpa < 1.80) {
+            html = `<div class='reg-alert'> PROBATION (Gözetim)</div><div>GPA < 1.80. Yeni ders alamazsın.</div>`;
+        } else if (gpa >= 1.80 && gpa < 2.00) {
+            html = `<div class='reg-warn'> Başarısız Durum</div><div>GPA < 2.00. Ders yükü azaltılabilir.</div>`;
+        } else {
+             html = `<div class='reg-ok'> Akademik Durum Uygun</div>`;
+             if(gpa >= 2.50) html += `<div> Ders yükü +3 ders arttırılabilir.</div>`;
+             else if(gpa >= 2.00) html += `<div> Ders yükü +2 ders arttırılabilir.</div>`;
+        }
+        box.innerHTML = html;
+    }
+
+    window.toggleRegs = function() {
+        document.getElementById('regBox').classList.toggle('open');
+        document.getElementById('regChevron').innerText = document.getElementById('regBox').classList.contains('open') ? '▲' : '▼';
+    }
+
+    window.updateStatus = function(gpa) {
+        const card = document.getElementById('gpaCard'), txt = document.getElementById('gpaStatus');
+        card.classList.remove('gpa-fail', 'gpa-ok', 'gpa-honor', 'gpa-high');
+        if (gpa < 2.00) { card.classList.add('gpa-fail'); txt.innerText = "Başarısız"; }
+        else if (gpa < 3.00) { card.classList.add('gpa-ok'); txt.innerText = "Başarılı"; }
+        else if (gpa < 3.50) { card.classList.add('gpa-honor'); txt.innerText = "Şeref"; }
+        else { card.classList.add('gpa-high'); txt.innerText = "Yüksek Şeref"; }
+    }
+
+    window.toggleSemester = function(id) { document.getElementById(id).classList.toggle('open'); }
+    
+    window.toggleStats = function() { 
+        const box = document.getElementById('statsBox'), chevron = document.getElementById('statsChevron');
+        if(box.style.display === 'none') { box.style.display = 'block'; chevron.innerText = '▲'; } else { box.style.display = 'none'; chevron.innerText = '▼'; }
+    }
+    
+    window.resetAll = function() { if(confirm("BU PROFİLDEKİ tüm veriler silinecek?")) { localStorage.removeItem(getStorageKey()); location.reload(); } }
+    
+    window.saveData = function() {
+        const data = { static: [], dynamic: [], target: document.getElementById('targetGPA').value };
+        document.querySelectorAll('tr[data-static="true"]').forEach(r => {
+            let obj = {}; 
+            if(r.querySelector('input[type="text"]')) obj.name = r.querySelector('input[type="text"]').value;
+            obj.cr = r.querySelector('.credit-input').value; obj.gr = r.querySelector('.grade-select').value;
+            data.static.push(obj);
+        });
+        document.querySelectorAll('.course-list tr:not([data-static="true"])').forEach(r => {
+            const inps = r.querySelectorAll('input, select');
+            data.dynamic.push({ sem: r.closest('.semester-block').id, code: inps[0].value, name: inps[1].value, credit: inps[2].value, grade: inps[3].value });
+        });
+        localStorage.setItem(getStorageKey(), JSON.stringify(data));
+    }
+
+    window.loadData = function() {
+        const raw = localStorage.getItem(getStorageKey());
+        if(!raw) return;
+        const d = JSON.parse(raw);
+        if(d.target) document.getElementById('targetGPA').value = d.target;
+        const sRows = document.querySelectorAll('tr[data-static="true"]');
+        if(d.static && d.static.length === sRows.length) {
+            sRows.forEach((r, i) => {
+                if(d.static[i].name && r.querySelector('input[type="text"]')) r.querySelector('input[type="text"]').value = d.static[i].name;
+                r.querySelector('.credit-input').value = d.static[i].cr;
+                r.querySelector('.grade-select').value = d.static[i].gr;
+            });
+        }
+        if(d.dynamic) d.dynamic.forEach(i => addCourse(i.sem, i));
+        calculateGPA();
+    }
+
+    window.autoFillTarget = function() {
+        const targetStr = document.getElementById('targetGPA').value;
+        if(!targetStr) { alert("Lütfen bir hedef ortalama girin."); return; }
+        const targetGPA = parseFloat(targetStr);
+        let currentPoints = 0, currentCredits = 0, emptyCourses = [];
+        document.querySelectorAll('tbody tr').forEach(row => {
+            const crIn = row.querySelector('.credit-input'), grSel = row.querySelector('.grade-select');
+            if(crIn && grSel) {
+                const cr = parseFloat(crIn.value);
+                if(!isNaN(cr) && cr > 0) {
+                    if(grSel.value !== "") { currentPoints += cr * grades[grSel.value]; currentCredits += cr; }
+                    else { emptyCourses.push({ el: grSel, cr: cr, gradeIndex: 0 }); }
+                }
+            }
+        });
+        if(emptyCourses.length === 0) { alert("Boş ders yok."); return; }
+        
+        saveHistorySnapshot();
+        let neededTotalCredits = currentCredits, neededTotalPoints = currentPoints;
+        emptyCourses.forEach(c => { neededTotalCredits += c.cr; neededTotalPoints += c.cr * grades[gradeKeys[0]]; });
+        
+        const targetTotalPoints = targetGPA * neededTotalCredits;
+        let maxPoints = currentPoints;
+        emptyCourses.forEach(c => maxPoints += c.cr * 4.0);
+        
+        if (targetTotalPoints > maxPoints) {
+            const maxPossibleGPA = (maxPoints / neededTotalCredits).toFixed(2);
+            document.getElementById('targetResult').innerHTML = `<span style='color:#e67e22'>Maksimum potansiyel: <b>${maxPossibleGPA}</b></span>`;
+             emptyCourses.forEach(c => c.el.value = "AA");
+             calculateGPA();
+             document.getElementById('btnUndo').style.display = 'block';
+             return;
+        }
+
+        if(neededTotalPoints >= targetTotalPoints) {
+            emptyCourses.forEach(c => c.el.value = gradeKeys[0]);
+        } else {
+            let iter = 0;
+            while(neededTotalPoints < targetTotalPoints && iter < 1000) {
+                let bestCandidate = null, minIndex = 99;
+                for(let i=0; i<emptyCourses.length; i++) {
+                    if(emptyCourses[i].gradeIndex < gradeKeys.length - 1 && emptyCourses[i].gradeIndex < minIndex) {
+                        minIndex = emptyCourses[i].gradeIndex; bestCandidate = emptyCourses[i];
+                    }
+                }
+                if(!bestCandidate) break;
+                const oldGrade = gradeKeys[bestCandidate.gradeIndex];
+                const newGrade = gradeKeys[bestCandidate.gradeIndex + 1];
+                neededTotalPoints -= bestCandidate.cr * grades[oldGrade];
+                neededTotalPoints += bestCandidate.cr * grades[newGrade];
+                bestCandidate.gradeIndex++; iter++;
+            }
+            emptyCourses.forEach(c => c.el.value = gradeKeys[c.gradeIndex]);
+        }
+        calculateGPA();
+        document.getElementById('btnUndo').style.display = 'block';
+    }
+
+    window.saveHistorySnapshot = function() { gradeHistory = []; document.querySelectorAll('.grade-select').forEach(sel => gradeHistory.push(sel.value)); }
+    
+    window.undoLastAction = function() {
+        if(gradeHistory.length === 0) return;
+        document.querySelectorAll('.grade-select').forEach((sel, i) => { if (gradeHistory[i] !== undefined) sel.value = gradeHistory[i]; });
+        calculateGPA();
+        document.getElementById('btnUndo').style.display = 'none';
+        gradeHistory = [];
+    }
+    
+    window.addCourse = function(semId, data=null) {
+        const tbody = document.querySelector(`#${semId} .course-list`);
+        const tr = document.createElement('tr');
+        tr.innerHTML = `
+            <td><input type="text" placeholder="Kod" value="${data?data.code:''}"></td>
+            <td><input type="text" placeholder="Ders Adı" value="${data?data.name:''}"></td>
+            <td><input type="number" value="${data?data.credit:3}" class="credit-input"></td>
+            <td><select class="grade-select">${optionsHTML}</select></td>
+            <td style="text-align:center"><div class="remove-btn" onclick="this.closest('tr').remove(); calculateGPA()">×</div></td>
+        `;
+        if(data && data.grade) tr.querySelector('select').value = data.grade;
+        tbody.appendChild(tr);
+        if(!data) calculateGPA();
+    }
+    
+    window.exportData = function() {
+        const dataStr = localStorage.getItem(getStorageKey());
+        if(!dataStr) { alert("Kaydedilecek veri yok."); return; }
+        const blob = new Blob([dataStr], {type: "application/json"});
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url; a.download = `iyte_gpa_${currentProfile}.json`; a.click();
+        URL.revokeObjectURL(url);
+    }
+    
+    window.importData = function(input) {
+        const file = input.files[0];
+        if(!file) return;
+        const reader = new FileReader();
+        reader.onload = function(e) {
+            try {
+                const json = JSON.parse(e.target.result);
+                localStorage.setItem(getStorageKey(), JSON.stringify(json));
+                alert("Yüklendi!"); location.reload();
+            } catch(err) { alert("Dosya hatalı."); }
+        };
+        reader.readAsText(file);
+    }
+</script>
+
+</body>
+</html>
