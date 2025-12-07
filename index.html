@@ -157,30 +157,11 @@
             }
 
             errorDiv.style.display = 'none';
-
-            // 2. YIL HESAPLAMA (Örn: 31 -> 2023)
-            const yearPrefix = parseInt(id.substring(0, 2), 10);
-            const entryYear = 1992 + yearPrefix; // 1992 + 31 = 2023
-
-            // --- DEĞİŞİKLİK BURADA BAŞLIYOR ---
             
-            // Müfredat Yılı Mantığı:
-            // Eğer giriş yılı 2018 ile 2021 (dahil) arasındaysa, hepsini 2018 dosyasına yönlendir.
-            let fileYear = entryYear;
-
-            if (entryYear >= 2018 && entryYear <= 2021) {
-                fileYear = 2018;
-            }
-            if else(entryYear >= 2025){
-                fileYear = 2025;
-            }
-            
-            // --- DEĞİŞİKLİK BURADA BİTİYOR ---
-
-            // 3. BÖLÜM KODU (Örn: 101)
+            // 2. BÖLÜM KODU (Örn: 101)
             const deptCode = id.substring(3, 6);
 
-            // 4. BÖLÜM İSİMLENDİRMESİ
+            // 3. BÖLÜM İSİMLENDİRMESİ
             const deptMap = {
                 "101": "phys",
                 "104": "mbg",
@@ -210,6 +191,26 @@
                 return;
             }
 
+
+            // 4. YIL HESAPLAMA (Örn: 31 -> 2023)
+            const yearPrefix = parseInt(id.substring(0, 2), 10);
+            const entryYear = 1992 + yearPrefix; // 1992 + 31 = 2023
+
+            // --- DEĞİŞİKLİK BURADA BAŞLIYOR ---
+            
+            // Müfredat Yılı Mantığı:
+            // Eğer giriş yılı 2018 ile 2021 (dahil) arasındaysa, hepsini 2018 dosyasına yönlendir.
+            let fileYear = entryYear;
+
+            if (entryYear >= 2018 && entryYear <= 2021 && deptName == "phys") {
+                fileYear = 2018;
+            }
+            if else(entryYear >= 2025 && deptName == "phys"){
+                fileYear = 2025;
+            }
+            
+            // --- DEĞİŞİKLİK BURADA BİTİYOR ---
+            
             // 5. DOSYA İSMİNİ OLUŞTURMA
             // 'entryYear' yerine yukarıda hesapladığımız 'fileYear' kullanıyoruz
             const targetFile = `${fileYear}_${deptName}.html`;
@@ -220,4 +221,5 @@
     </script>
 </body>
 </html>
+
 
