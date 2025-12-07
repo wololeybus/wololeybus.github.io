@@ -117,22 +117,7 @@
                 <input type="text" id="studentId" placeholder="Örn: 310101016" maxlength="9" inputmode="numeric">
                 <div class="hint">9 haneli okul numaranız</div>
             </div>
-
-            <div>
-                <label for="semesterSelect">Aktif Döneminiz</label>
-                <select id="semesterSelect">
-                    <option value="all">Tüm Dönemler</option>
-                    <option value="1">1. Yarıyıl (Güz)</option>
-                    <option value="2">2. Yarıyıl (Bahar)</option>
-                    <option value="3">3. Yarıyıl (Güz)</option>
-                    <option value="4">4. Yarıyıl (Bahar)</option>
-                    <option value="5">5. Yarıyıl (Güz)</option>
-                    <option value="6">6. Yarıyıl (Bahar)</option>
-                    <option value="7">7. Yarıyıl (Güz)</option>
-                    <option value="8">8. Yarıyıl (Bahar)</option>
-                </select>
-            </div>
-
+            
             <button onclick="routeUser()">Hesaplamaya Başla</button>
             <div id="errorMsg" class="error-msg"></div>
         </div>
@@ -170,24 +155,24 @@
             // Dosya isimlerinde kullanacağın İngilizce/Türkçe karakterlere dikkat et.
             // Burada "fizik", "ceng" gibi küçük harf ve Türkçe karaktersiz isimler kullanıyoruz.
             const deptMap = {
-                "101": "fizik", "502": "fizik",
+                "101": "phys",
                 "104": "mbg",
-                "103": "matematik",
-                "102": "kimya",
-                "105": "fotonik",
-                "201": "ceng", "401": "ceng",
-                "202": "kimmuh",
-                "203": "makmuh",
-                "204": "insaat",
-                "205": "gida",
-                "206": "ehm",
-                "208": "malzeme",
-                "209": "enerji",
-                "210": "biomuh",
-                "211": "cevre",
-                "303": "entas",
-                "301": "mimarlik",
-                "302": "sbp"
+                "103": "math",
+                "102": "chem",
+                "105": "photonics",
+                "201": "cse",
+                "202": "chemeng",
+                "203": "mm",
+                "204": "ceng",
+                "205": "feng",
+                "206": "ece",
+                "208": "materialsc",
+                "209": "energy",
+                "210": "bioeng",
+                "211": "Env",
+                "303": "endes",
+                "301": "arch",
+                "302": "urp"
             };
 
             const deptName = deptMap[deptCode];
@@ -208,3 +193,4 @@
     </script>
 </body>
 </html>
+
