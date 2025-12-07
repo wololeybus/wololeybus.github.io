@@ -173,7 +173,7 @@
             let fileYear = entryYear; // Varsayılan: Giriş yılı = Dosya yılı
 
             // Mantık Zinciri:
-            if (entryYear < 2018) {
+            if (entryYear < 2018 && deptName === "phys") {
                 // DURUM 1: 2018'den eskiler
                 // Kullanıcıya bilgi verip 2018'e yönlendiriyoruz
                 alert("Sistemde en eski müfredat 2018 müfredatıdır, tabii olduğunuz müfredatı maalesef bulamadım, 2018 müfredatı üzerinden değişiklik yapabilirsiniz.");
@@ -187,6 +187,11 @@
                 // DURUM 3: Fizik Bölümü 2025 sonrası
                 fileYear = 2025;
             }
+            else if (deptName === "ceng") {
+
+                fileYear = 2025;
+            }
+                
             
             // 4. YÖNLENDİRME
             const targetFile = `${fileYear}_${deptName}.html`;
@@ -199,4 +204,5 @@
     </script>
 </body>
 </html>
+
 
