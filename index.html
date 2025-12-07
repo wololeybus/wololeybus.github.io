@@ -158,7 +158,7 @@
                 "101": "phys", "104": "mbg", "103": "math", "102": "chem", "105": "photonics",
                 "201": "cse", "202": "chemeng", "203": "mm", "204": "ceng", "205": "feng",
                 "206": "ece", "208": "materialsc", "209": "energy", "210": "bioeng",
-                "211": "Env", "303": "endes", "301": "arch", "302": "urp"
+                "211": "Env", "303": "ID", "301": "arch", "302": "urp"
             };
 
             const deptName = deptMap[deptCode];
@@ -192,6 +192,11 @@
                     fileYear = 2025; 
                 }
             }
+            else if (deptName === "ID") {
+                if (entryYear >= 0) { 
+                    fileYear = 2025; 
+                }
+            }
                 
             
             // 4. YÖNLENDİRME
@@ -205,6 +210,7 @@
     </script>
 </body>
 </html>
+
 
 
 
