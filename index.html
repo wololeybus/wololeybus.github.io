@@ -52,7 +52,7 @@
             font-size: 0.9rem;
         }
 
-        input[type="text"], select {
+        input[type="text"] {
             width: 100%;
             padding: 12px;
             font-size: 1rem;
@@ -61,15 +61,12 @@
             transition: border-color 0.3s;
             box-sizing: border-box;
             background-color: #fff;
-        }
-
-        input[type="text"] {
             text-align: center;
             letter-spacing: 1px;
             font-weight: bold;
         }
 
-        input[type="text"]:focus, select:focus {
+        input[type="text"]:focus {
             border-color: var(--iyte-red);
             outline: none;
         }
@@ -124,7 +121,6 @@
     </div>
 
     <script>
-        // Enter tuşunda formun beklenmedik submit davranışını engelle ve routeUser çağır
         document.addEventListener("keypress", function(event) {
             if (event.key === "Enter") {
                 event.preventDefault();
@@ -133,7 +129,7 @@
         });
 
         function getCurrentSemester() {
-            const month = new Date().getMonth() + 1; // 1-12
+            const month = new Date().getMonth() + 1;
             if (month >= 9 || month === 1) return '1';
             if (month >= 2 && month <= 6) return '2';
             return '0';
@@ -151,32 +147,18 @@
                 errorDiv.style.display = 'block';
                 return;
             }
-
             errorDiv.style.display = 'none';
             
-            // 2. BÖLÜM KODU
+            // 2. BÖLÜM ve YIL ÇIKARMA
+            const yearPrefix = parseInt(id.substring(0, 2), 10);
+            const entryYear = 1992 + yearPrefix;
             const deptCode = id.substring(3, 6);
 
-            // 3. BÖLÜM İSİMLENDİRMESİ
             const deptMap = {
-                "101": "phys",
-                "104": "mbg",
-                "103": "math",
-                "102": "chem",
-                "105": "photonics",
-                "201": "cse",
-                "202": "chemeng",
-                "203": "mm",
-                "204": "ceng",
-                "205": "feng",
-                "206": "ece",
-                "208": "materialsc",
-                "209": "energy",
-                "210": "bioeng",
-                "211": "Env",
-                "303": "endes",
-                "301": "arch",
-                "302": "urp"
+                "101": "phys", "104": "mbg", "103": "math", "102": "chem", "105": "photonics",
+                "201": "cse", "202": "chemeng", "203": "mm", "204": "ceng", "205": "feng",
+                "206": "ece", "208": "materialsc", "209": "energy", "210": "bioeng",
+                "211": "Env", "303": "endes", "301": "arch", "302": "urp"
             };
 
             const deptName = deptMap[deptCode];
@@ -187,42 +169,33 @@
                 return;
             }
 
+            // 3. MÜFREDAT YILI MANTIĞI (En Temiz Hali)
+            let fileYear = entryYear; // Varsayılan: Giriş yılı = Dosya yılı
 
-            // 4. YIL HESAPLAMA
-            const yearPrefix = parseInt(id.substring(0, 2), 10);
-            const entryYear = 1992 + yearPrefix; 
-
-            // --- DÜZELTİLEN KISIM ---
-            
-            let fileYear = entryYear;
-
-            // Mantık:
-            // 1. Fizik bölümü VE 2018-2021 arası ise -> 2018
-            // 2. Fizik bölümü VE 2025 sonrası ise -> 2025
-            // 3. Diğer durumlarda -> Giriş yılı neyse o (fileYear = entryYear)
-            
+            // Mantık Zinciri:
             if (entryYear < 2018) {
-            errorDiv.innerText = "Sistemde en eski müfredat 2018 müfredatıdır, tabii olduğunuz müfredatı maalesef bulamadım, 2018 müfredatı üzerinden değişiklik yapabilirsiniz.";
-                fileYear = 2018;
-            }
-            
-            if (entryYear >= 2018 && entryYear <= 2021 && deptName == "phys") {
+                // DURUM 1: 2018'den eskiler
+                // Kullanıcıya bilgi verip 2018'e yönlendiriyoruz
+                alert("Sistemde en eski müfredat 2018'dir. 2018 müfredatına yönlendiriliyorsunuz.");
                 fileYear = 2018;
             } 
-            else if (entryYear >= 2025 && deptName == "phys") {
+            else if (entryYear >= 2018 && entryYear <= 2021 && deptName === "phys") {
+                // DURUM 2: Fizik Bölümü 2018-2021 arası
+                fileYear = 2018;
+            } 
+            else if (entryYear >= 2025 && deptName === "phys") {
+                // DURUM 3: Fizik Bölümü 2025 sonrası
                 fileYear = 2025;
             }
             
-            
-            // --- DÜZELTİLEN KISIM BİTTİ ---
-            
-            // 5. DOSYA İSMİNİ OLUŞTURMA
+            // 4. YÖNLENDİRME
             const targetFile = `${fileYear}_${deptName}.html`;
+            
+            // Hata ayıklama için konsola yaz (F12 -> Console'dan kontrol edilebilir)
+            console.log(`Giriş Yılı: ${entryYear}, Yönlendirilen Dosya: ${targetFile}`);
 
-            // Yönlendirme
             window.location.href = `${targetFile}?id=${id}&sem=${encodeURIComponent(semester)}`;
         }
     </script>
 </body>
 </html>
-
