@@ -279,9 +279,9 @@
         // !!! ÖNEMLİ !!
         departments: {
             "101": "FIZIK",
-            "???": "MBG",
+            "104": "MBG",
             "103": "MATEMATIK",
-            "???": "KIMYA",
+            "102": "KIMYA",
             "105": "FOTONIK",
             "???": "CENG",    
             "210": "BIOMUH",
@@ -384,7 +384,7 @@
         if(isNaN(prefixVal)) return null;
 
         const entryYear = 1992 + prefixVal;
-        const deptCode = id.substring(2, 5); // Sonraki 3 hane bölüm kodu
+        const deptCode = id.substring(3, 6); // Sonraki 3 hane bölüm kodu
         
         return { year: entryYear, deptCode: deptCode };
     }
@@ -788,3 +788,4 @@
 
 </body>
 </html>
+
