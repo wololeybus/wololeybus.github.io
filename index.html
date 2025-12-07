@@ -118,15 +118,7 @@
                 <div class="hint">9 haneli okul numaranız</div>
             </div>
 
-            <div>
-                <label for="semesterSelect">Dönem</label>
-                <select id="semesterSelect">
-                    <option value="1">Güz (1)</option>
-                    <option value="2">Bahar (2)</option>
-                    <option value="0">Yaz (0)</option>
-                </select>
-                <div class="hint">Hangi dönem için hesaplama yapıyorsunuz?</div>
-            </div>
+            <!-- Dönem seçimi kullanıcıya sorulmuyor, otomatik hesaplanıyor -->
             
             <button onclick="routeUser()">Hesaplamaya Başla</button>
             <div id="errorMsg" class="error-msg"></div>
@@ -142,12 +134,22 @@
             }
         });
 
+        function getCurrentSemester() {
+            // Otomatik dönem tahmini:
+            // - Güz (1): Eylül(9)-Aralık(12) ve Ocak(1)
+            // - Bahar (2): Şubat(2)-Haziran(6)
+            // - Yaz (0): Temmuz(7)-Ağustos(8)
+            const month = new Date().getMonth() + 1; // 1-12
+            if (month >= 9 || month === 1) return '1';
+            if (month >= 2 && month <= 6) return '2';
+            return '0';
+        }
+
         function routeUser() {
             const idInput = document.getElementById('studentId');
-            const semSelect = document.getElementById('semesterSelect');
             const errorDiv = document.getElementById('errorMsg');
             const id = idInput.value.trim();
-            const semester = semSelect ? semSelect.value : '';
+            const semester = getCurrentSemester();
 
             // 1. Doğrulama: sadece rakamlardan oluşan 9 haneli kontrolü
             if (!/^\d{9}$/.test(id)) {
