@@ -200,13 +200,19 @@
             // 1. Fizik bölümü VE 2018-2021 arası ise -> 2018
             // 2. Fizik bölümü VE 2025 sonrası ise -> 2025
             // 3. Diğer durumlarda -> Giriş yılı neyse o (fileYear = entryYear)
-
+            
+            if (entryYear < 2018) {
+            errorDiv.innerText = "Sistemde en eski müfredat 2018 müfredatıdır, tabii olduğunuz müfredatı maalesef bulamadım, 2018 müfredatı üzerinden değişiklik yapabilirsiniz.";
+                fileYear = 2018;
+            }
+            
             if (entryYear >= 2018 && entryYear <= 2021 && deptName == "phys") {
                 fileYear = 2018;
             } 
             else if (entryYear >= 2025 && deptName == "phys") {
                 fileYear = 2025;
             }
+            
             
             // --- DÜZELTİLEN KISIM BİTTİ ---
             
@@ -219,3 +225,4 @@
     </script>
 </body>
 </html>
+
