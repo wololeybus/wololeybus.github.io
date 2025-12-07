@@ -1,970 +1,210 @@
 <!DOCTYPE html>
-<html lang="tr" data-theme="light">
+<html lang="tr">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>İYTE GPA Calculator - Final</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>İYTE GPA Asistanı - Giriş</title>
     <style>
-        /* --- TEMEL STİLLER --- */
         :root {
             --iyte-red: #b30000;
-            --bg-color: #f0f2f5;
-            --sidebar-bg: #ffffff;
-            --card-bg: #ffffff;
-            --text-main: #2c3e50;
-            --text-sub: #7f8c8d;
-            --border-color: #e9ecef;
-            --input-bg: #ffffff;
-            --input-border: #ced4da;
-            --shadow: 0 4px 6px rgba(0,0,0,0.05);
-            --hover-bg: #f8f9fa;
-            --danger-bg: #f8d7da;
-            --danger-text: #721c24;
-            --success-bg: #d4edda;
-            --success-text: #155724;
-            --warning-bg: #fff3cd;
-            --warning-text: #856404;
+            --text-color: #2c3e50;
+            --bg-color: #f4f6f9;
         }
-
-        [data-theme="dark"] {
-            --iyte-red: #ff4d4d;
-            --bg-color: #121212;
-            --sidebar-bg: #1e1e1e;
-            --card-bg: #1e1e1e;
-            --text-main: #e0e0e0;
-            --text-sub: #a0a0a0;
-            --border-color: #333333;
-            --input-bg: #2d2d2d;
-            --input-border: #444444;
-            --shadow: 0 4px 6px rgba(0,0,0,0.3);
-            --hover-bg: #2c2c2c;
-            --danger-bg: #3e1216;
-            --danger-text: #ff8b94;
-            --success-bg: #0e2e16;
-            --success-text: #81c784;
-            --warning-bg: #3e3006;
-            --warning-text: #ffda6a;
-        }
-
-        * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
 
         body {
-            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
             background-color: var(--bg-color);
-            color: var(--text-main);
-            margin: 0; padding: 0;
-            height: 100%; min-height: 100vh;
-            overflow-x: hidden;
+            color: var(--text-color);
+            margin: 0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            padding: 20px;
         }
 
-        .app-layout { display: flex; height: 100vh; width: 100%; overflow: hidden; }
-
-        .sidebar-left, .sidebar-right {
-            width: 300px; background: var(--sidebar-bg); display: flex; flex-direction: column;
-            padding: 20px; z-index: 10; overflow-y: auto; flex-shrink: 0;
-            -webkit-overflow-scrolling: touch; border-right: 1px solid var(--border-color);
-            position: relative;
-        }
-        .sidebar-right { border-left: 1px solid var(--border-color); border-right: none; }
-
-        .main-content { 
-            flex: 1; padding: 30px; overflow-y: auto; scroll-behavior: smooth; 
-            -webkit-overflow-scrolling: touch; padding-bottom: 100px; 
-        }
-        .content-container { max-width: 850px; margin: 0 auto; }
-
-        .brand-title { font-size: 1.3rem; font-weight: 800; color: var(--iyte-red); text-align: center; margin-bottom: 5px; letter-spacing: 1px; }
-        .brand-subtitle { font-size: 0.75rem; color: var(--text-sub); text-align: center; padding-bottom: 15px; border-bottom: 1px solid var(--border-color); margin-bottom: 20px; }
-        
-        .theme-toggle { 
-            position: absolute; top: 10px; right: 10px; 
-            background: var(--card-bg); border: 1px solid var(--border-color); 
-            border-radius: 50%; cursor: pointer; color: var(--text-main); 
-            font-size: 1.2rem; width: 35px; height: 35px;
-            display: flex; align-items: center; justify-content: center;
-            z-index: 200; 
+        .container {
+            background: white;
+            padding: 40px;
+            border-radius: 15px;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.1);
+            max-width: 500px;
+            width: 100%;
+            text-align: center;
+            border-top: 5px solid var(--iyte-red);
         }
 
-        .stat-card { background: var(--card-bg); border: 2px solid var(--iyte-red); color: var(--iyte-red); border-radius: 12px; padding: 20px; text-align: center; margin-bottom: 15px; }
-        .gpa-fail { background: var(--danger-bg); color: var(--danger-text); border-color: var(--danger-text); }
-        .gpa-ok { background: var(--card-bg); color: var(--text-main); border-color: var(--text-main); }
-        .gpa-honor { background: var(--success-bg); color: var(--success-text); border-color: var(--success-text); }
-        .gpa-high { background: var(--warning-bg); color: var(--warning-text); border-color: var(--warning-text); } 
-        .stat-value { font-size: 2.8rem; font-weight: 700; line-height: 1.2; }
-        .stat-status { font-size: 0.8rem; font-weight: bold; margin-top: 5px; }
-        
-        .credits-card { background: var(--card-bg); border: 1px solid var(--border-color); border-radius: 8px; padding: 15px; text-align: center; margin-bottom: 15px; }
-        .credits-val { font-size: 1.5rem; font-weight: bold; }
+        h1 { color: var(--iyte-red); margin-bottom: 5px; }
+        p.subtitle { color: #7f8c8d; font-size: 0.9rem; margin-top: 0; }
 
-        .reg-box { background: var(--card-bg); border: 1px solid var(--border-color); border-radius: 8px; margin-bottom: 15px; overflow: hidden; }
-        .reg-header { padding: 12px; font-weight: bold; font-size: 0.85rem; cursor: pointer; display: flex; justify-content: space-between; align-items: center; background: var(--hover-bg); }
-        .reg-content { display: none; padding: 12px; font-size: 0.8rem; }
-        .reg-box.open .reg-content { display: block; }
-        .reg-raw-text { font-size: 0.7rem; color: var(--text-sub); white-space: pre-line; line-height: 1.3; max-height: 200px; overflow-y: auto; background: var(--bg-color); padding: 8px; border-radius: 4px; border: 1px solid var(--border-color); }
-        .reg-alert { color: var(--danger-text); font-weight: bold; margin-bottom: 5px; }
-        .reg-warn { color: var(--warning-text); font-weight: bold; margin-bottom: 5px; }
-        .reg-ok { color: var(--success-text); font-weight: bold; margin-bottom: 5px; }
-
-        .profile-switcher { display: flex; gap: 5px; margin-bottom: 10px; }
-        .profile-btn { flex: 1; padding: 8px 5px; font-size: 0.75rem; border: 1px solid var(--border-color); background: var(--card-bg); color: var(--text-sub); cursor: pointer; border-radius: 4px; }
-        .profile-btn.active { background: var(--iyte-red); color: white; border-color: var(--iyte-red); font-weight: bold; }
-        
-        .panel-header { font-size: 0.8rem; font-weight: bold; color: var(--text-sub); text-transform: uppercase; margin-bottom: 10px; border-bottom: 1px solid var(--border-color); margin-top: 15px; padding-bottom: 5px; }
-        .tool-box { background: var(--card-bg); padding: 15px; border-radius: 8px; border: 1px solid var(--border-color); margin-bottom: 10px; }
-        .tool-input { width: 100%; padding: 10px; margin-bottom: 8px; border: 1px solid var(--input-border); border-radius: 4px; background: var(--input-bg); color: var(--text-main); font-size: 0.95rem; }
-        .tool-btn { width: 100%; padding: 12px; border: none; border-radius: 4px; cursor: pointer; font-weight: bold; font-size: 0.9rem; margin-bottom: 5px; }
-        .btn-backup { background: #6CB753; color: white; }
-        .btn-magic { background: #9b59b6; color: white; }
-        .btn-restore { background: #3899D1; color: white; display: block; text-align: center; padding: 12px; border-radius: 4px; cursor: pointer; font-size: 0.9rem; font-weight: bold;}
-        .btn-reset { background: transparent; border: 1px solid #e74c3c; color: #e74c3c; margin-top: 20px; }
-        .btn-undo { background: #f39c12; color: white; display: none; }
-        
-        .semester-block { background: var(--card-bg); border-radius: 10px; margin-bottom: 20px; border: 1px solid var(--border-color); box-shadow: var(--shadow); overflow: hidden; }
-        .semester-header { padding: 15px 20px; display: flex; justify-content: space-between; align-items: center; background: var(--card-bg); cursor: pointer; border-bottom: 1px solid transparent; user-select: none; }
-        .semester-block.open .semester-header { border-bottom-color: var(--border-color); }
-        .semester-title { font-weight: 700; font-size: 1rem; }
-        .semester-spa { font-size: 0.8rem; background: var(--bg-color); padding: 2px 8px; border-radius: 4px; color: var(--text-main); font-weight: 600; border: 1px solid var(--border-color); margin-left: 10px;}
-        .semester-content { display: none; padding: 0 20px 20px 20px; }
-        .semester-block.open .semester-content { display: block; }
-        .chevron { font-size: 0.8rem; color: var(--text-sub); margin-right: 8px;}
-
-        table { width: 100%; border-collapse: collapse; margin-top: 10px; }
-        th { text-align: left; font-size: 0.75rem; color: var(--text-sub); text-transform: uppercase; padding: 8px; }
-        td { padding: 8px; border-top: 1px solid var(--border-color); vertical-align: middle; }
-        
-        input, select { width: 100%; padding: 8px; border: 1px solid var(--input-border); border-radius: 6px; background: var(--input-bg); color: var(--text-main); -webkit-appearance: none; appearance: none; }
-        select { background-image: url("data:image/svg+xml;charset=UTF-8,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%237f8c8d' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3e%3cpolyline points='6 9 12 15 18 9'%3e%3c/polyline%3e%3c/svg%3e"); background-repeat: no-repeat; background-position: right 5px center; background-size: 12px; padding-right: 20px; }
-        
-        .grade-select { min-width: 65px; font-weight: bold; text-align: center;} 
-        .credit-input { text-align: center; font-weight: bold; }
-        .add-course-btn { background: var(--text-main); color: var(--card-bg); border: none; padding: 6px 14px; border-radius: 15px; font-size: 0.75rem; cursor: pointer; }
-        .remove-btn { color: #e74c3c; cursor: pointer; font-weight: bold; font-size: 1.5rem; text-align: center; padding: 0 10px;}
-        .prereq-fail { background-color: rgba(231, 76, 60, 0.1); border-left: 4px solid #e74c3c; }
-        .fail-msg { font-size: 0.7rem; color: #c0392b; font-weight: bold; display: block; margin-top: 2px; }
-
-        @media (max-width: 1100px) {
-            input, select, textarea { font-size: 16px !important; }
-            select { background-image: none !important; -webkit-appearance: menulist !important; appearance: menulist !important; padding-right: 0 !important; }
-            body { height: auto; overflow-x: hidden; overflow-y: auto; position: relative; }
-            .app-layout { display: block; height: auto; overflow: visible; }
-            .sidebar-left { width: 100%; height: auto; position: -webkit-sticky; position: sticky; top: 0; background: var(--bg-color); z-index: 100; box-shadow: 0 4px 10px rgba(0,0,0,0.1); border-bottom: 1px solid var(--border-color); padding: 10px; display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; }
-            .sidebar-left > div:first-child { text-align: left; padding-left: 5px; flex: 1; }
-            .brand-title { text-align: left; font-size: 1.1rem; }
-            .brand-subtitle { display: none; }
-            .theme-toggle { position: static; margin-left: 10px; background: var(--card-bg); box-shadow: 0 2px 5px rgba(0,0,0,0.1); }
-            .stat-card { width: 100%; margin-top: 15px; padding: 10px; display: flex; flex-direction: row; align-items: center; justify-content: space-between; text-align: left; order: 3; }
-            .stat-value { font-size: 1.8rem; margin: 0; }
-            .stat-status { margin: 0; font-size: 0.9rem; }
-            .credits-card { display: none; }
-            .reg-box { width: 100%; margin-top: 10px; order: 4;}
-            .panel-header { display: none; } #statsBox { display: none !important; }
-            .main-content { padding: 15px 10px; overflow: visible; min-height: auto; }
-            .sidebar-right { width: 100%; height: auto; padding: 15px; margin-top: 20px; background: var(--card-bg); }
-            .semester-content { padding: 10px; overflow-x: auto; -webkit-overflow-scrolling: touch; }
-            table { min-width: 100%; }
-            th, td { font-size: 0.9rem; padding: 10px 5px; }
-            .grade-select { width: 100%; }
-            input[placeholder="Ders Adı"] { width: 100%; min-width: 120px; }
-            .tool-btn, .profile-btn { padding: 15px; font-size: 1rem; }
+        .form-grid {
+            display: grid;
+            gap: 15px;
+            margin-top: 30px;
+            text-align: left;
         }
+
+        label {
+            display: block;
+            font-weight: bold;
+            color: #34495e;
+            margin-bottom: 5px;
+            font-size: 0.9rem;
+        }
+
+        input[type="text"], select {
+            width: 100%;
+            padding: 12px;
+            font-size: 1rem;
+            border: 2px solid #ddd;
+            border-radius: 8px;
+            transition: border-color 0.3s;
+            box-sizing: border-box;
+            background-color: #fff;
+        }
+
+        input[type="text"] {
+            text-align: center;
+            letter-spacing: 1px;
+            font-weight: bold;
+        }
+
+        input[type="text"]:focus, select:focus {
+            border-color: var(--iyte-red);
+            outline: none;
+        }
+
+        button {
+            background-color: var(--iyte-red);
+            color: white;
+            border: none;
+            padding: 15px;
+            font-size: 1rem;
+            border-radius: 8px;
+            cursor: pointer;
+            width: 100%;
+            font-weight: bold;
+            margin-top: 20px;
+            transition: background 0.3s;
+        }
+
+        button:hover { background-color: #900000; }
+
+        .error-msg {
+            color: #e74c3c;
+            font-size: 0.85rem;
+            margin-top: 15px;
+            display: none;
+            font-weight: bold;
+            background: #fadbd8;
+            padding: 10px;
+            border-radius: 5px;
+        }
+        
+        .hint { font-size: 0.75rem; color: #95a5a6; margin-top: 5px; }
     </style>
 </head>
 <body>
 
-<div class="app-layout">
-    <aside class="sidebar-left">
-        <div>
-            <div class="brand-title" id="deptTitle">İYTE GPA</div>
-            <div class="brand-subtitle" style="margin-bottom:0; padding-bottom:5px;">GPA ASİSTANI</div>
-        </div>
+    <div class="container">
+        <h1>İYTE GPA Asistanı</h1>
+        <p class="subtitle">Not ortalamanızı hızlıca hesaplayın</p>
         
-        <button class="theme-toggle" onclick="toggleTheme()" aria-label="Temayı Değiştir">☾</button>
-
-        <div class="tool-box" style="margin-top:10px;">
-            <div style="font-size:0.7rem; color:var(--text-sub); margin-bottom:5px;">ÖĞRENCİ NUMARASI</div>
-            <input type="text" id="studentNoInput" class="tool-input" placeholder="Örn: 310101016" style="text-align:center; font-weight:bold; letter-spacing:1px;">
-            <button class="tool-btn btn-backup" onclick="initCurriculumByStudentId()">📚 Müfredatı Getir</button>
-            <div id="deptStatus" style="font-size:0.75rem; text-align:center; color:var(--text-main); font-weight:bold; margin-top:5px; min-height:1rem;"></div>
-        </div>
-
-        <div class="stat-card" id="gpaCard">
+        <div class="form-grid">
+            
             <div>
-                 <div class="stat-value" id="gpaResult">0.00</div>
-                 <div class="stat-status" id="gpaStatus">Başlangıç</div>
+                <label for="studentId">Öğrenci Numarası</label>
+                <input type="text" id="studentId" placeholder="Örn: 310101016" maxlength="9" inputmode="numeric">
+                <div class="hint">9 haneli okul numaranız</div>
             </div>
-            <div style="flex:1;"></div> 
-        </div>
 
-        <div class="credits-card">
-            <div style="font-size:0.7rem; color:var(--text-sub);">TOPLAM KREDİ</div>
-            <div class="credits-val" id="totalCredits">0</div>
-        </div>
-
-        <div class="reg-box" id="regBox">
-            <div class="reg-header" onclick="toggleRegs()">
-                <span>🎓 Akademik Durum</span>
-                <span id="regChevron">▼</span>
+            <div>
+                <label for="semesterSelect">Aktif Döneminiz</label>
+                <select id="semesterSelect">
+                    <option value="all">Tüm Dönemler</option>
+                    <option value="1">1. Yarıyıl (Güz)</option>
+                    <option value="2">2. Yarıyıl (Bahar)</option>
+                    <option value="3">3. Yarıyıl (Güz)</option>
+                    <option value="4">4. Yarıyıl (Bahar)</option>
+                    <option value="5">5. Yarıyıl (Güz)</option>
+                    <option value="6">6. Yarıyıl (Bahar)</option>
+                    <option value="7">7. Yarıyıl (Güz)</option>
+                    <option value="8">8. Yarıyıl (Bahar)</option>
+                </select>
             </div>
-            <div class="reg-content" id="regContent">
-                <div class="reg-dynamic" id="regDynamicStatus"></div>
-                <div class="reg-raw-text">Genel not ortalaması 2,00’ın altında olan öğrenciler başarısız sayılır...</div>
-            </div>
+
+            <button onclick="routeUser()">Hesaplamaya Başla</button>
+            <div id="errorMsg" class="error-msg"></div>
         </div>
-        
-        <div class="panel-header clickable-header" onclick="toggleStats()" style="margin-top:20px;">
-            <span>İstatistikler</span> <span id="statsChevron">▼</span>
-        </div>
-        <div class="tool-box" id="statsBox" style="padding:10px; display:none;">
-            <div class="stats-list" id="statsContainer"></div>
-        </div>
-    </aside>
+    </div>
 
-    <main class="main-content">
-        <div class="content-container">
-            <form id="gpaForm">
-                <div id="curriculumContainer" style="text-align:center; color:var(--text-sub); padding:40px;">
-                    <h3 style="color:var(--iyte-red)">Hoşgeldiniz!</h3>
-                    <p>Lütfen soldaki menüden öğrenci numaranızı girerek "Müfredatı Getir" butonuna tıklayın.</p>
-                </div>
-            </form>
-            <div style="height: 80px;"></div>
-        </div>
-    </main>
-
-    <aside class="sidebar-right">
-        <div class="panel-header" style="margin-top:0;">Profil / Senaryo</div>
-        <div class="tool-box">
-             <div class="profile-switcher">
-                 <button class="profile-btn active" onclick="switchProfile('default', this)">Varsayılan</button>
-                 <button class="profile-btn" onclick="switchProfile('p1', this)">Senaryo A</button>
-                 <button class="profile-btn" onclick="switchProfile('p2', this)">Senaryo B</button>
-             </div>
-        </div>
-
-        <div class="panel-header">Veri & Yedekleme</div>
-        <div class="tool-box">
-             <button class="tool-btn btn-backup" onclick="exportData()"> Yedek İndir (.json)</button>
-             <label for="importFile" class="btn-restore"> Yedeği Geri Yükle</label>
-             <input type="file" id="importFile" style="display:none;" onchange="importData(this)">
-        </div>
-
-        <div class="panel-header">Hedef Hesaplayıcı</div>
-        <div class="tool-box">
-            <input type="number" id="targetGPA" class="tool-input" placeholder="Hedef Ort. (3.00)" step="0.01">
-            <div id="targetResult" style="text-align:center; font-weight:bold; font-size:0.9rem; margin:5px 0;">-</div>
-            <button class="tool-btn btn-magic" onclick="autoFillTarget()"> Hedefe Göre Doldur</button>
-            <button class="tool-btn btn-undo" id="btnUndo" onclick="undoLastAction()"> Geri Al</button>
-        </div>
-        
-        <button class="tool-btn btn-reset" onclick="resetAll()">Bu Profili Sıfırla</button>
-    </aside>
-</div>
-
-<script>
-    /* =========================================
-       1. DATA STRUCTURE (TÜM 8 DÖNEM + UYUMLU FORMAT)
-       ========================================= */
-    const universityData = {
-        departments: {
-            "101": "FIZIK", "502": "FIZIK",
-            "104": "MBG", "103": "MATEMATIK", "102": "KIMYA", "105": "FOTONIK",
-            "201": "CENG", "401": "CENG",
-            "202": "KIMMUH", "203": "MAKMUH", "204": "INSAAT", "205": "GIDA",
-            "206": "EHM", "208": "MALZEME", "209": "ENERJI", "210": "BIOMUH", 
-            "211": "CEVRE", "303": "ENTAS", "301": "MIMARLIK", "302": "SBP"
-        },
-        
-        curriculums: {
-            "FIZIK": {
-                // ---------------------------------------------------------
-                // 2023, 2024, 2025... (YENİ MÜFREDAT - 8 DÖNEM)
-                // ---------------------------------------------------------
-                "2023": [
-                    {
-                        semester: 1,
-                        courses: [
-                            { code: "PHYS 101", name: "General Physics I", credit: 3, static: true },
-                            { code: "PHYS 111", name: "General Physics Lab I", credit: 1, static: true },
-                            { code: "MATH 145", name: "Calculus I", credit: 5, static: true },
-                            { code: "CHEM 121", name: "General Chemistry I", credit: 3, static: true },
-                            { code: "CHEM 141", name: "General Chemistry Lab I", credit: 1, static: true },
-                            { code: "MATH 101", name: "Pre-Calculus", credit: 0, static: true },
-                            { code: "ENG 101", name: "Dev. of Reading & Writing I", credit: 3, static: true }
-                        ]
-                    },
-                    {
-                        semester: 2,
-                        courses: [
-                            { code: "PHYS 102", name: "General Physics II", credit: 3, static: true },
-                            { code: "PHYS 112", name: "General Physics Lab II", credit: 1, static: true },
-                            { code: "PHYS 114", name: "Intro. to Prog. for Physicists", credit: 3, static: true },
-                            { code: "MATH 146", name: "Calculus II", credit: 5, static: true },
-                            { code: "CHEM 122", name: "General Chemistry II", credit: 3, static: true },
-                            { code: "CHEM 142", name: "General Chemistry Lab II", credit: 1, static: true },
-                            { code: "GCC 101", name: "Career Planning", credit: 0, static: true },
-                            { code: "ENG 102", name: "Dev. of Reading & Writing II", credit: 3, static: true }
-                        ]
-                    },
-                    {
-                        semester: 3,
-                        courses: [
-                            { code: "PHYS 201", name: "Waves and Optics", credit: 4, static: true },
-                            { code: "PHYS 203", name: "Classical Mechanics I", credit: 3, static: true },
-                            { code: "MATH 255", name: "Differential Equations", credit: 4, static: true },
-                            { code: "MATH 265", name: "Basic Linear Algebra", credit: 3, static: true },
-                            { code: "ELS I", name: "Elective Social I", credit: 3, static: false },
-                            { code: "HIST 201", name: "History of Revolution I", credit: 0, static: true },
-                            { code: "TURK 201", name: "Turkish Language I", credit: 0, static: true }
-                        ]
-                    },
-                    {
-                        semester: 4,
-                        courses: [
-                            { code: "PHYS 204", name: "Classical Mechanics II", credit: 3, static: true },
-                            { code: "PHYS 212", name: "Waves and Optics Lab", credit: 2, static: true },
-                            { code: "PHYS 222", name: "Modern Physics", credit: 4, static: true },
-                            { code: "PHYS 266", name: "Math. Methods in Physics", credit: 4, static: true },
-                            { code: "ELS II", name: "Elective Social II", credit: 3, static: false },
-                            { code: "ELS III", name: "Elective Social III", credit: 3, static: false }, 
-                            { code: "HIST 202", name: "History of Revolution II", credit: 0, static: true },
-                            { code: "TURK 202", name: "Turkish Language II", credit: 0, static: true }
-                        ]
-                    },
-                    {
-                        semester: 5,
-                        courses: [
-                            { code: "PHYS 301", name: "Quantum Mechanics I", credit: 3, static: true },
-                            { code: "PHYS 311", name: "Experimental Methods", credit: 3, static: true },
-                            { code: "PHYS 321", name: "Electromagnetic Theory I", credit: 4, static: true },
-                            { code: "ELS IV", name: "Elective Social IV", credit: 3, static: false }
-                        ]
-                    },
-                    {
-                        semester: 6,
-                        courses: [
-                            { code: "PHYS 302", name: "Quantum Mechanics II", credit: 3, static: true },
-                            { code: "PHYS 322", name: "Electromagnetic Theory II", credit: 4, static: true },
-                            { code: "PHYS 326", name: "Statistical Mechanics", credit: 3, static: true },
-                            { code: "ELS V", name: "Elective Social V", credit: 3, static: false }
-                        ]
-                    },
-                    {
-                        semester: 7,
-                        courses: [
-                            { code: "PHYS 401", name: "Condensed Matter Phys. I", credit: 4, static: true },
-                            { code: "PHYS 496", name: "Graduation Project I", credit: 3, static: true },
-                            { code: "TE", name: "Technical Elective", credit: 3, static: false },
-                            { code: "TE", name: "Technical Elective", credit: 3, static: false },
-                            { code: "TE", name: "Technical Elective", credit: 3, static: false }
-                        ]
-                    },
-                    {
-                        semester: 8,
-                        courses: [
-                            { code: "PHYS 497", name: "Graduation Project II", credit: 3, static: true },
-                            { code: "TE", name: "Technical Elective", credit: 3, static: false },
-                            { code: "TE", name: "Technical Elective", credit: 3, static: false },
-                            { code: "TE", name: "Technical Elective", credit: 3, static: false },
-                            { code: "FE", name: "Free Elective", credit: 3, static: false }
-                        ]
-                    }
-                ],
-
-                // ---------------------------------------------------------
-                // 2018 - 2022 (ESKİ MÜFREDAT - 8 DÖNEM)
-                // ---------------------------------------------------------
-                "2018": [
-                    {
-                        semester: 1,
-                        courses: [
-                            { code: "PHYS 101", name: "General Physics I", credit: 3, static: true },
-                            { code: "PHYS 111", name: "General Physics Lab I", credit: 1, static: true },
-                            { code: "MATH 145", name: "Calculus I", credit: 5, static: true },
-                            { code: "CHEM 121", name: "General Chemistry I", credit: 3, static: true },
-                            { code: "CHEM 141", name: "General Chemistry Lab I", credit: 1, static: true },
-                            { code: "MBG 101", name: "Biology I", credit: 3, static: true },
-                            { code: "ENG 101", name: "Dev. of Reading & Writing I", credit: 3, static: true }
-                        ]
-                    },
-                    {
-                        semester: 2,
-                        courses: [
-                            { code: "PHYS 102", name: "General Physics II", credit: 3, static: true },
-                            { code: "PHYS 112", name: "General Physics Lab II", credit: 1, static: true },
-                            { code: "PHYS 114", name: "Intro. to Prog. for Physicists", credit: 3, static: true },
-                            { code: "MATH 146", name: "Calculus II", credit: 5, static: true },
-                            { code: "CHEM 122", name: "General Chemistry II", credit: 3, static: true },
-                            { code: "CHEM 142", name: "General Chemistry Lab II", credit: 1, static: true },
-                            { code: "ENG 102", name: "Dev. of Reading & Writing II", credit: 3, static: true }
-                        ]
-                    },
-                    {
-                        semester: 3,
-                        courses: [
-                            { code: "PHYS 201", name: "Waves and Optics", credit: 4, static: true },
-                            { code: "PHYS 203", name: "Classical Mechanics I", credit: 3, static: true },
-                            { code: "MATH 255", name: "Differential Equations", credit: 4, static: true },
-                            { code: "MATH 265", name: "Basic Linear Algebra", credit: 3, static: true },
-                            { code: "ELS I", name: "Elective Social I", credit: 3, static: false },
-                            { code: "HIST 201", name: "History of Revolution I", credit: 0, static: true },
-                            { code: "TURK 201", name: "Turkish Language I", credit: 0, static: true }
-                        ]
-                    },
-                    {
-                        semester: 4,
-                        courses: [
-                            { code: "PHYS 204", name: "Classical Mechanics II", credit: 3, static: true },
-                            { code: "PHYS 212", name: "Waves and Optics Lab", credit: 2, static: true },
-                            { code: "PHYS 222", name: "Modern Physics", credit: 4, static: true },
-                            { code: "PHYS 266", name: "Math. Methods in Physics", credit: 4, static: true },
-                            { code: "ELS II", name: "Elective Social II", credit: 3, static: false },
-                            { code: "HIST 202", name: "History of Revolution II", credit: 0, static: true },
-                            { code: "TURK 202", name: "Turkish Language II", credit: 0, static: true }
-                        ]
-                    },
-                    {
-                        semester: 5,
-                        courses: [
-                            { code: "PHYS 301", name: "Quantum Mechanics I", credit: 3, static: true },
-                            { code: "PHYS 311", name: "Experimental Methods", credit: 3, static: true },
-                            { code: "PHYS 321", name: "Electromagnetic Theory I", credit: 4, static: true },
-                            { code: "ELS III", name: "Elective Social III", credit: 3, static: false }
-                        ]
-                    },
-                    {
-                        semester: 6,
-                        courses: [
-                            { code: "PHYS 302", name: "Quantum Mechanics II", credit: 3, static: true },
-                            { code: "PHYS 322", name: "Electromagnetic Theory II", credit: 4, static: true },
-                            { code: "PHYS 326", name: "Statistical Mechanics", credit: 3, static: true },
-                            { code: "TE", name: "Technical Elective", credit: 3, static: false }
-                        ]
-                    },
-                    {
-                        semester: 7,
-                        courses: [
-                            { code: "PHYS 401", name: "Condensed Matter Phys. I", credit: 4, static: true },
-                            { code: "PHYS 491", name: "Graduation Project I", credit: 3, static: true },
-                            { code: "TE", name: "Technical Elective", credit: 3, static: false },
-                            { code: "TE", name: "Technical Elective", credit: 3, static: false },
-                            { code: "FE", name: "Free Elective", credit: 3, static: false }
-                        ]
-                    },
-                    {
-                        semester: 8,
-                        courses: [
-                            { code: "PHYS 492", name: "Graduation Project II", credit: 3, static: true },
-                            { code: "TE", name: "Technical Elective", credit: 3, static: false },
-                            { code: "TE", name: "Technical Elective", credit: 3, static: false },
-                            { code: "TE", name: "Technical Elective", credit: 3, static: false },
-                            { code: "FE", name: "Free Elective", credit: 3, static: false }
-                        ]
-                    }
-                ],
-                "default": [ { semester: 1, courses: [] } ] 
-            },
-            // Diğer bölümler için boş şablon
-            "MBG": { "default": [] }, "MATEMATIK": { "default": [] }, "KIMYA": { "default": [] },
-            "FOTONIK": { "default": [] }, "CENG": { "default": [] }, "BIOMUH": { "default": [] },
-            "CEVRE": { "default": [] }, "ENERJI": { "default": [] }, "EHM": { "default": [] },
-            "GIDA": { "default": [] }, "INSAAT": { "default": [] }, "KIMMUH": { "default": [] },
-            "MAKMUH": { "default": [] }, "MALZEME": { "default": [] }, "ENTAS": { "default": [] },
-            "MIMARLIK": { "default": [] }, "SBP": { "default": [] }
-        }
-    };
-
-    /* =========================================
-       2. LOGIC: FALLBACK & PARSING
-       ========================================= */
-    function getCurriculumForYear(deptKey, entryYear) {
-        const deptData = universityData.curriculums[deptKey];
-        if (!deptData) return null;
-
-        const years = Object.keys(deptData)
-                            .filter(k => k !== "default")
-                            .map(Number)
-                            .sort((a, b) => b - a); 
-
-        let selectedYear = "default";
-        
-        // Eğer hiçbir yıl uymuyorsa (Örn: 2017) ve 2018 varsa, fallback olarak en eskiyi seçelim
-        // Ancak esas kontrol render kısmında yapılacak
-        if (years.length > 0 && entryYear < Math.min(...years)) {
-             selectedYear = Math.min(...years).toString();
-        } else {
-             for (let y of years) {
-                if (entryYear >= y) {
-                    selectedYear = y.toString();
-                    break;
-                }
-            }
-        }
-        
-        return { data: deptData[selectedYear], yearLabel: selectedYear };
-    }
-
-    /* =========================================
-       3. STANDARD GPA LOGIC & VARIABLES
-       ========================================= */
-    window.grades = { "AA": 4.0, "BA": 3.5, "BB": 3.0, "CB": 2.5, "CC": 2.0, "DC": 1.5, "DD": 1.0, "FD": 0.5, "FF": 0.0, "NA": 0.0 };
-    window.gradeKeys = ["DD", "DC", "CC", "CB", "BB", "BA", "AA"];
-    window.failingGrades = ["FF", "FD", "NA"];
-    window.optionsHTML = '<option value="">-</option>' + Object.keys(grades).map(g => `<option value="${g}">${g}</option>`).join('');
-    
-    window.prerequisites = {
-        "PHYS 102": "PHYS 101", "PHYS 201": "PHYS 102", "PHYS 302": "PHYS 301", "PHYS 322": "PHYS 321"
-    };
-
-    window.gradeHistory = [];
-    window.currentProfile = "default";
-    window.currentDept = null;
-
-    /* =========================================
-       4. INITIALIZATION & DYNAMIC RENDERING
-       ========================================= */
-    document.addEventListener('DOMContentLoaded', () => {
-        loadTheme();
-        const savedDept = localStorage.getItem('iyte_active_dept_' + currentProfile);
-        const savedId = localStorage.getItem('iyte_student_id_' + currentProfile);
-        
-        if (savedId) {
-            document.getElementById('studentNoInput').value = savedId;
-            initCurriculumByStudentId(false); 
-        }
-
-        const form = document.getElementById('gpaForm');
-        form.addEventListener('change', (e) => { if(e.target.tagName === 'SELECT' || e.target.tagName === 'INPUT') calculateGPA(); });
-        form.addEventListener('input', (e) => { if(e.target.tagName === 'INPUT') calculateGPA(); });
-    });
-
-    // --- PARSER: 9 HANELİ İYTE FORMATI (YY0BBB0NNN) ---
-    // Örn: 310101016 -> 31(Yıl), 101(Bölüm)
-    window.parseStudentID = function(id) {
-        id = id.toString().trim();
-        if (id.length !== 9) return null; 
-        
-        // 1. Yıl: İlk 2 hane
-        const prefixStr = id.substring(0, 2); 
-        const prefixVal = parseInt(prefixStr);
-        if(isNaN(prefixVal)) return null;
-        const entryYear = 1992 + prefixVal;
-        
-        // 2. Bölüm Kodu: 3, 4, 5. indeksler (Aradaki 0 atlanıyor)
-        const deptCode = id.substring(3, 6); 
-        
-        return { year: entryYear, deptCode: deptCode };
-    }
-
-    window.initCurriculumByStudentId = function(showAlert = true) {
-        const id = document.getElementById('studentNoInput').value;
-        const info = parseStudentID(id);
-        
-        if (!info) {
-            if(showAlert) alert("Geçersiz Numara! Lütfen 9 haneli İYTE formatını kullanın. (Örn: 310101016)");
-            return;
-        }
-
-        const deptKey = universityData.departments[info.deptCode];
-        
-        if (!deptKey) {
-            if(showAlert) alert(`Bölüm kodu (${info.deptCode}) sistemde tanımlı değil.`);
-            return;
-        }
-
-        window.currentDept = deptKey;
-        document.getElementById('deptTitle').innerText = "İYTE " + deptKey;
-        document.getElementById('deptStatus').innerText = `${info.year} Girişli (${deptKey})`;
-        
-        localStorage.setItem('iyte_student_id_' + currentProfile, id);
-        
-        renderCurriculum(deptKey, info.year);
-        loadData();
-    }
-
-    window.renderCurriculum = function(deptKey, entryYear) {
-        const container = document.getElementById('curriculumContainer');
-        container.innerHTML = "";
-        
-        const result = getCurriculumForYear(deptKey, entryYear);
-        const curriculum = result ? result.data : null;
-        
-        if (!curriculum) {
-            container.innerHTML = "<h3>Müfredat verisi bulunamadı.</h3>";
-            return;
-        }
-
-        // --- UYARI VE BİLGİLENDİRME ---
-        const badge = document.createElement('div');
-        badge.style.cssText = "text-align:center; font-size:0.8rem; margin-bottom:15px; padding:10px; border-radius:5px;";
-        
-        if (deptKey === "FIZIK" && entryYear < 2018) {
-             badge.style.backgroundColor = "var(--danger-bg)";
-             badge.style.color = "var(--danger-text)";
-             badge.style.fontWeight = "bold";
-             badge.innerHTML = "⚠️ Müfredata erişilemedi, 2018 müfredatı uygulandı.<br>Lütfen dersleri manuel olarak düzenleyiniz.";
-        } else {
-             badge.style.backgroundColor = "var(--hover-bg)";
-             badge.style.color = "var(--text-sub)";
-             badge.innerText = `Uygulanan Müfredat: ${result.yearLabel}`;
-        }
-        container.appendChild(badge);
-
-        curriculum.forEach(semData => {
-            const semDiv = document.createElement('div');
-            semDiv.className = "semester-block open";
-            semDiv.id = `sem${semData.semester}`;
-            
-            let rowsHTML = "";
-            semData.courses.forEach(course => {
-                rowsHTML += `
-                <tr data-static="${course.static}">
-                    <td class="c-code">${course.code}</td>
-                    <td>${course.name}</td>
-                    <td><input type="number" value="${course.credit}" readonly class="credit-input"></td>
-                    <td>
-                        <select class="grade-select">
-                            ${window.optionsHTML}
-                        </select>
-                    </td>
-                    <td></td>
-                </tr>`;
-            });
-
-            semDiv.innerHTML = `
-                <div class="semester-header" onclick="toggleSemester('sem${semData.semester}')">
-                    <div>
-                        <span class="chevron">▼</span>
-                        <span class="semester-title">${semData.semester}. Yarıyıl</span>
-                        <span class="semester-spa" id="sem${semData.semester}-spa">0.00</span>
-                    </div>
-                    <button type="button" class="add-course-btn" onclick="event.stopPropagation(); addCourse('sem${semData.semester}')">+ Ders</button>
-                </div>
-                <div class="semester-content">
-                    <table>
-                        <thead><tr><th style="width:15%">Kod</th><th>Ders Adı</th><th style="text-align:center">Kr</th><th>Not</th><th style="width:20px"></th></tr></thead>
-                        <tbody class="course-list">
-                            ${rowsHTML}
-                        </tbody>
-                    </table>
-                </div>
-            `;
-            container.appendChild(semDiv);
-        });
-    }
-
-    // --- DİĞER STANDART FONKSİYONLAR (DEĞİŞİKLİK YOK) ---
-    window.loadTheme = function() {
-        const theme = localStorage.getItem('iyte_gpa_theme');
-        if(theme) document.documentElement.setAttribute('data-theme', theme);
-    }
-    window.toggleTheme = function() { 
-        const h = document.documentElement; 
-        const n = h.getAttribute('data-theme') === 'dark' ? 'light' : 'dark'; 
-        h.setAttribute('data-theme', n); 
-        localStorage.setItem('iyte_gpa_theme', n);
-    }
-    window.switchProfile = function(profileName, btnElement) {
-        saveData();
-        window.currentProfile = profileName;
-        document.querySelectorAll('.profile-btn').forEach(b => b.classList.remove('active'));
-        btnElement.classList.add('active');
-        
-        const savedId = localStorage.getItem('iyte_student_id_' + currentProfile);
-        if(savedId) {
-            document.getElementById('studentNoInput').value = savedId;
-            initCurriculumByStudentId(false);
-        } else {
-            document.getElementById('studentNoInput').value = "";
-            document.getElementById('curriculumContainer').innerHTML = "<div style='padding:40px; text-align:center;'>Bu profil boş. Öğrenci numarası girin.</div>";
-            document.getElementById('deptTitle').innerText = "İYTE GPA";
-            document.getElementById('gpaResult').innerText = "0.00";
-            document.getElementById('deptStatus').innerText = "";
-        }
-    }
-
-    window.getStorageKey = function() { return 'iyte_gpa_v5_' + window.currentProfile + '_' + (window.currentDept || 'NA'); }
-
-    window.calculateGPA = function() {
-        let totalPoints = 0, totalCredits = 0, semesterData = {};
-        let courseGrades = {}; 
-        let stats = { filledCount: 0, gradeCounts: {} };
-        Object.keys(grades).forEach(g => stats.gradeCounts[g] = 0);
-        
-        const rows = document.getElementById('gpaForm').querySelectorAll('tbody tr');
-        rows.forEach(row => {
-            const crIn = row.querySelector('.credit-input');
-            const grSel = row.querySelector('.grade-select');
-            
-            let code = "";
-            const staticCode = row.querySelector('.c-code');
-            const dynamicCode = row.querySelector('input[placeholder="Kod"]');
-            if(staticCode) code = staticCode.innerText.trim();
-            else if(dynamicCode) code = dynamicCode.value.trim().toUpperCase();
-
-            if(code && grSel) courseGrades[code] = grSel.value;
-
-            const semBlock = row.closest('.semester-block');
-            if (!semBlock) return;
-            const semId = semBlock.id;
-            
-            if(!semesterData[semId]) semesterData[semId] = {pts:0, cr:0};
-
-            if (crIn && grSel) {
-                const credit = parseFloat(crIn.value);
-                const grade = grSel.value;
-                if (grade && grade !== "" && !isNaN(credit) && credit > 0) {
-                    const pts = credit * grades[grade];
-                    totalPoints += pts; totalCredits += credit;
-                    semesterData[semId].pts += pts; semesterData[semId].cr += credit;
-                    stats.filledCount++;
-                    if(stats.gradeCounts[grade] !== undefined) stats.gradeCounts[grade]++;
-                }
-            }
+    <script>
+        document.addEventListener("keypress", function(event) {
+            if (event.key === "Enter") routeUser();
         });
 
-        const gpa = totalCredits > 0 ? (totalPoints / totalCredits).toFixed(2) : "0.00";
-        document.getElementById('gpaResult').innerText = gpa;
-        document.getElementById('totalCredits').innerText = totalCredits;
-        
-        for(const [id, data] of Object.entries(semesterData)) {
-            const spa = data.cr > 0 ? (data.pts / data.cr).toFixed(2) : "0.00";
-            const badge = document.getElementById(id + '-spa');
-            if(badge) badge.innerText = spa;
-        }
+        function routeUser() {
+            const idInput = document.getElementById('studentId');
+            const semSelect = document.getElementById('semesterSelect');
+            const errorDiv = document.getElementById('errorMsg');
+            const id = idInput.value.trim();
+            const semester = semSelect.value;
 
-        updateStatus(parseFloat(gpa));
-        checkPrerequisites(courseGrades);
-        updateRegulations(parseFloat(gpa));
-        updateStatsPanel(stats);
-        saveData();
-    }
-    
-    window.updateStatsPanel = function(stats) {
-        const container = document.getElementById('statsContainer');
-        let html = `<div style="display:flex; justify-content:space-between; margin-bottom:5px; border-bottom:1px dashed #ccc;"><span>Toplam Ders:</span> <b>${stats.filledCount}</b></div>`;
-        Object.keys(stats.gradeCounts).forEach(g => {
-            if(stats.gradeCounts[g] > 0) html += `<div style="display:flex; justify-content:space-between; margin-bottom:5px; border-bottom:1px dashed #eee;"><span>${g}:</span> <b>${stats.gradeCounts[g]}</b></div>`;
-        });
-        container.innerHTML = html;
-    }
-
-    window.checkPrerequisites = function(courseGrades) {
-        document.querySelectorAll('.prereq-fail').forEach(el => {
-            el.classList.remove('prereq-fail');
-            const msg = el.querySelector('.fail-msg');
-            if(msg) msg.remove();
-        });
-
-        document.querySelectorAll('tbody tr').forEach(row => {
-            let code = "";
-            const staticCode = row.querySelector('.c-code');
-            if(staticCode) code = staticCode.innerText.trim();
-            else {
-                const inp = row.querySelector('input[placeholder="Kod"]');
-                if(inp) code = inp.value.trim().toUpperCase();
+            // 1. Doğrulama
+            if (id.length !== 9 || isNaN(id)) {
+                errorDiv.innerText = "Lütfen geçerli, 9 haneli bir öğrenci numarası giriniz.";
+                errorDiv.style.display = 'block';
+                return;
             }
 
-            if(code && prerequisites[code]) {
-                const prereqCode = prerequisites[code];
-                const prereqGrade = courseGrades[prereqCode];
-                if(prereqGrade && failingGrades.includes(prereqGrade)) {
-                    row.classList.add('prereq-fail');
-                    if(!row.querySelector('.fail-msg')) {
-                        const cell = row.querySelector('td:nth-child(2)');
-                        cell.innerHTML += `<span class='fail-msg'> Ön şart: ${prereqCode} başarısız!</span>`;
-                    }
-                }
-            }
-        });
-    }
+            errorDiv.style.display = 'none';
 
-    window.updateRegulations = function(gpa) {
-        const box = document.getElementById('regDynamicStatus');
-        let html = "";
-        if(gpa < 1.80) {
-            html = `<div class='reg-alert'> PROBATION (Gözetim)</div><div>GPA < 1.80. Yeni ders alamazsın.</div>`;
-        } else if (gpa >= 1.80 && gpa < 2.00) {
-            html = `<div class='reg-warn'> Başarısız Durum</div><div>GPA < 2.00. Ders yükü azaltılabilir.</div>`;
-        } else {
-             html = `<div class='reg-ok'> Akademik Durum Uygun</div>`;
-             if(gpa >= 2.50) html += `<div> Ders yükü +3 ders arttırılabilir.</div>`;
-             else if(gpa >= 2.00) html += `<div> Ders yükü +2 ders arttırılabilir.</div>`;
-        }
-        box.innerHTML = html;
-    }
+            // 2. YIL HESAPLAMA (Örn: 31 -> 2023)
+            const yearPrefix = parseInt(id.substring(0, 2));
+            const entryYear = 1992 + yearPrefix; // 1992 + 31 = 2023
 
-    window.toggleRegs = function() {
-        document.getElementById('regBox').classList.toggle('open');
-        document.getElementById('regChevron').innerText = document.getElementById('regBox').classList.contains('open') ? '▲' : '▼';
-    }
+            // 3. BÖLÜM KODU (Örn: 101)
+            const deptCode = id.substring(3, 6);
 
-    window.updateStatus = function(gpa) {
-        const card = document.getElementById('gpaCard'), txt = document.getElementById('gpaStatus');
-        card.classList.remove('gpa-fail', 'gpa-ok', 'gpa-honor', 'gpa-high');
-        if (gpa < 2.00) { card.classList.add('gpa-fail'); txt.innerText = "Başarısız"; }
-        else if (gpa < 3.00) { card.classList.add('gpa-ok'); txt.innerText = "Başarılı"; }
-        else if (gpa < 3.50) { card.classList.add('gpa-honor'); txt.innerText = "Şeref"; }
-        else { card.classList.add('gpa-high'); txt.innerText = "Yüksek Şeref"; }
-    }
-
-    window.toggleSemester = function(id) { document.getElementById(id).classList.toggle('open'); }
-    
-    window.toggleStats = function() { 
-        const box = document.getElementById('statsBox'), chevron = document.getElementById('statsChevron');
-        if(box.style.display === 'none') { box.style.display = 'block'; chevron.innerText = '▲'; } else { box.style.display = 'none'; chevron.innerText = '▼'; }
-    }
-    
-    window.resetAll = function() { if(confirm("BU PROFİLDEKİ tüm veriler silinecek?")) { localStorage.removeItem(getStorageKey()); localStorage.removeItem('iyte_student_id_' + currentProfile); location.reload(); } }
-    
-    window.saveData = function() {
-        if(!window.currentDept) return; 
-        const data = { static: [], dynamic: [], target: document.getElementById('targetGPA').value };
-        
-        document.querySelectorAll('tr[data-static="true"]').forEach(r => {
-            let obj = {
-                code: r.querySelector('.c-code').innerText,
-                gr: r.querySelector('.grade-select').value
+            // 4. BÖLÜM İSİMLENDİRMESİ
+            // Dosya isimlerinde kullanacağın İngilizce/Türkçe karakterlere dikkat et.
+            // Burada "fizik", "ceng" gibi küçük harf ve Türkçe karaktersiz isimler kullanıyoruz.
+            const deptMap = {
+                "101": "fizik", "502": "fizik",
+                "104": "mbg",
+                "103": "matematik",
+                "102": "kimya",
+                "105": "fotonik",
+                "201": "ceng", "401": "ceng",
+                "202": "kimmuh",
+                "203": "makmuh",
+                "204": "insaat",
+                "205": "gida",
+                "206": "ehm",
+                "208": "malzeme",
+                "209": "enerji",
+                "210": "biomuh",
+                "211": "cevre",
+                "303": "entas",
+                "301": "mimarlik",
+                "302": "sbp"
             };
-            data.static.push(obj);
-        });
 
-        document.querySelectorAll('.course-list tr:not([data-static="true"])').forEach(r => {
-            const inps = r.querySelectorAll('input, select');
-            data.dynamic.push({ sem: r.closest('.semester-block').id, code: inps[0].value, name: inps[1].value, credit: inps[2].value, grade: inps[3].value });
-        });
-        localStorage.setItem(getStorageKey(), JSON.stringify(data));
-    }
+            const deptName = deptMap[deptCode];
 
-    window.loadData = function() {
-        const raw = localStorage.getItem(getStorageKey());
-        if(!raw) return;
-        const d = JSON.parse(raw);
-        if(d.target) document.getElementById('targetGPA').value = d.target;
-        
-        if(d.static) {
-            d.static.forEach(item => {
-                const rows = document.querySelectorAll('tr[data-static="true"]');
-                for(let r of rows) {
-                    if(r.querySelector('.c-code').innerText === item.code) {
-                        r.querySelector('.grade-select').value = item.gr;
-                        break;
-                    }
-                }
-            });
-        }
-        
-        if(d.dynamic) d.dynamic.forEach(i => addCourse(i.sem, i));
-        calculateGPA();
-    }
-
-    window.autoFillTarget = function() {
-        const targetStr = document.getElementById('targetGPA').value;
-        if(!targetStr) { alert("Lütfen bir hedef ortalama girin."); return; }
-        const targetGPA = parseFloat(targetStr);
-        let currentPoints = 0, currentCredits = 0, emptyCourses = [];
-        document.querySelectorAll('tbody tr').forEach(row => {
-            const crIn = row.querySelector('.credit-input'), grSel = row.querySelector('.grade-select');
-            if(crIn && grSel) {
-                const cr = parseFloat(crIn.value);
-                if(!isNaN(cr) && cr > 0) {
-                    if(grSel.value !== "") { currentPoints += cr * grades[grSel.value]; currentCredits += cr; }
-                    else { emptyCourses.push({ el: grSel, cr: cr, gradeIndex: 0 }); }
-                }
+            if (!deptName) {
+                errorDiv.innerText = `Bölüm kodu (${deptCode}) tanımlanamadı.`;
+                errorDiv.style.display = 'block';
+                return;
             }
-        });
-        if(emptyCourses.length === 0) { alert("Boş ders yok."); return; }
-        
-        saveHistorySnapshot();
-        let neededTotalCredits = currentCredits, neededTotalPoints = currentPoints;
-        emptyCourses.forEach(c => { neededTotalCredits += c.cr; neededTotalPoints += c.cr * grades[gradeKeys[0]]; });
-        
-        const targetTotalPoints = targetGPA * neededTotalCredits;
-        let maxPoints = currentPoints;
-        emptyCourses.forEach(c => maxPoints += c.cr * 4.0);
-        
-        if (targetTotalPoints > maxPoints) {
-            const maxPossibleGPA = (maxPoints / neededTotalCredits).toFixed(2);
-            document.getElementById('targetResult').innerHTML = `<span style='color:#e67e22'>Maksimum potansiyel: <b>${maxPossibleGPA}</b></span>`;
-             emptyCourses.forEach(c => c.el.value = "AA");
-             calculateGPA();
-             document.getElementById('btnUndo').style.display = 'block';
-             return;
+
+            // 5. DOSYA İSMİNİ OLUŞTURMA
+            // Format: YIL_BOLUM.html (Örn: 2023_fizik.html)
+            const targetFile = `${entryYear}_${deptName}.html`;
+
+            // Yönlendirme (ID ve Dönem bilgisini de taşıyoruz)
+            window.location.href = `${targetFile}?id=${id}&sem=${semester}`;
         }
-
-        if(neededTotalPoints >= targetTotalPoints) {
-            emptyCourses.forEach(c => c.el.value = gradeKeys[0]);
-        } else {
-            let iter = 0;
-            while(neededTotalPoints < targetTotalPoints && iter < 1000) {
-                let bestCandidate = null, minIndex = 99;
-                for(let i=0; i<emptyCourses.length; i++) {
-                    if(emptyCourses[i].gradeIndex < gradeKeys.length - 1 && emptyCourses[i].gradeIndex < minIndex) {
-                        minIndex = emptyCourses[i].gradeIndex; bestCandidate = emptyCourses[i];
-                    }
-                }
-                if(!bestCandidate) break;
-                const oldGrade = gradeKeys[bestCandidate.gradeIndex];
-                const newGrade = gradeKeys[bestCandidate.gradeIndex + 1];
-                neededTotalPoints -= bestCandidate.cr * grades[oldGrade];
-                neededTotalPoints += bestCandidate.cr * grades[newGrade];
-                bestCandidate.gradeIndex++; iter++;
-            }
-            emptyCourses.forEach(c => c.el.value = gradeKeys[c.gradeIndex]);
-        }
-        calculateGPA();
-        document.getElementById('btnUndo').style.display = 'block';
-    }
-
-    window.saveHistorySnapshot = function() { gradeHistory = []; document.querySelectorAll('.grade-select').forEach(sel => gradeHistory.push(sel.value)); }
-    
-    window.undoLastAction = function() {
-        if(gradeHistory.length === 0) return;
-        document.querySelectorAll('.grade-select').forEach((sel, i) => { if (gradeHistory[i] !== undefined) sel.value = gradeHistory[i]; });
-        calculateGPA();
-        document.getElementById('btnUndo').style.display = 'none';
-        gradeHistory = [];
-    }
-    
-    window.addCourse = function(semId, data=null) {
-        const tbody = document.querySelector(`#${semId} .course-list`);
-        if(!tbody) return;
-        const tr = document.createElement('tr');
-        tr.innerHTML = `
-            <td><input type="text" placeholder="Kod" value="${data?data.code:''}"></td>
-            <td><input type="text" placeholder="Ders Adı" value="${data?data.name:''}"></td>
-            <td><input type="number" value="${data?data.credit:3}" class="credit-input"></td>
-            <td><select class="grade-select">${optionsHTML}</select></td>
-            <td style="text-align:center"><div class="remove-btn" onclick="this.closest('tr').remove(); calculateGPA()">×</div></td>
-        `;
-        if(data && data.grade) tr.querySelector('select').value = data.grade;
-        tbody.appendChild(tr);
-        if(!data) calculateGPA();
-    }
-    
-    window.exportData = function() {
-        const dataStr = localStorage.getItem(getStorageKey());
-        if(!dataStr) { alert("Kaydedilecek veri yok."); return; }
-        const blob = new Blob([dataStr], {type: "application/json"});
-        const url = URL.createObjectURL(blob);
-        const a = document.createElement('a');
-        a.href = url; a.download = `iyte_gpa_${currentProfile}.json`; a.click();
-        URL.revokeObjectURL(url);
-    }
-    
-    window.importData = function(input) {
-        const file = input.files[0];
-        if(!file) return;
-        const reader = new FileReader();
-        reader.onload = function(e) {
-            try {
-                const json = JSON.parse(e.target.result);
-                localStorage.setItem(getStorageKey(), JSON.stringify(json));
-                alert("Yüklendi!"); location.reload();
-            } catch(err) { alert("Dosya hatalı."); }
-        };
-        reader.readAsText(file);
-    }
-</script>
-
+    </script>
 </body>
 </html>
