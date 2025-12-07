@@ -197,7 +197,11 @@
                     fileYear = 2025; 
                 }
             }
-                
+            else if (deptName === "materialsc") {
+                if (entryYear >= 0) { 
+                    fileYear = 2024; 
+                }
+            }    
             
             // 4. YÖNLENDİRME
             const targetFile = `${fileYear}_${deptName}.html`;
@@ -210,6 +214,7 @@
     </script>
 </body>
 </html>
+
 
 
 
