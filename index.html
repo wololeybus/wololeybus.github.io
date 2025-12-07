@@ -78,23 +78,13 @@
         .brand-title { font-size: 1.3rem; font-weight: 800; color: var(--iyte-red); text-align: center; margin-bottom: 5px; letter-spacing: 1px; }
         .brand-subtitle { font-size: 0.75rem; color: var(--text-sub); text-align: center; padding-bottom: 15px; border-bottom: 1px solid var(--border-color); margin-bottom: 20px; }
         
-        /* THEME TOGGLE FIX */
         .theme-toggle { 
-            position: absolute; 
-            top: 10px; 
-            right: 10px; 
-            background: var(--card-bg); 
-            border: 1px solid var(--border-color); 
-            border-radius: 50%;
-            cursor: pointer; 
-            color: var(--text-main); 
-            font-size: 1.2rem; 
-            width: 35px;
-            height: 35px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            z-index: 200; /* Ensure visibility */
+            position: absolute; top: 10px; right: 10px; 
+            background: var(--card-bg); border: 1px solid var(--border-color); 
+            border-radius: 50%; cursor: pointer; color: var(--text-main); 
+            font-size: 1.2rem; width: 35px; height: 35px;
+            display: flex; align-items: center; justify-content: center;
+            z-index: 200; 
         }
 
         .stat-card { background: var(--card-bg); border: 2px solid var(--iyte-red); color: var(--iyte-red); border-radius: 12px; padding: 20px; text-align: center; margin-bottom: 15px; }
@@ -162,45 +152,47 @@
             body { height: auto; overflow-x: hidden; overflow-y: auto; position: relative; }
             .app-layout { display: block; height: auto; overflow: visible; }
             
-            /* Sidebar Mobile düzeni düzeltildi: Flex yerine normal akış + Fixed */
+            /* --- MOBILE SIDEBAR LAYOUT FIX --- */
+            /* Flex ile yan yana diz, sığmazsa aşağı indir (Wrap) */
             .sidebar-left { 
                 width: 100%; height: auto; position: -webkit-sticky; position: sticky; top: 0; 
                 background: var(--bg-color); z-index: 100; box-shadow: 0 4px 10px rgba(0,0,0,0.1); 
                 border-bottom: 1px solid var(--border-color); padding: 10px; 
-                display: block; /* Flex'i kaldırdık, sıralama sorunu çözüldü */
+                display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between;
             }
             
-            /* Logo ve Başlık */
+            /* 1. Öğe: Logo/Başlık (Solda kalır, esner) */
             .sidebar-left > div:first-child { 
-                text-align: left; padding-left: 5px; 
+                text-align: left; padding-left: 5px; flex: 1;
             }
             .brand-title { text-align: left; font-size: 1.1rem; }
             .brand-subtitle { display: none; }
 
-            /* Theme Butonu Mobile Fix */
+            /* 2. Öğe: Theme Butonu (Position Static = Akış içinde, Sağda) */
             .theme-toggle {
-                position: absolute;
-                top: 15px;
-                right: 15px;
+                position: static; /* Absolute yerine akışa alıyoruz */
+                margin-left: 10px; /* Logo ile araya boşluk */
                 background: var(--card-bg);
                 box-shadow: 0 2px 5px rgba(0,0,0,0.1);
             }
 
-            /* Stat Card Mobile Düzeni */
+            /* 3. Öğe: GPA Kartı (Alt satıra zorla iner) */
             .stat-card { 
-                margin-top: 10px; 
+                width: 100%; /* Tam genişlik kaplar, bu yüzden alt satıra geçer */
+                margin-top: 15px; 
                 padding: 10px; 
                 display: flex; 
                 flex-direction: row; 
                 align-items: center; 
                 justify-content: space-between;
                 text-align: left;
+                order: 3; /* Sıralamada en son */
             }
             .stat-value { font-size: 1.8rem; margin: 0; }
             .stat-status { margin: 0; font-size: 0.9rem; }
             
             .credits-card { display: none; }
-            .reg-box { width: 100%; margin-top: 10px; }
+            .reg-box { width: 100%; margin-top: 10px; order: 4;}
             .panel-header { display: none; } #statsBox { display: none !important; }
             .main-content { padding: 15px 10px; overflow: visible; min-height: auto; }
             .sidebar-right { width: 100%; height: auto; padding: 15px; margin-top: 20px; background: var(--card-bg); }
