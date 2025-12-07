@@ -117,6 +117,16 @@
                 <input type="text" id="studentId" placeholder="Örn: 310101016" maxlength="9" inputmode="numeric">
                 <div class="hint">9 haneli okul numaranız</div>
             </div>
+
+            <div>
+                <label for="semesterSelect">Dönem</label>
+                <select id="semesterSelect">
+                    <option value="1">Güz (1)</option>
+                    <option value="2">Bahar (2)</option>
+                    <option value="0">Yaz (0)</option>
+                </select>
+                <div class="hint">Hangi dönem için hesaplama yapıyorsunuz?</div>
+            </div>
             
             <button onclick="routeUser()">Hesaplamaya Başla</button>
             <div id="errorMsg" class="error-msg"></div>
@@ -124,8 +134,12 @@
     </div>
 
     <script>
+        // Enter tuşunda formun beklenmedik submit davranışını engelle ve routeUser çağır
         document.addEventListener("keypress", function(event) {
-            if (event.key === "Enter") routeUser();
+            if (event.key === "Enter") {
+                event.preventDefault();
+                routeUser();
+            }
         });
 
         function routeUser() {
@@ -133,10 +147,10 @@
             const semSelect = document.getElementById('semesterSelect');
             const errorDiv = document.getElementById('errorMsg');
             const id = idInput.value.trim();
-            const semester = semSelect.value;
+            const semester = semSelect ? semSelect.value : '';
 
-            // 1. Doğrulama
-            if (id.length !== 9 || isNaN(id)) {
+            // 1. Doğrulama: sadece rakamlardan oluşan 9 haneli kontrolü
+            if (!/^\d{9}$/.test(id)) {
                 errorDiv.innerText = "Lütfen geçerli, 9 haneli bir öğrenci numarası giriniz.";
                 errorDiv.style.display = 'block';
                 return;
@@ -145,15 +159,13 @@
             errorDiv.style.display = 'none';
 
             // 2. YIL HESAPLAMA (Örn: 31 -> 2023)
-            const yearPrefix = parseInt(id.substring(0, 2));
+            const yearPrefix = parseInt(id.substring(0, 2), 10);
             const entryYear = 1992 + yearPrefix; // 1992 + 31 = 2023
 
             // 3. BÖLÜM KODU (Örn: 101)
             const deptCode = id.substring(3, 6);
 
             // 4. BÖLÜM İSİMLENDİRMESİ
-            // Dosya isimlerinde kullanacağın İngilizce/Türkçe karakterlere dikkat et.
-            // Burada "fizik", "ceng" gibi küçük harf ve Türkçe karaktersiz isimler kullanıyoruz.
             const deptMap = {
                 "101": "phys",
                 "104": "mbg",
@@ -184,13 +196,11 @@
             }
 
             // 5. DOSYA İSMİNİ OLUŞTURMA
-            // Format: YIL_BOLUM.html (Örn: 2023_fizik.html)
             const targetFile = `${entryYear}_${deptName}.html`;
 
             // Yönlendirme (ID ve Dönem bilgisini de taşıyoruz)
-            window.location.href = `${targetFile}?id=${id}&sem=${semester}`;
+            window.location.href = `${targetFile}?id=${id}&sem=${encodeURIComponent(semester)}`;
         }
     </script>
 </body>
 </html>
-
