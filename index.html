@@ -117,7 +117,7 @@
         .tool-btn { width: 100%; padding: 12px; border: none; border-radius: 4px; cursor: pointer; font-weight: bold; font-size: 0.9rem; margin-bottom: 5px; }
         .btn-backup { background: #6CB753; color: white; }
         .btn-magic { background: #9b59b6; color: white; }
-        .btn-restore { background: #3899D1; color: white; display: block; text-align: center; padding: 12px; border-radius: 4px; cursor: pointer; font-size: 0.9rem; font-weight: bold;
+        .btn-restore { background: #3899D1; color: white; display: block; text-align: center; padding: 12px; border-radius: 4px; cursor: pointer; font-size: 0.9rem; font-weight: bold;}
         .btn-reset { background: transparent; border: 1px solid #e74c3c; color: #e74c3c; margin-top: 20px; }
         .btn-undo { background: #f39c12; color: white; display: none; }
         
@@ -232,7 +232,6 @@
             input[placeholder="Ders Adı"] { width: 100%; min-width: 120px; }
             .tool-btn, .profile-btn { padding: 15px; font-size: 1rem; }
         }
-        
     </style>
 </head>
 <body>
@@ -241,7 +240,7 @@
     <div class="enver-content">
         <div class="close-egg" onclick="closeEnver()">×</div>
         <img src="enver.jpg" alt="Enver Modu">
-        <div style="color:white; margin-top:10px; font-weight:bold; font-size:1.2rem; text-shadow:0 2px 4px black;">Slyllabus</div>
+        <div style="color:white; margin-top:10px; font-weight:bold; font-size:1.2rem; text-shadow:0 2px 4px black;">SYLLABUS</div>
     </div>
 </div>
 
@@ -251,6 +250,7 @@
             <div class="brand-title">İYTE FİZİK</div>
             <div class="brand-subtitle" style="margin-bottom:0; padding-bottom:5px;">GPA ASİSTANI PRO</div>
         </div>
+        
         <button class="theme-toggle" onclick="toggleTheme()" aria-label="Temayı Değiştir">☾</button>
 
         <div class="stat-card" id="gpaCard">
@@ -288,10 +288,6 @@
 
     <main class="main-content">
         <div class="content-container">
-            <div class="student-info-print" style="display:none; margin-bottom:20px; border-bottom:1px solid black;">
-                <input type="text" class="name-input" placeholder="Ad Soyad" style="border:none; font-size:1.5rem; font-weight:bold; width:100%;">
-            </div>
-
             <form id="gpaForm">
                 <div class="semester-block open" id="sem1">
                     <div class="semester-header" onclick="toggleSemester('sem1')"><div><span class="chevron">▼</span><span class="semester-title">1. Yarıyıl (Güz)</span><span class="semester-spa" id="sem1-spa">0.00</span></div><button type="button" class="add-course-btn" onclick="event.stopPropagation(); addCourse('sem1')">+ Ders</button></div>
@@ -449,8 +445,8 @@
         <div class="tool-box">
             <input type="number" id="targetGPA" class="tool-input" placeholder="Hedef Ort. (3.00)" step="0.01">
             <div id="targetResult" style="text-align:center; font-weight:bold; font-size:0.9rem; margin:5px 0;">-</div>
-            <button class="tool-btn btn-magic" onclick="autoFillTarget()">🪄 Hedefe Göre Doldur</button>
-            <button class="tool-btn btn-undo" id="btnUndo" onclick="undoLastAction()">↩ Geri Al</button>
+            <button class="tool-btn btn-magic" onclick="autoFillTarget()"> Hedefe Göre Doldur</button>
+            <button class="tool-btn btn-undo" id="btnUndo" onclick="undoLastAction()"> Geri Al</button>
         </div>
         
         <button class="tool-btn btn-reset" onclick="resetAll()">Bu Profili Sıfırla</button>
@@ -625,7 +621,7 @@
                     row.classList.add('prereq-fail');
                     if(!row.querySelector('.fail-msg')) {
                         const cell = row.querySelector('td:nth-child(2)');
-                        cell.innerHTML += `<span class='fail-msg'>⚠️ Ön şart: ${prereqCode} başarısız!</span>`;
+                        cell.innerHTML += `<span class='fail-msg'> Ön şart: ${prereqCode} başarısız!</span>`;
                     }
                 }
             }
@@ -636,13 +632,13 @@
         const box = document.getElementById('regDynamicStatus');
         let html = "";
         if(gpa < 1.80) {
-            html = `<div class='reg-alert'>⚠️ PROBATION (Gözetim)</div><div>GPA < 1.80. Yeni ders alamazsın.</div>`;
+            html = `<div class='reg-alert'> PROBATION (Gözetim)</div><div>GPA < 1.80. Yeni ders alamazsın.</div>`;
         } else if (gpa >= 1.80 && gpa < 2.00) {
-            html = `<div class='reg-warn'>⚠️ Başarısız Durum</div><div>GPA < 2.00. Ders yükü azaltılabilir.</div>`;
+            html = `<div class='reg-warn'> Başarısız Durum</div><div>GPA < 2.00. Ders yükü azaltılabilir.</div>`;
         } else {
-             html = `<div class='reg-ok'>✅ Akademik Durum Uygun</div>`;
-             if(gpa >= 2.50) html += `<div>🌟 Ders yükün +3 ders arttırılabilir.</div>`;
-             else if(gpa >= 2.00) html += `<div>💡 Ders yükün +2 ders arttırılabilir.</div>`;
+             html = `<div class='reg-ok'> Akademik Durum Uygun</div>`;
+             if(gpa >= 2.50) html += `<div> Ders yükü +3 ders arttırılabilir.</div>`;
+             else if(gpa >= 2.00) html += `<div> Ders yükü +2 ders arttırılabilir.</div>`;
         }
         box.innerHTML = html;
     }
@@ -812,5 +808,3 @@
 
 </body>
 </html>
-
-
