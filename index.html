@@ -3,9 +3,9 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>İYTE GPA Calculator</title>
+    <title>İYTE GPA Calculator - Final</title>
     <style>
-        /* --- TASARIM VE STİLLER (AYNEN KORUNDU) --- */
+        /* --- TEMEL STİLLER --- */
         :root {
             --iyte-red: #b30000;
             --bg-color: #f0f2f5;
@@ -73,7 +73,6 @@
         }
         .content-container { max-width: 850px; margin: 0 auto; }
 
-        /* UI Elements */
         .brand-title { font-size: 1.3rem; font-weight: 800; color: var(--iyte-red); text-align: center; margin-bottom: 5px; letter-spacing: 1px; }
         .brand-subtitle { font-size: 0.75rem; color: var(--text-sub); text-align: center; padding-bottom: 15px; border-bottom: 1px solid var(--border-color); margin-bottom: 20px; }
         
@@ -183,7 +182,7 @@
 
         <div class="tool-box" style="margin-top:10px;">
             <div style="font-size:0.7rem; color:var(--text-sub); margin-bottom:5px;">ÖĞRENCİ NUMARASI</div>
-            <input type="text" id="studentNoInput" class="tool-input" placeholder="Örn: 31502001" style="text-align:center; font-weight:bold; letter-spacing:1px;">
+            <input type="text" id="studentNoInput" class="tool-input" placeholder="Örn: 310101016" style="text-align:center; font-weight:bold; letter-spacing:1px;">
             <button class="tool-btn btn-backup" onclick="initCurriculumByStudentId()">📚 Müfredatı Getir</button>
             <div id="deptStatus" style="font-size:0.75rem; text-align:center; color:var(--text-main); font-weight:bold; margin-top:5px; min-height:1rem;"></div>
         </div>
@@ -263,33 +262,22 @@
 
 <script>
     /* =========================================
-       1. DATA STRUCTURE (TÜM BÖLÜMLER)
+       1. DATA STRUCTURE (TÜM 8 DÖNEM + UYUMLU FORMAT)
        ========================================= */
-    
-    // Yardımcı fonksiyon: Boş 8 dönemlik müfredat oluşturur
-    function createEmptyCurriculum() {
-        const arr = [];
-        for(let i=1; i<=8; i++) {
-            arr.push({ semester: i, courses: [] });
-        }
-        return arr;
-    }
-
-   const universityData = {
-        // Bölüm Kodları (Öğrenci numarası formatına göre)
+    const universityData = {
         departments: {
-            "101": "FIZIK", "104": "MBG", "103": "MATEMATIK", "102": "KIMYA", "105": "FOTONIK",
-            "201": "CENG", "202": "KIMMUH", "203": "MAKMUH", "204": "INSAAT", "205": "GIDA",
-            "206": "EHM", "208": "MALZEME", "209": "ENERJI", "210": "BIOMUH", "211": "CEVRE",
-            "303": "ENTAS", "301": "MIMARLIK", "302": "SBP"
+            "101": "FIZIK", "502": "FIZIK",
+            "104": "MBG", "103": "MATEMATIK", "102": "KIMYA", "105": "FOTONIK",
+            "201": "CENG", "401": "CENG",
+            "202": "KIMMUH", "203": "MAKMUH", "204": "INSAAT", "205": "GIDA",
+            "206": "EHM", "208": "MALZEME", "209": "ENERJI", "210": "BIOMUH", 
+            "211": "CEVRE", "303": "ENTAS", "301": "MIMARLIK", "302": "SBP"
         },
         
-        // MÜFREDAT VERİLERİ (YIL BAZLI AYRIŞTIRILMIŞ)
         curriculums: {
             "FIZIK": {
                 // ---------------------------------------------------------
-                // 2023, 2024, 2025 ve sonrası girişliler için (YENİ MÜFREDAT)
-                // MBG 101 Yok, MATH 101 Var, 4. Dönemde ELS III eklendi.
+                // 2023, 2024, 2025... (YENİ MÜFREDAT - 8 DÖNEM)
                 // ---------------------------------------------------------
                 "2023": [
                     {
@@ -300,7 +288,7 @@
                             { code: "MATH 145", name: "Calculus I", credit: 5, static: true },
                             { code: "CHEM 121", name: "General Chemistry I", credit: 3, static: true },
                             { code: "CHEM 141", name: "General Chemistry Lab I", credit: 1, static: true },
-                            { code: "MATH 101", name: "Pre-Calculus", credit: 0, static: true }, // Kredisiz yeni ders
+                            { code: "MATH 101", name: "Pre-Calculus", credit: 0, static: true },
                             { code: "ENG 101", name: "Dev. of Reading & Writing I", credit: 3, static: true }
                         ]
                     },
@@ -324,7 +312,7 @@
                             { code: "PHYS 203", name: "Classical Mechanics I", credit: 3, static: true },
                             { code: "MATH 255", name: "Differential Equations", credit: 4, static: true },
                             { code: "MATH 265", name: "Basic Linear Algebra", credit: 3, static: true },
-                            { code: "ELS I", name: "Elective Social I", credit: 3, static: false }, // Kullanıcı seçmeli
+                            { code: "ELS I", name: "Elective Social I", credit: 3, static: false },
                             { code: "HIST 201", name: "History of Revolution I", credit: 0, static: true },
                             { code: "TURK 201", name: "Turkish Language I", credit: 0, static: true }
                         ]
@@ -337,18 +325,53 @@
                             { code: "PHYS 222", name: "Modern Physics", credit: 4, static: true },
                             { code: "PHYS 266", name: "Math. Methods in Physics", credit: 4, static: true },
                             { code: "ELS II", name: "Elective Social II", credit: 3, static: false },
-                            { code: "ELS III", name: "Elective Social III", credit: 3, static: false }, // Yeni eklenen
+                            { code: "ELS III", name: "Elective Social III", credit: 3, static: false }, 
                             { code: "HIST 202", name: "History of Revolution II", credit: 0, static: true },
                             { code: "TURK 202", name: "Turkish Language II", credit: 0, static: true }
                         ]
                     },
-                    { semester: 5, courses: [] }, { semester: 6, courses: [] }, 
-                    { semester: 7, courses: [] }, { semester: 8, courses: [] }
+                    {
+                        semester: 5,
+                        courses: [
+                            { code: "PHYS 301", name: "Quantum Mechanics I", credit: 3, static: true },
+                            { code: "PHYS 311", name: "Experimental Methods", credit: 3, static: true },
+                            { code: "PHYS 321", name: "Electromagnetic Theory I", credit: 4, static: true },
+                            { code: "ELS IV", name: "Elective Social IV", credit: 3, static: false }
+                        ]
+                    },
+                    {
+                        semester: 6,
+                        courses: [
+                            { code: "PHYS 302", name: "Quantum Mechanics II", credit: 3, static: true },
+                            { code: "PHYS 322", name: "Electromagnetic Theory II", credit: 4, static: true },
+                            { code: "PHYS 326", name: "Statistical Mechanics", credit: 3, static: true },
+                            { code: "ELS V", name: "Elective Social V", credit: 3, static: false }
+                        ]
+                    },
+                    {
+                        semester: 7,
+                        courses: [
+                            { code: "PHYS 401", name: "Condensed Matter Phys. I", credit: 4, static: true },
+                            { code: "PHYS 496", name: "Graduation Project I", credit: 3, static: true },
+                            { code: "TE", name: "Technical Elective", credit: 3, static: false },
+                            { code: "TE", name: "Technical Elective", credit: 3, static: false },
+                            { code: "TE", name: "Technical Elective", credit: 3, static: false }
+                        ]
+                    },
+                    {
+                        semester: 8,
+                        courses: [
+                            { code: "PHYS 497", name: "Graduation Project II", credit: 3, static: true },
+                            { code: "TE", name: "Technical Elective", credit: 3, static: false },
+                            { code: "TE", name: "Technical Elective", credit: 3, static: false },
+                            { code: "TE", name: "Technical Elective", credit: 3, static: false },
+                            { code: "FE", name: "Free Elective", credit: 3, static: false }
+                        ]
+                    }
                 ],
 
                 // ---------------------------------------------------------
-                // 2018, 2019, 2020, 2021, 2022 Girişliler (ESKİ MÜFREDAT)
-                // MBG 101 Var. 4. Dönemde sadece 1 ELS var.
+                // 2018 - 2022 (ESKİ MÜFREDAT - 8 DÖNEM)
                 // ---------------------------------------------------------
                 "2018": [
                     {
@@ -359,7 +382,7 @@
                             { code: "MATH 145", name: "Calculus I", credit: 5, static: true },
                             { code: "CHEM 121", name: "General Chemistry I", credit: 3, static: true },
                             { code: "CHEM 141", name: "General Chemistry Lab I", credit: 1, static: true },
-                            { code: "MBG 101", name: "Biology I", credit: 3, static: true }, // Eski müfredatta var
+                            { code: "MBG 101", name: "Biology I", credit: 3, static: true },
                             { code: "ENG 101", name: "Dev. of Reading & Writing I", credit: 3, static: true }
                         ]
                     },
@@ -399,37 +422,89 @@
                             { code: "TURK 202", name: "Turkish Language II", credit: 0, static: true }
                         ]
                     },
-                    { semester: 5, courses: [] }, { semester: 6, courses: [] }, 
-                    { semester: 7, courses: [] }, { semester: 8, courses: [] }
+                    {
+                        semester: 5,
+                        courses: [
+                            { code: "PHYS 301", name: "Quantum Mechanics I", credit: 3, static: true },
+                            { code: "PHYS 311", name: "Experimental Methods", credit: 3, static: true },
+                            { code: "PHYS 321", name: "Electromagnetic Theory I", credit: 4, static: true },
+                            { code: "ELS III", name: "Elective Social III", credit: 3, static: false }
+                        ]
+                    },
+                    {
+                        semester: 6,
+                        courses: [
+                            { code: "PHYS 302", name: "Quantum Mechanics II", credit: 3, static: true },
+                            { code: "PHYS 322", name: "Electromagnetic Theory II", credit: 4, static: true },
+                            { code: "PHYS 326", name: "Statistical Mechanics", credit: 3, static: true },
+                            { code: "TE", name: "Technical Elective", credit: 3, static: false }
+                        ]
+                    },
+                    {
+                        semester: 7,
+                        courses: [
+                            { code: "PHYS 401", name: "Condensed Matter Phys. I", credit: 4, static: true },
+                            { code: "PHYS 491", name: "Graduation Project I", credit: 3, static: true },
+                            { code: "TE", name: "Technical Elective", credit: 3, static: false },
+                            { code: "TE", name: "Technical Elective", credit: 3, static: false },
+                            { code: "FE", name: "Free Elective", credit: 3, static: false }
+                        ]
+                    },
+                    {
+                        semester: 8,
+                        courses: [
+                            { code: "PHYS 492", name: "Graduation Project II", credit: 3, static: true },
+                            { code: "TE", name: "Technical Elective", credit: 3, static: false },
+                            { code: "TE", name: "Technical Elective", credit: 3, static: false },
+                            { code: "TE", name: "Technical Elective", credit: 3, static: false },
+                            { code: "FE", name: "Free Elective", credit: 3, static: false }
+                        ]
+                    }
                 ],
-                // Hiçbir yıl eşleşmezse kullanılacak yedek
-                "default": [ 
-                     { semester: 1, courses: [] }, { semester: 2, courses: [] } 
-                ]
+                "default": [ { semester: 1, courses: [] } ] 
             },
-            
-            // Diğer bölümler için boş şablonlar (Gerektiğinde doldurulabilir)
-            "MBG": { "default": createEmptyCurriculum() },
-            "MATEMATIK": { "default": createEmptyCurriculum() },
-            "KIMYA": { "default": createEmptyCurriculum() },
-            "FOTONIK": { "default": createEmptyCurriculum() },
-            "CENG": { "default": createEmptyCurriculum() },
-            "BIOMUH": { "default": createEmptyCurriculum() },
-            "CEVRE": { "default": createEmptyCurriculum() },
-            "ENERJI": { "default": createEmptyCurriculum() },
-            "EHM": { "default": createEmptyCurriculum() },
-            "GIDA": { "default": createEmptyCurriculum() },
-            "INSAAT": { "default": createEmptyCurriculum() },
-            "KIMMUH": { "default": createEmptyCurriculum() },
-            "MAKMUH": { "default": createEmptyCurriculum() },
-            "MALZEME": { "default": createEmptyCurriculum() },
-            "ENTAS": { "default": createEmptyCurriculum() },
-            "MIMARLIK": { "default": createEmptyCurriculum() },
-            "SBP": { "default": createEmptyCurriculum() }
+            // Diğer bölümler için boş şablon
+            "MBG": { "default": [] }, "MATEMATIK": { "default": [] }, "KIMYA": { "default": [] },
+            "FOTONIK": { "default": [] }, "CENG": { "default": [] }, "BIOMUH": { "default": [] },
+            "CEVRE": { "default": [] }, "ENERJI": { "default": [] }, "EHM": { "default": [] },
+            "GIDA": { "default": [] }, "INSAAT": { "default": [] }, "KIMMUH": { "default": [] },
+            "MAKMUH": { "default": [] }, "MALZEME": { "default": [] }, "ENTAS": { "default": [] },
+            "MIMARLIK": { "default": [] }, "SBP": { "default": [] }
         }
     };
+
     /* =========================================
-       2. STANDARD GPA LOGIC & VARIABLES
+       2. LOGIC: FALLBACK & PARSING
+       ========================================= */
+    function getCurriculumForYear(deptKey, entryYear) {
+        const deptData = universityData.curriculums[deptKey];
+        if (!deptData) return null;
+
+        const years = Object.keys(deptData)
+                            .filter(k => k !== "default")
+                            .map(Number)
+                            .sort((a, b) => b - a); 
+
+        let selectedYear = "default";
+        
+        // Eğer hiçbir yıl uymuyorsa (Örn: 2017) ve 2018 varsa, fallback olarak en eskiyi seçelim
+        // Ancak esas kontrol render kısmında yapılacak
+        if (years.length > 0 && entryYear < Math.min(...years)) {
+             selectedYear = Math.min(...years).toString();
+        } else {
+             for (let y of years) {
+                if (entryYear >= y) {
+                    selectedYear = y.toString();
+                    break;
+                }
+            }
+        }
+        
+        return { data: deptData[selectedYear], yearLabel: selectedYear };
+    }
+
+    /* =========================================
+       3. STANDARD GPA LOGIC & VARIABLES
        ========================================= */
     window.grades = { "AA": 4.0, "BA": 3.5, "BB": 3.0, "CB": 2.5, "CC": 2.0, "DC": 1.5, "DD": 1.0, "FD": 0.5, "FF": 0.0, "NA": 0.0 };
     window.gradeKeys = ["DD", "DC", "CC", "CB", "BB", "BA", "AA"];
@@ -437,7 +512,7 @@
     window.optionsHTML = '<option value="">-</option>' + Object.keys(grades).map(g => `<option value="${g}">${g}</option>`).join('');
     
     window.prerequisites = {
-        "PHYS 102": "PHYS 101", "PHYS 201": "PHYS 102"
+        "PHYS 102": "PHYS 101", "PHYS 201": "PHYS 102", "PHYS 302": "PHYS 301", "PHYS 322": "PHYS 321"
     };
 
     window.gradeHistory = [];
@@ -445,7 +520,7 @@
     window.currentDept = null;
 
     /* =========================================
-       3. INITIALIZATION & DYNAMIC RENDERING
+       4. INITIALIZATION & DYNAMIC RENDERING
        ========================================= */
     document.addEventListener('DOMContentLoaded', () => {
         loadTheme();
@@ -462,20 +537,20 @@
         form.addEventListener('input', (e) => { if(e.target.tagName === 'INPUT') calculateGPA(); });
     });
 
-    // --- YENİ PARSER MANTIĞI ---
-    // Giriş Yılı = 1992 + Numaranın İlk 2 Hanesi
-    // Örn: 31 -> 1992 + 31 = 2023 Girişli
-    // Örn: 23 -> 1992 + 23 = 2015 Girişli
+    // --- PARSER: 9 HANELİ İYTE FORMATI (YY0BBB0NNN) ---
+    // Örn: 310101016 -> 31(Yıl), 101(Bölüm)
     window.parseStudentID = function(id) {
         id = id.toString().trim();
-        if (id.length < 5) return null; 
+        if (id.length !== 9) return null; 
         
+        // 1. Yıl: İlk 2 hane
         const prefixStr = id.substring(0, 2); 
         const prefixVal = parseInt(prefixStr);
         if(isNaN(prefixVal)) return null;
-
         const entryYear = 1992 + prefixVal;
-        const deptCode = id.substring(3, 6); // Sonraki 3 hane bölüm kodu
+        
+        // 2. Bölüm Kodu: 3, 4, 5. indeksler (Aradaki 0 atlanıyor)
+        const deptCode = id.substring(3, 6); 
         
         return { year: entryYear, deptCode: deptCode };
     }
@@ -485,40 +560,54 @@
         const info = parseStudentID(id);
         
         if (!info) {
-            if(showAlert) alert("Geçersiz Öğrenci Numarası Formatı!");
+            if(showAlert) alert("Geçersiz Numara! Lütfen 9 haneli İYTE formatını kullanın. (Örn: 310101016)");
             return;
         }
 
         const deptKey = universityData.departments[info.deptCode];
         
         if (!deptKey) {
-            if(showAlert) alert(`Bölüm kodu (${info.deptCode}) sistemde tanımlı değil. Lütfen kod listesini güncelleyin.`);
+            if(showAlert) alert(`Bölüm kodu (${info.deptCode}) sistemde tanımlı değil.`);
             return;
         }
 
-        // Bölümü Bulduk
         window.currentDept = deptKey;
         document.getElementById('deptTitle').innerText = "İYTE " + deptKey;
         document.getElementById('deptStatus').innerText = `${info.year} Girişli (${deptKey})`;
         
         localStorage.setItem('iyte_student_id_' + currentProfile, id);
         
-        renderCurriculum(deptKey);
+        renderCurriculum(deptKey, info.year);
         loadData();
     }
 
-    window.renderCurriculum = function(deptKey) {
+    window.renderCurriculum = function(deptKey, entryYear) {
         const container = document.getElementById('curriculumContainer');
         container.innerHTML = "";
         
-        // Varsayılan olarak 'default' müfredatı çekiyoruz.
-        // İleride yıla göre if/else eklenebilir.
-        const curriculum = universityData.curriculums[deptKey] ? universityData.curriculums[deptKey]["default"] : null;
+        const result = getCurriculumForYear(deptKey, entryYear);
+        const curriculum = result ? result.data : null;
         
         if (!curriculum) {
             container.innerHTML = "<h3>Müfredat verisi bulunamadı.</h3>";
             return;
         }
+
+        // --- UYARI VE BİLGİLENDİRME ---
+        const badge = document.createElement('div');
+        badge.style.cssText = "text-align:center; font-size:0.8rem; margin-bottom:15px; padding:10px; border-radius:5px;";
+        
+        if (deptKey === "FIZIK" && entryYear < 2018) {
+             badge.style.backgroundColor = "var(--danger-bg)";
+             badge.style.color = "var(--danger-text)";
+             badge.style.fontWeight = "bold";
+             badge.innerHTML = "⚠️ Müfredata erişilemedi, 2018 müfredatı uygulandı.<br>Lütfen dersleri manuel olarak düzenleyiniz.";
+        } else {
+             badge.style.backgroundColor = "var(--hover-bg)";
+             badge.style.color = "var(--text-sub)";
+             badge.innerText = `Uygulanan Müfredat: ${result.yearLabel}`;
+        }
+        container.appendChild(badge);
 
         curriculum.forEach(semData => {
             const semDiv = document.createElement('div');
@@ -563,7 +652,7 @@
         });
     }
 
-    // --- YARDIMCI FONKSİYONLAR ---
+    // --- DİĞER STANDART FONKSİYONLAR (DEĞİŞİKLİK YOK) ---
     window.loadTheme = function() {
         const theme = localStorage.getItem('iyte_gpa_theme');
         if(theme) document.documentElement.setAttribute('data-theme', theme);
@@ -593,7 +682,7 @@
         }
     }
 
-    window.getStorageKey = function() { return 'iyte_gpa_v4_' + window.currentProfile + '_' + (window.currentDept || 'NA'); }
+    window.getStorageKey = function() { return 'iyte_gpa_v5_' + window.currentProfile + '_' + (window.currentDept || 'NA'); }
 
     window.calculateGPA = function() {
         let totalPoints = 0, totalCredits = 0, semesterData = {};
@@ -879,6 +968,3 @@
 
 </body>
 </html>
-
-
-
