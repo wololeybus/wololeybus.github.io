@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>İYTE GPA Calculator - Universal V2</title>
+    <title>İYTE GPA Calculator</title>
     <style>
         /* --- TASARIM VE STİLLER (AYNEN KORUNDU) --- */
         :root {
@@ -275,33 +275,23 @@
         return arr;
     }
 
-    const universityData = {
-        // !!! ÖNEMLİ !!
+   const universityData = {
+        // Bölüm Kodları (Öğrenci numarası formatına göre)
         departments: {
-            "101": "FIZIK",
-            "104": "MBG",
-            "103": "MATEMATIK",
-            "102": "KIMYA",
-            "105": "FOTONIK",
-            "201": "CENG", 
-            "202": "KIMMUH",
-            "203": "MAKMUH",
-            "204": "INSAAT",
-            "205": "GIDA",
-            "206": "EHM",
-            "208": "MALZEME",
-            "209": "ENERJI",
-            "210": "BIOMUH",
-            "211": "CEVRE",
-            "303": "ENTAS",
-            "301": "MIMARLIK",
-            "302": "SBP"
+            "101": "FIZIK", "104": "MBG", "103": "MATEMATIK", "102": "KIMYA", "105": "FOTONIK",
+            "201": "CENG", "202": "KIMMUH", "203": "MAKMUH", "204": "INSAAT", "205": "GIDA",
+            "206": "EHM", "208": "MALZEME", "209": "ENERJI", "210": "BIOMUH", "211": "CEVRE",
+            "303": "ENTAS", "301": "MIMARLIK", "302": "SBP"
         },
         
-        // Müfredat Verileri
+        // MÜFREDAT VERİLERİ (YIL BAZLI AYRIŞTIRILMIŞ)
         curriculums: {
             "FIZIK": {
-                "default": [
+                // ---------------------------------------------------------
+                // 2023, 2024, 2025 ve sonrası girişliler için (YENİ MÜFREDAT)
+                // MBG 101 Yok, MATH 101 Var, 4. Dönemde ELS III eklendi.
+                // ---------------------------------------------------------
+                "2023": [
                     {
                         semester: 1,
                         courses: [
@@ -309,14 +299,116 @@
                             { code: "PHYS 111", name: "General Physics Lab I", credit: 1, static: true },
                             { code: "MATH 145", name: "Calculus I", credit: 5, static: true },
                             { code: "CHEM 121", name: "General Chemistry I", credit: 3, static: true },
-                            { code: "ENG 101", name: "Reading & Writing I", credit: 3, static: true }
+                            { code: "CHEM 141", name: "General Chemistry Lab I", credit: 1, static: true },
+                            { code: "MATH 101", name: "Pre-Calculus", credit: 0, static: true }, // Kredisiz yeni ders
+                            { code: "ENG 101", name: "Dev. of Reading & Writing I", credit: 3, static: true }
                         ]
                     },
-                    { semester: 2, courses: [] }, { semester: 3, courses: [] }, { semester: 4, courses: [] },
-                    { semester: 5, courses: [] }, { semester: 6, courses: [] }, { semester: 7, courses: [] }, { semester: 8, courses: [] }
+                    {
+                        semester: 2,
+                        courses: [
+                            { code: "PHYS 102", name: "General Physics II", credit: 3, static: true },
+                            { code: "PHYS 112", name: "General Physics Lab II", credit: 1, static: true },
+                            { code: "PHYS 114", name: "Intro. to Prog. for Physicists", credit: 3, static: true },
+                            { code: "MATH 146", name: "Calculus II", credit: 5, static: true },
+                            { code: "CHEM 122", name: "General Chemistry II", credit: 3, static: true },
+                            { code: "CHEM 142", name: "General Chemistry Lab II", credit: 1, static: true },
+                            { code: "GCC 101", name: "Career Planning", credit: 0, static: true },
+                            { code: "ENG 102", name: "Dev. of Reading & Writing II", credit: 3, static: true }
+                        ]
+                    },
+                    {
+                        semester: 3,
+                        courses: [
+                            { code: "PHYS 201", name: "Waves and Optics", credit: 4, static: true },
+                            { code: "PHYS 203", name: "Classical Mechanics I", credit: 3, static: true },
+                            { code: "MATH 255", name: "Differential Equations", credit: 4, static: true },
+                            { code: "MATH 265", name: "Basic Linear Algebra", credit: 3, static: true },
+                            { code: "ELS I", name: "Elective Social I", credit: 3, static: false }, // Kullanıcı seçmeli
+                            { code: "HIST 201", name: "History of Revolution I", credit: 0, static: true },
+                            { code: "TURK 201", name: "Turkish Language I", credit: 0, static: true }
+                        ]
+                    },
+                    {
+                        semester: 4,
+                        courses: [
+                            { code: "PHYS 204", name: "Classical Mechanics II", credit: 3, static: true },
+                            { code: "PHYS 212", name: "Waves and Optics Lab", credit: 2, static: true },
+                            { code: "PHYS 222", name: "Modern Physics", credit: 4, static: true },
+                            { code: "PHYS 266", name: "Math. Methods in Physics", credit: 4, static: true },
+                            { code: "ELS II", name: "Elective Social II", credit: 3, static: false },
+                            { code: "ELS III", name: "Elective Social III", credit: 3, static: false }, // Yeni eklenen
+                            { code: "HIST 202", name: "History of Revolution II", credit: 0, static: true },
+                            { code: "TURK 202", name: "Turkish Language II", credit: 0, static: true }
+                        ]
+                    },
+                    { semester: 5, courses: [] }, { semester: 6, courses: [] }, 
+                    { semester: 7, courses: [] }, { semester: 8, courses: [] }
+                ],
+
+                // ---------------------------------------------------------
+                // 2018, 2019, 2020, 2021, 2022 Girişliler (ESKİ MÜFREDAT)
+                // MBG 101 Var. 4. Dönemde sadece 1 ELS var.
+                // ---------------------------------------------------------
+                "2018": [
+                    {
+                        semester: 1,
+                        courses: [
+                            { code: "PHYS 101", name: "General Physics I", credit: 3, static: true },
+                            { code: "PHYS 111", name: "General Physics Lab I", credit: 1, static: true },
+                            { code: "MATH 145", name: "Calculus I", credit: 5, static: true },
+                            { code: "CHEM 121", name: "General Chemistry I", credit: 3, static: true },
+                            { code: "CHEM 141", name: "General Chemistry Lab I", credit: 1, static: true },
+                            { code: "MBG 101", name: "Biology I", credit: 3, static: true }, // Eski müfredatta var
+                            { code: "ENG 101", name: "Dev. of Reading & Writing I", credit: 3, static: true }
+                        ]
+                    },
+                    {
+                        semester: 2,
+                        courses: [
+                            { code: "PHYS 102", name: "General Physics II", credit: 3, static: true },
+                            { code: "PHYS 112", name: "General Physics Lab II", credit: 1, static: true },
+                            { code: "PHYS 114", name: "Intro. to Prog. for Physicists", credit: 3, static: true },
+                            { code: "MATH 146", name: "Calculus II", credit: 5, static: true },
+                            { code: "CHEM 122", name: "General Chemistry II", credit: 3, static: true },
+                            { code: "CHEM 142", name: "General Chemistry Lab II", credit: 1, static: true },
+                            { code: "ENG 102", name: "Dev. of Reading & Writing II", credit: 3, static: true }
+                        ]
+                    },
+                    {
+                        semester: 3,
+                        courses: [
+                            { code: "PHYS 201", name: "Waves and Optics", credit: 4, static: true },
+                            { code: "PHYS 203", name: "Classical Mechanics I", credit: 3, static: true },
+                            { code: "MATH 255", name: "Differential Equations", credit: 4, static: true },
+                            { code: "MATH 265", name: "Basic Linear Algebra", credit: 3, static: true },
+                            { code: "ELS I", name: "Elective Social I", credit: 3, static: false },
+                            { code: "HIST 201", name: "History of Revolution I", credit: 0, static: true },
+                            { code: "TURK 201", name: "Turkish Language I", credit: 0, static: true }
+                        ]
+                    },
+                    {
+                        semester: 4,
+                        courses: [
+                            { code: "PHYS 204", name: "Classical Mechanics II", credit: 3, static: true },
+                            { code: "PHYS 212", name: "Waves and Optics Lab", credit: 2, static: true },
+                            { code: "PHYS 222", name: "Modern Physics", credit: 4, static: true },
+                            { code: "PHYS 266", name: "Math. Methods in Physics", credit: 4, static: true },
+                            { code: "ELS II", name: "Elective Social II", credit: 3, static: false },
+                            { code: "HIST 202", name: "History of Revolution II", credit: 0, static: true },
+                            { code: "TURK 202", name: "Turkish Language II", credit: 0, static: true }
+                        ]
+                    },
+                    { semester: 5, courses: [] }, { semester: 6, courses: [] }, 
+                    { semester: 7, courses: [] }, { semester: 8, courses: [] }
+                ],
+                // Hiçbir yıl eşleşmezse kullanılacak yedek
+                "default": [ 
+                     { semester: 1, courses: [] }, { semester: 2, courses: [] } 
                 ]
             },
-            // Diğer bölümler için boş şablonlar
+            
+            // Diğer bölümler için boş şablonlar (Gerektiğinde doldurulabilir)
             "MBG": { "default": createEmptyCurriculum() },
             "MATEMATIK": { "default": createEmptyCurriculum() },
             "KIMYA": { "default": createEmptyCurriculum() },
@@ -336,7 +428,6 @@
             "SBP": { "default": createEmptyCurriculum() }
         }
     };
-
     /* =========================================
        2. STANDARD GPA LOGIC & VARIABLES
        ========================================= */
@@ -788,5 +879,6 @@
 
 </body>
 </html>
+
 
 
