@@ -133,10 +133,6 @@
         });
 
         function getCurrentSemester() {
-            // Otomatik dönem tahmini:
-            // - Güz (1): Eylül(9)-Aralık(12) ve Ocak(1)
-            // - Bahar (2): Şubat(2)-Haziran(6)
-            // - Yaz (0): Temmuz(7)-Ağustos(8)
             const month = new Date().getMonth() + 1; // 1-12
             if (month >= 9 || month === 1) return '1';
             if (month >= 2 && month <= 6) return '2';
@@ -149,7 +145,7 @@
             const id = idInput.value.trim();
             const semester = getCurrentSemester();
 
-            // 1. Doğrulama: sadece rakamlardan oluşan 9 haneli kontrolü
+            // 1. Doğrulama
             if (!/^\d{9}$/.test(id)) {
                 errorDiv.innerText = "Lütfen geçerli, 9 haneli bir öğrenci numarası giriniz.";
                 errorDiv.style.display = 'block';
@@ -158,7 +154,7 @@
 
             errorDiv.style.display = 'none';
             
-            // 2. BÖLÜM KODU (Örn: 101)
+            // 2. BÖLÜM KODU
             const deptCode = id.substring(3, 6);
 
             // 3. BÖLÜM İSİMLENDİRMESİ
@@ -192,36 +188,34 @@
             }
 
 
-            // 4. YIL HESAPLAMA (Örn: 31 -> 2023)
+            // 4. YIL HESAPLAMA
             const yearPrefix = parseInt(id.substring(0, 2), 10);
-            const entryYear = 1992 + yearPrefix; // 1992 + 31 = 2023
+            const entryYear = 1992 + yearPrefix; 
 
-            // --- DEĞİŞİKLİK BURADA BAŞLIYOR ---
+            // --- DÜZELTİLEN KISIM ---
             
-            // Müfredat Yılı Mantığı:
-            // Eğer giriş yılı 2018 ile 2021 (dahil) arasındaysa, hepsini 2018 dosyasına yönlendir.
             let fileYear = entryYear;
+
+            // Mantık:
+            // 1. Fizik bölümü VE 2018-2021 arası ise -> 2018
+            // 2. Fizik bölümü VE 2025 sonrası ise -> 2025
+            // 3. Diğer durumlarda -> Giriş yılı neyse o (fileYear = entryYear)
 
             if (entryYear >= 2018 && entryYear <= 2021 && deptName == "phys") {
                 fileYear = 2018;
-            }
+            } 
             else if (entryYear >= 2025 && deptName == "phys") {
                 fileYear = 2025;
             }
             
-            // --- DEĞİŞİKLİK BURADA BİTİYOR ---
+            // --- DÜZELTİLEN KISIM BİTTİ ---
             
             // 5. DOSYA İSMİNİ OLUŞTURMA
-            // 'entryYear' yerine yukarıda hesapladığımız 'fileYear' kullanıyoruz
             const targetFile = `${fileYear}_${deptName}.html`;
 
-            // Yönlendirme (ID ve Dönem bilgisini de taşıyoruz)
+            // Yönlendirme
             window.location.href = `${targetFile}?id=${id}&sem=${encodeURIComponent(semester)}`;
         }
     </script>
 </body>
 </html>
-
-
-
-
