@@ -118,8 +118,6 @@
                 <div class="hint">9 haneli okul numaranız</div>
             </div>
 
-            <!-- Dönem seçimi kullanıcıya sorulmuyor, otomatik hesaplanıyor -->
-            
             <button onclick="routeUser()">Hesaplamaya Başla</button>
             <div id="errorMsg" class="error-msg"></div>
         </div>
@@ -164,6 +162,18 @@
             const yearPrefix = parseInt(id.substring(0, 2), 10);
             const entryYear = 1992 + yearPrefix; // 1992 + 31 = 2023
 
+            // --- DEĞİŞİKLİK BURADA BAŞLIYOR ---
+            
+            // Müfredat Yılı Mantığı:
+            // Eğer giriş yılı 2018 ile 2021 (dahil) arasındaysa, hepsini 2018 dosyasına yönlendir.
+            let fileYear = entryYear;
+
+            if (entryYear >= 2018 && entryYear <= 2021) {
+                fileYear = 2018;
+            }
+            
+            // --- DEĞİŞİKLİK BURADA BİTİYOR ---
+
             // 3. BÖLÜM KODU (Örn: 101)
             const deptCode = id.substring(3, 6);
 
@@ -198,7 +208,8 @@
             }
 
             // 5. DOSYA İSMİNİ OLUŞTURMA
-            const targetFile = `${entryYear}_${deptName}.html`;
+            // 'entryYear' yerine yukarıda hesapladığımız 'fileYear' kullanıyoruz
+            const targetFile = `${fileYear}_${deptName}.html`;
 
             // Yönlendirme (ID ve Dönem bilgisini de taşıyoruz)
             window.location.href = `${targetFile}?id=${id}&sem=${encodeURIComponent(semester)}`;
