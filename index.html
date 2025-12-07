@@ -3,9 +3,9 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>İYTE GPA Calculator - Universal</title>
+    <title>İYTE GPA Calculator - Universal V2</title>
     <style>
-        /* --- MEVCUT CSS AYNEN KORUNDU --- */
+        /* --- TASARIM VE STİLLER (AYNEN KORUNDU) --- */
         :root {
             --iyte-red: #b30000;
             --bg-color: #f0f2f5;
@@ -183,9 +183,9 @@
 
         <div class="tool-box" style="margin-top:10px;">
             <div style="font-size:0.7rem; color:var(--text-sub); margin-bottom:5px;">ÖĞRENCİ NUMARASI</div>
-            <input type="text" id="studentNoInput" class="tool-input" placeholder="Örn: 23502001" style="text-align:center; font-weight:bold; letter-spacing:1px;">
-            <button class="tool-btn btn-backup" onclick="initCurriculumByStudentId()"> Müfredatı Getir</button>
-            <div id="deptStatus" style="font-size:0.7rem; text-align:center; color:var(--text-sub); margin-top:5px;"></div>
+            <input type="text" id="studentNoInput" class="tool-input" placeholder="Örn: 31502001" style="text-align:center; font-weight:bold; letter-spacing:1px;">
+            <button class="tool-btn btn-backup" onclick="initCurriculumByStudentId()">📚 Müfredatı Getir</button>
+            <div id="deptStatus" style="font-size:0.75rem; text-align:center; color:var(--text-main); font-weight:bold; margin-top:5px; min-height:1rem;"></div>
         </div>
 
         <div class="stat-card" id="gpaCard">
@@ -263,21 +263,44 @@
 
 <script>
     /* =========================================
-       1. DATA STRUCTURE (Temsili Veritabanı)
+       1. DATA STRUCTURE (TÜM BÖLÜMLER)
        ========================================= */
+    
+    // Yardımcı fonksiyon: Boş 8 dönemlik müfredat oluşturur
+    function createEmptyCurriculum() {
+        const arr = [];
+        for(let i=1; i<=8; i++) {
+            arr.push({ semester: i, courses: [] });
+        }
+        return arr;
+    }
+
     const universityData = {
-        // İYTE Bölüm Kodları (OBS standartlarına göre düzenlenebilir)
-        // Örn: 502 -> Fizik, 401 -> Bilgisayar Müh.
+        // !!! ÖNEMLİ !!
         departments: {
-            "502": "PHYS",
-            "401": "CENG",
-            "302": "ARCH" 
+            "101": "FIZIK",
+            "???": "MBG",
+            "103": "MATEMATIK",
+            "???": "KIMYA",
+            "105": "FOTONIK",
+            "???": "CENG",    
+            "210": "BIOMUH",
+            "???": "CEVRE",
+            "???": "ENERJI",
+            "206": "EHM",
+            "???": "GIDA",
+            "204": "INSAAT",
+            "???": "KIMMUH",
+            "???": "MAKMUH",
+            "208": "MALZEME",
+            "???": "ENTAS",
+            "???": "MIMARLIK",
+            "???": "SBP"
         },
         
         // Müfredat Verileri
         curriculums: {
-            "PHYS": {
-                // Varsayılan veya 2023 girişliler
+            "FIZIK": {
                 "default": [
                     {
                         semester: 1,
@@ -289,43 +312,28 @@
                             { code: "ENG 101", name: "Reading & Writing I", credit: 3, static: true }
                         ]
                     },
-                    {
-                        semester: 2,
-                        courses: [
-                            { code: "PHYS 102", name: "General Physics II", credit: 3, static: true },
-                            { code: "MATH 146", name: "Calculus II", credit: 5, static: true },
-                            { code: "PHYS 114", name: "Intro. Programming", credit: 3, static: true }
-                        ]
-                    },
-                    {
-                        semester: 3,
-                        courses: [
-                            { code: "PHYS 201", name: "Waves and Optics", credit: 4, static: true },
-                            { code: "MATH 255", name: "Diff. Equations", credit: 4, static: true }
-                        ]
-                    }
-                    // Diğer dönemler buraya eklenecek...
+                    { semester: 2, courses: [] }, { semester: 3, courses: [] }, { semester: 4, courses: [] },
+                    { semester: 5, courses: [] }, { semester: 6, courses: [] }, { semester: 7, courses: [] }, { semester: 8, courses: [] }
                 ]
             },
-            "CENG": {
-                "default": [
-                    {
-                        semester: 1,
-                        courses: [
-                            { code: "CENG 111", name: "Comp. Eng. Concepts", credit: 3, static: true },
-                            { code: "MATH 141", name: "Basic Calculus I", credit: 4, static: true },
-                            { code: "PHYS 101", name: "General Physics I", credit: 3, static: true }
-                        ]
-                    },
-                    {
-                        semester: 2,
-                        courses: [
-                            { code: "CENG 112", name: "Data Structures", credit: 4, static: true },
-                            { code: "MATH 142", name: "Basic Calculus II", credit: 4, static: true }
-                        ]
-                    }
-                ]
-            }
+            // Diğer bölümler için boş şablonlar
+            "MBG": { "default": createEmptyCurriculum() },
+            "MATEMATIK": { "default": createEmptyCurriculum() },
+            "KIMYA": { "default": createEmptyCurriculum() },
+            "FOTONIK": { "default": createEmptyCurriculum() },
+            "CENG": { "default": createEmptyCurriculum() },
+            "BIOMUH": { "default": createEmptyCurriculum() },
+            "CEVRE": { "default": createEmptyCurriculum() },
+            "ENERJI": { "default": createEmptyCurriculum() },
+            "EHM": { "default": createEmptyCurriculum() },
+            "GIDA": { "default": createEmptyCurriculum() },
+            "INSAAT": { "default": createEmptyCurriculum() },
+            "KIMMUH": { "default": createEmptyCurriculum() },
+            "MAKMUH": { "default": createEmptyCurriculum() },
+            "MALZEME": { "default": createEmptyCurriculum() },
+            "ENTAS": { "default": createEmptyCurriculum() },
+            "MIMARLIK": { "default": createEmptyCurriculum() },
+            "SBP": { "default": createEmptyCurriculum() }
         }
     };
 
@@ -337,14 +345,13 @@
     window.failingGrades = ["FF", "FD", "NA"];
     window.optionsHTML = '<option value="">-</option>' + Object.keys(grades).map(g => `<option value="${g}">${g}</option>`).join('');
     
-    // Basitleştirilmiş önkoşul listesi
     window.prerequisites = {
-        "PHYS 102": "PHYS 101", "PHYS 201": "PHYS 102", "CENG 112": "CENG 111"
+        "PHYS 102": "PHYS 101", "PHYS 201": "PHYS 102"
     };
 
     window.gradeHistory = [];
     window.currentProfile = "default";
-    window.currentDept = null; // Aktif bölüm kodu
+    window.currentDept = null;
 
     /* =========================================
        3. INITIALIZATION & DYNAMIC RENDERING
@@ -356,7 +363,7 @@
         
         if (savedId) {
             document.getElementById('studentNoInput').value = savedId;
-            initCurriculumByStudentId(false); // Otomatik yükle
+            initCurriculumByStudentId(false); 
         }
 
         const form = document.getElementById('gpaForm');
@@ -364,16 +371,20 @@
         form.addEventListener('input', (e) => { if(e.target.tagName === 'INPUT') calculateGPA(); });
     });
 
-    // --- PARSER ---
-    // Öğrenci No Formatı: YY (Yıl) + BBB (Bölüm) + NNN (Sıra) varsayımı
-    // Örn: 23502001 -> Yıl: 23, Bölüm: 502
+    // --- YENİ PARSER MANTIĞI ---
+    // Giriş Yılı = 1992 + Numaranın İlk 2 Hanesi
+    // Örn: 31 -> 1992 + 31 = 2023 Girişli
+    // Örn: 23 -> 1992 + 23 = 2015 Girişli
     window.parseStudentID = function(id) {
         id = id.toString().trim();
-        if (id.length < 5) return null; // Basit kontrol
+        if (id.length < 5) return null; 
         
-        const yearPrefix = id.substring(0, 2); // İlk 2 hane yıl (23)
-        const entryYear = "20" + yearPrefix;
-        const deptCode = id.substring(2, 5); // Sonraki 3 hane bölüm (502)
+        const prefixStr = id.substring(0, 2); 
+        const prefixVal = parseInt(prefixStr);
+        if(isNaN(prefixVal)) return null;
+
+        const entryYear = 1992 + prefixVal;
+        const deptCode = id.substring(2, 5); // Sonraki 3 hane bölüm kodu
         
         return { year: entryYear, deptCode: deptCode };
     }
@@ -390,26 +401,27 @@
         const deptKey = universityData.departments[info.deptCode];
         
         if (!deptKey) {
-            if(showAlert) alert(`Bölüm kodu (${info.deptCode}) sistemde bulunamadı.`);
+            if(showAlert) alert(`Bölüm kodu (${info.deptCode}) sistemde tanımlı değil. Lütfen kod listesini güncelleyin.`);
             return;
         }
 
         // Bölümü Bulduk
         window.currentDept = deptKey;
         document.getElementById('deptTitle').innerText = "İYTE " + deptKey;
-        document.getElementById('deptStatus').innerText = `${info.year} Girişli - ${deptKey}`;
+        document.getElementById('deptStatus').innerText = `${info.year} Girişli (${deptKey})`;
         
-        // LocalStorage'a ID kaydet
         localStorage.setItem('iyte_student_id_' + currentProfile, id);
         
         renderCurriculum(deptKey);
-        loadData(); // Varsa kayıtlı notları doldur
+        loadData();
     }
 
     window.renderCurriculum = function(deptKey) {
         const container = document.getElementById('curriculumContainer');
-        container.innerHTML = ""; // Temizle
+        container.innerHTML = "";
         
+        // Varsayılan olarak 'default' müfredatı çekiyoruz.
+        // İleride yıla göre if/else eklenebilir.
         const curriculum = universityData.curriculums[deptKey] ? universityData.curriculums[deptKey]["default"] : null;
         
         if (!curriculum) {
@@ -477,7 +489,6 @@
         document.querySelectorAll('.profile-btn').forEach(b => b.classList.remove('active'));
         btnElement.classList.add('active');
         
-        // Yeni profilin ID'si varsa onu yükle, yoksa ekranı temizle
         const savedId = localStorage.getItem('iyte_student_id_' + currentProfile);
         if(savedId) {
             document.getElementById('studentNoInput').value = savedId;
@@ -487,10 +498,11 @@
             document.getElementById('curriculumContainer').innerHTML = "<div style='padding:40px; text-align:center;'>Bu profil boş. Öğrenci numarası girin.</div>";
             document.getElementById('deptTitle').innerText = "İYTE GPA";
             document.getElementById('gpaResult').innerText = "0.00";
+            document.getElementById('deptStatus').innerText = "";
         }
     }
 
-    window.getStorageKey = function() { return 'iyte_gpa_v3_' + window.currentProfile + '_' + (window.currentDept || 'NA'); }
+    window.getStorageKey = function() { return 'iyte_gpa_v4_' + window.currentProfile + '_' + (window.currentDept || 'NA'); }
 
     window.calculateGPA = function() {
         let totalPoints = 0, totalCredits = 0, semesterData = {};
@@ -625,12 +637,9 @@
     window.resetAll = function() { if(confirm("BU PROFİLDEKİ tüm veriler silinecek?")) { localStorage.removeItem(getStorageKey()); localStorage.removeItem('iyte_student_id_' + currentProfile); location.reload(); } }
     
     window.saveData = function() {
-        if(!window.currentDept) return; // Bölüm seçilmediyse kaydetme
+        if(!window.currentDept) return; 
         const data = { static: [], dynamic: [], target: document.getElementById('targetGPA').value };
         
-        // Statik derslerin notlarını kaydet
-        // Not: render edildiği sıraya güveniyoruz, ancak daha sağlam olması için kod ile eşleştirebiliriz
-        // Basitlik adına sırayla alıyoruz
         document.querySelectorAll('tr[data-static="true"]').forEach(r => {
             let obj = {
                 code: r.querySelector('.c-code').innerText,
@@ -639,7 +648,6 @@
             data.static.push(obj);
         });
 
-        // Dinamik eklenen dersler
         document.querySelectorAll('.course-list tr:not([data-static="true"])').forEach(r => {
             const inps = r.querySelectorAll('input, select');
             data.dynamic.push({ sem: r.closest('.semester-block').id, code: inps[0].value, name: inps[1].value, credit: inps[2].value, grade: inps[3].value });
@@ -653,12 +661,8 @@
         const d = JSON.parse(raw);
         if(d.target) document.getElementById('targetGPA').value = d.target;
         
-        // Statik Ders Notlarını Geri Yükle
-        // Kod eşleştirmesi yaparak dolduruyoruz
         if(d.static) {
             d.static.forEach(item => {
-                // XPath veya selector ile kodu bul
-                // Basitlik için tüm satırları geziyoruz
                 const rows = document.querySelectorAll('tr[data-static="true"]');
                 for(let r of rows) {
                     if(r.querySelector('.c-code').innerText === item.code) {
@@ -784,4 +788,3 @@
 
 </body>
 </html>
-
