@@ -217,6 +217,12 @@
                    fileYear = 2025; 
                }
             }    
+            else if (deptName === "photonics") {
+               if (entryYear >= 0) { 
+                   fileYear = 2025; 
+               }
+            }   
+            
             // 4. YÖNLENDİRME
             const targetFile = `${fileYear}_${deptName}.html`;
             
@@ -228,6 +234,7 @@
     </script>
 </body>
 </html>
+
 
 
 
