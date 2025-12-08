@@ -4,11 +4,34 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>İYTE GPA Asistanı - Giriş</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
+        /* --- CSS Değişkenleri - Varsayılan (DARK MODE) --- */
         :root {
+            --iyte-red: #d32f2f; /* Koyu tema için optimize edilmiş kırmızı */
+            --text-color: #ecf0f1;
+            --bg-color: #121212;
+            --container-bg: #1e1e1e;
+            --input-bg: #2c2c2c;
+            --input-border: #444;
+            --input-text: #fff;
+            --subtitle-color: #bdc3c7;
+            --shadow: rgba(0,0,0,0.5);
+            --placeholder-color: #95a5a6;
+        }
+
+        /* --- LIGHT MODE Sınıfı --- */
+        body.light-mode {
             --iyte-red: #b30000;
             --text-color: #2c3e50;
             --bg-color: #f4f6f9;
+            --container-bg: #ffffff;
+            --input-bg: #ffffff;
+            --input-border: #ddd;
+            --input-text: #2c3e50;
+            --subtitle-color: #7f8c8d;
+            --shadow: rgba(0,0,0,0.1);
+            --placeholder-color: #95a5a6;
         }
 
         body {
@@ -17,25 +40,48 @@
             color: var(--text-color);
             margin: 0;
             display: flex;
+            flex-direction: column;
             justify-content: center;
             align-items: center;
             min-height: 100vh;
             padding: 20px;
+            transition: background-color 0.3s, color 0.3s;
+        }
+
+        /* Tema Değiştirme Butonu */
+        .theme-toggle-btn {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            background: var(--container-bg);
+            border: 2px solid var(--iyte-red);
+            color: var(--text-color);
+            padding: 10px 15px;
+            border-radius: 20px;
+            cursor: pointer;
+            font-size: 1.2rem;
+            transition: all 0.3s;
+            box-shadow: 0 2px 5px var(--shadow);
+        }
+        
+        .theme-toggle-btn:hover {
+            transform: scale(1.05);
         }
 
         .container {
-            background: white;
+            background: var(--container-bg);
             padding: 40px;
             border-radius: 15px;
-            box-shadow: 0 10px 25px rgba(0,0,0,0.1);
+            box-shadow: 0 10px 25px var(--shadow);
             max-width: 500px;
             width: 100%;
             text-align: center;
             border-top: 5px solid var(--iyte-red);
+            transition: background-color 0.3s, box-shadow 0.3s;
         }
 
         h1 { color: var(--iyte-red); margin-bottom: 5px; }
-        p.subtitle { color: #7f8c8d; font-size: 0.9rem; margin-top: 0; }
+        p.subtitle { color: var(--subtitle-color); font-size: 0.9rem; margin-top: 0; }
 
         .form-grid {
             display: grid;
@@ -47,7 +93,7 @@
         label {
             display: block;
             font-weight: bold;
-            color: #34495e;
+            color: var(--text-color);
             margin-bottom: 5px;
             font-size: 0.9rem;
         }
@@ -56,22 +102,27 @@
             width: 100%;
             padding: 12px;
             font-size: 1rem;
-            border: 2px solid #ddd;
+            border: 2px solid var(--input-border);
             border-radius: 8px;
-            transition: border-color 0.3s;
+            transition: border-color 0.3s, background-color 0.3s;
             box-sizing: border-box;
-            background-color: #fff;
+            background-color: var(--input-bg);
+            color: var(--input-text);
             text-align: center;
             letter-spacing: 1px;
             font-weight: bold;
         }
+        
+        input::placeholder {
+            color: var(--placeholder-color);
+        }
 
-        input[type="text"]:focus {
+        input:focus {
             border-color: var(--iyte-red);
             outline: none;
         }
 
-        button {
+        button.action-btn {
             background-color: var(--iyte-red);
             color: white;
             border: none;
@@ -85,7 +136,7 @@
             transition: background 0.3s;
         }
 
-        button:hover { background-color: #900000; }
+        button.action-btn:hover { background-color: #900000; }
 
         .error-msg {
             color: #e74c3c;
@@ -98,10 +149,15 @@
             border-radius: 5px;
         }
         
-        .hint { font-size: 0.75rem; color: #95a5a6; margin-top: 5px; }
+        .hint { font-size: 0.75rem; color: var(--subtitle-color); margin-top: 5px; }
+
     </style>
 </head>
 <body>
+
+    <button class="theme-toggle-btn" onclick="toggleTheme()" title="Temayı Değiştir">
+        <i class="fas fa-sun"></i> / <i class="fas fa-moon"></i>
+    </button>
 
     <div class="container">
         <h1>İYTE GPA Asistanı</h1>
@@ -115,12 +171,19 @@
                 <div class="hint">9 haneli okul numaranız</div>
             </div>
 
-            <button onclick="routeUser()">Hesaplamaya Başla</button>
+            <button class="action-btn" onclick="routeUser()">Hesaplamaya Başla</button>
             <div id="errorMsg" class="error-msg"></div>
         </div>
     </div>
 
     <script>
+        // --- TEMA YÖNETİMİ ---
+        function toggleTheme() {
+            const body = document.body;
+            body.classList.toggle('light-mode');
+        }
+
+        // --- HESAPLAMA MANTIĞI ---
         document.addEventListener("keypress", function(event) {
             if (event.key === "Enter") {
                 event.preventDefault();
@@ -169,134 +232,42 @@
                 return;
             }
 
-            // 3. MÜFREDAT YILI MANTIĞI (En Temiz Hali)
-            let fileYear = entryYear; // Varsayılan: Giriş yılı = Dosya yılı
+            // 3. MÜFREDAT YILI MANTIĞI
+            let fileYear = entryYear; 
 
-            // Mantık Zinciri:
             if (entryYear < 2018 && deptName === "phys") {
-                // DURUM 1: 2018'den eskiler
-                // Kullanıcıya bilgi verip 2018'e yönlendiriyoruz
                 alert("Sistemde en eski müfredat 2018 müfredatıdır, tabii olduğunuz müfredatı maalesef bulamadım, 2018 müfredatı üzerinden değişiklik yapabilirsiniz.");
                 fileYear = 2018;
             } 
             else if (entryYear >= 2018 && entryYear <= 2021 && deptName === "phys") {
-                // DURUM 2: Fizik Bölümü 2018-2021 arası
                 fileYear = 2018;
             } 
             else if (entryYear >= 2025 && deptName === "phys") {
-                // DURUM 3: Fizik Bölümü 2025 sonrası
                 fileYear = 2025;
             }
-            else if (deptName === "cse") {
-                if (entryYear >= 0) { 
-                    fileYear = 2025; 
-                }
-            }
-            else if (deptName === "ID") {
-                if (entryYear >= 0) { 
-                    fileYear = 2025; 
-                }
-            }
-            else if (deptName === "materialsc") {
-                if (entryYear >= 0) { 
-                    fileYear = 2024; 
-                }
-            }    
-            else if (deptName === "math") {
-               if (entryYear >= 0) { 
-                   fileYear = 2024; 
-               }
-            }    
-            else if (deptName === "chem") {
-               if (entryYear >= 0) { 
-                   fileYear = 2024; 
-               }
-            }    
-            else if (deptName === "mbg") {
-               if (entryYear >= 0) { 
-                   fileYear = 2025; 
-               }
-            }    
-            else if (deptName === "photonics") {
-               if (entryYear >= 0) { 
-                   fileYear = 2025; 
-               }
-            }   
-            else if (deptName === "bioeng") {
-               if (entryYear >= 0) { 
-                   fileYear = 2025; 
-               }
-            }   
-            else if (deptName === "Env") {
-               if (entryYear >= 0) { 
-                   fileYear = 2025; 
-               }
-            }
-            else if (deptName === "ese") {
-               if (entryYear >= 0) { 
-                   fileYear = 2025; 
-               }
-            }
-            else if (deptName === "ece") {
-               if (entryYear >= 0) { 
-                   fileYear = 2025; 
-               }
-            }
-            else if (deptName === "feng") {
-               if (entryYear >= 0) { 
-                   fileYear = 2025; 
-               }
-            }
-            else if (deptName === "ceng") {
-               if (entryYear >= 0) { 
-                   fileYear = 2025; 
-               }
-            }
-            else if (deptName === "mm") {
-               if (entryYear >= 0) { 
-                   fileYear = 2025; 
-               }
-            }
-            else if (deptName === "chemeng") {
-               if (entryYear >= 0) { 
-                   fileYear = 2025; 
-               }
-            }
-            else if (deptName === "arch") {
-               if (entryYear >= 0) { 
-                   fileYear = 2025; 
-               }
-            }
-            else if (deptName === "urp") {
-               if (entryYear >= 0) { 
-                   fileYear = 2025; 
-               }
-            }
+            else if (deptName === "cse") { if (entryYear >= 0) fileYear = 2025; }
+            else if (deptName === "ID") { if (entryYear >= 0) fileYear = 2025; }
+            else if (deptName === "materialsc") { if (entryYear >= 0) fileYear = 2024; }    
+            else if (deptName === "math") { if (entryYear >= 0) fileYear = 2024; }    
+            else if (deptName === "chem") { if (entryYear >= 0) fileYear = 2024; }    
+            else if (deptName === "mbg") { if (entryYear >= 0) fileYear = 2025; }    
+            else if (deptName === "photonics") { if (entryYear >= 0) fileYear = 2025; }   
+            else if (deptName === "bioeng") { if (entryYear >= 0) fileYear = 2025; }   
+            else if (deptName === "Env") { if (entryYear >= 0) fileYear = 2025; }
+            else if (deptName === "ese") { if (entryYear >= 0) fileYear = 2025; }
+            else if (deptName === "ece") { if (entryYear >= 0) fileYear = 2025; }
+            else if (deptName === "feng") { if (entryYear >= 0) fileYear = 2025; }
+            else if (deptName === "ceng") { if (entryYear >= 0) fileYear = 2025; }
+            else if (deptName === "mm") { if (entryYear >= 0) fileYear = 2025; }
+            else if (deptName === "chemeng") { if (entryYear >= 0) fileYear = 2025; }
+            else if (deptName === "arch") { if (entryYear >= 0) fileYear = 2025; }
+            else if (deptName === "urp") { if (entryYear >= 0) fileYear = 2025; }
+
             // 4. YÖNLENDİRME
             const targetFile = `${fileYear}_${deptName}.html`;
-            
-            // Hata ayıklama için konsola yaz (F12 -> Console'dan kontrol edilebilir)
             console.log(`Giriş Yılı: ${entryYear}, Yönlendirilen Dosya: ${targetFile}`);
-
             window.location.href = `${targetFile}?id=${id}&sem=${encodeURIComponent(semester)}`;
         }
     </script>
 </body>
 </html>
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
