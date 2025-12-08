@@ -212,7 +212,11 @@
                    fileYear = 2024; 
                }
             }    
-            
+            else if (deptName === "math") {
+               if (entryYear >= 0) { 
+                   fileYear = 2025; 
+               }
+            }    
             // 4. YÖNLENDİRME
             const targetFile = `${fileYear}_${deptName}.html`;
             
@@ -224,6 +228,7 @@
     </script>
 </body>
 </html>
+
 
 
 
