@@ -4,8 +4,8 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <meta name="color-scheme" content="light dark">
-  <meta name="description" content="Birden fazla ders için ayarlanabilir vize ve final ortalaması hesaplama aracı.">
-  <title>Vize–Final Ortalaması</title>
+  <meta name="description" content="Birden fazla ders için ayarlanabilir not ve hedef not hesaplama aracı.">
+  <title>Not Ortalaması</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700&display=swap" rel="stylesheet">
@@ -83,12 +83,12 @@
     .course-body { padding: 20px; }
     .settings-row { display: flex; align-items: end; justify-content: space-between; gap: 14px; margin-bottom: 18px; }
     .field-label { display: block; margin-bottom: 7px; color: var(--muted); font-size: .76rem; font-weight: 600; }
-    .count-select, .score-input, .weight-input {
+    .count-select, .score-input, .weight-input, .target-score-input {
       border: 1px solid var(--line); border-radius: 8px; background: var(--input);
       color: var(--text); outline: none;
     }
     .count-select { min-width: 112px; padding: 9px 10px; }
-    .count-select:focus, .score-input:focus, .weight-input:focus { border-color: var(--accent); }
+    .count-select:focus, .score-input:focus, .weight-input:focus, .target-score-input:focus { border-color: var(--accent); }
     .assessment-list { display: grid; gap: 9px; }
     .assessment-row, .column-headings {
       display: grid; grid-template-columns: minmax(100px, 1fr) minmax(82px, 118px) minmax(82px, 118px);
@@ -117,6 +117,22 @@
     .weight-status { color: var(--muted); font-size: .78rem; line-height: 1.4; }
     .weight-status.invalid { color: var(--danger); }
     .weight-status.valid { color: var(--success); }
+    .target-panel {
+      margin-top: 18px; padding: 16px; border: 1px solid var(--line);
+      border-radius: 10px; background: var(--bg);
+    }
+    .target-grid {
+      display: grid; grid-template-columns: minmax(130px, 180px) minmax(0, 1fr);
+      align-items: end; gap: 16px;
+    }
+    .target-score-input {
+      width: 100%; padding: 10px 34px 10px 10px; appearance: textfield;
+    }
+    .target-grid .input-wrap { display: block; }
+    .target-result { color: var(--muted); font-size: .84rem; line-height: 1.5; }
+    .target-result.active { color: var(--accent); font-weight: 600; }
+    .target-result.success { color: var(--success); font-weight: 600; }
+    .target-result.danger { color: var(--danger); font-weight: 600; }
     .remove-course {
       border: 0; background: transparent; color: var(--muted); padding: 4px 0; font-size: .78rem;
     }
@@ -138,6 +154,7 @@
         grid-template-columns: minmax(76px, 1fr) minmax(70px, 94px) minmax(70px, 94px); gap: 7px;
       }
       .score-input, .weight-input { padding-left: 8px; padding-right: 25px; }
+      .target-grid { grid-template-columns: 1fr; align-items: stretch; gap: 10px; }
     }
     @media (max-width: 390px) {
       .course-header { grid-template-columns: 1fr; }
@@ -155,8 +172,8 @@
     </div>
     <header class="hero">
       <p class="eyebrow">Hesaplayıcı</p>
-      <h1>Vize–Final Ortalaması</h1>
-      <p class="intro">Her dersin değerlendirme sayısını, adlarını ve ağırlıklarını ayrı ayrı belirle. Yüzdeler toplamı 100 olduğunda ortalaman otomatik hesaplanır.</p>
+      <h1>Not Ortalaması</h1>
+      <p class="intro">Her dersin notlarını ve ağırlıklarını belirle; ortalamanı gör ve istediğin sonuca ulaşmak için kalan notlardan kaç alman gerektiğini hesapla.</p>
     </header>
     <main>
       <div class="toolbar">
@@ -177,6 +194,7 @@
     const root = document.documentElement;
     const coursesElement = document.getElementById("courses");
     const emptyNote = document.getElementById("emptyNote");
+    const NUMERIC_INPUT_SELECTOR = ".score-input, .weight-input, .target-score-input";
     const makeId = () => `${Date.now().toString(36)}-${Math.random().toString(36).slice(2, 8)}`;
 
     function defaultCourse(number = 1) {
@@ -186,7 +204,8 @@
           { id: makeId(), name: "Not 1", score: "", weight: 25 },
           { id: makeId(), name: "Not 2", score: "", weight: 25 }
         ],
-        finalName: "Final", finalScore: "", finalWeight: 50
+        finalName: "Final", finalScore: "", finalWeight: 50,
+        targetScore: ""
       };
     }
 
@@ -198,18 +217,21 @@
         ...course,
         id: course.id || makeId(),
         name: course.name || `Ders ${courseIndex + 1}`,
-        midterms: midterms.map((item, index) => ({
-          ...item,
-          id: item.id || makeId(),
-          name: typeof item.name === "string" && item.name.trim()
-            ? item.name
-            : `Değerlendirme ${index + 1}`
-        })),
+        midterms: midterms.map((item, index) => {
+          const savedName = typeof item.name === "string" ? item.name.trim() : "";
+          const legacyDefaultName = /^Değerlendirme \d+$/.test(savedName);
+          return {
+            ...item,
+            id: item.id || makeId(),
+            name: savedName && !legacyDefaultName ? savedName : `Not ${index + 1}`
+          };
+        }),
         finalName: typeof course.finalName === "string" && course.finalName.trim()
           ? course.finalName
           : "Final",
         finalScore: course.finalScore ?? "",
-        finalWeight: course.finalWeight ?? 50
+        finalWeight: course.finalWeight ?? 50,
+        targetScore: course.targetScore ?? ""
       };
     }
 
@@ -233,10 +255,29 @@
       return Number.isFinite(parsed) ? parsed : null;
     }
     function formatNumber(value) { return Number.isInteger(value) ? String(value) : value.toFixed(1); }
+    function sanitizeNumericValue(value) {
+      const normalized = String(value).replace(",", ".").replace(/[^0-9.]/g, "");
+      const firstDot = normalized.indexOf(".");
+      if (firstDot === -1) return normalized;
+      return normalized.slice(0, firstDot + 1) + normalized.slice(firstDot + 1).replaceAll(".", "");
+    }
+
+    function getAssessments(course) {
+      const assessments = course.midterms.map((item, index) => ({
+        name: item.name || `Not ${index + 1}`,
+        score: toNumber(item.score),
+        weight: toNumber(item.weight) || 0
+      }));
+      assessments.push({
+        name: course.finalName || "Final",
+        score: toNumber(course.finalScore),
+        weight: toNumber(course.finalWeight) || 0
+      });
+      return assessments;
+    }
 
     function calculateCourse(course) {
-      const assessments = course.midterms.map(item => ({ score: toNumber(item.score), weight: toNumber(item.weight) || 0 }));
-      assessments.push({ score: toNumber(course.finalScore), weight: toNumber(course.finalWeight) || 0 });
+      const assessments = getAssessments(course);
       const weightTotal = assessments.reduce((sum, item) => sum + item.weight, 0);
       const completed = assessments.filter(item => item.score !== null);
       const completedWeight = completed.reduce((sum, item) => sum + item.weight, 0);
@@ -257,6 +298,52 @@
       return { weightTotal, weightsValid, average, label };
     }
 
+    function calculateTarget(course) {
+      const target = toNumber(course.targetScore);
+      if (target === null) {
+        return { status: "neutral", text: "Hedefini gir; kalan notlarda gereken puanı hesaplayalım." };
+      }
+      if (target < 0 || target > 100) {
+        return { status: "danger", text: "Hedef not 0 ile 100 arasında olmalı." };
+      }
+
+      const assessments = getAssessments(course);
+      const weightTotal = assessments.reduce((sum, item) => sum + item.weight, 0);
+      if (Math.abs(weightTotal - 100) >= .01) {
+        return { status: "danger", text: "Hedef hesabı için ağırlıkların toplamı %100 olmalı." };
+      }
+
+      const completed = assessments.filter(item => item.score !== null);
+      const missing = assessments.filter(item => item.score === null && item.weight > 0);
+      const weightedPoints = completed.reduce((sum, item) => sum + item.score * item.weight, 0);
+      const missingWeight = missing.reduce((sum, item) => sum + item.weight, 0);
+
+      if (!missing.length || missingWeight <= 0) {
+        const finalAverage = weightedPoints / 100;
+        return finalAverage >= target
+          ? { status: "success", text: `Ders ortalaman ${finalAverage.toFixed(2)}; hedefe ulaştın.` }
+          : { status: "danger", text: `Ders ortalaman ${finalAverage.toFixed(2)}; ${formatNumber(target)} hedefinin altında.` };
+      }
+
+      const required = (target * 100 - weightedPoints) / missingWeight;
+      if (required <= 0) {
+        return { status: "success", text: "Kalan notlardan 0 alsan bile hedefe ulaşıyorsun." };
+      }
+      if (required > 100) {
+        return { status: "danger", text: "Kalan notlardan 100 alsan bile bu hedef mümkün değil." };
+      }
+      if (missing.length === 1) {
+        return {
+          status: "active",
+          text: `${missing[0].name} için gereken not: ${required.toFixed(1)}`
+        };
+      }
+      return {
+        status: "active",
+        text: `Kalan ${missing.length} not için gerekli ağırlıklı ortalama: ${required.toFixed(1)}`
+      };
+    }
+
     function assessmentRow(courseId, item, index) {
       return `
         <div class="assessment-row">
@@ -267,7 +354,7 @@
           <label class="input-wrap">
             <input class="score-input" type="number" min="0" max="100" step="0.5" inputmode="decimal"
               value="${escapeHtml(item.score)}" data-action="midterm-score" data-course-id="${courseId}" data-item-id="${item.id}"
-              aria-label="Not ${index + 1} notu" placeholder="—">
+              aria-label="Not ${index + 1} puanı" placeholder="—">
             <span class="input-suffix">puan</span>
           </label>
           <label class="input-wrap">
@@ -281,6 +368,7 @@
 
     function courseTemplate(course) {
       const result = calculateCourse(course);
+      const targetResult = calculateTarget(course);
       const resultText = result.average === null ? "—" : result.average.toFixed(2);
       const statusClass = result.weightsValid ? "valid" : "invalid";
       const statusText = result.weightsValid ? "Ağırlık toplamı %100"
@@ -300,8 +388,8 @@
           <div class="course-body">
             <div class="settings-row">
               <label>
-                <span class="field-label">Değerlendirme sayısı</span>
-                <select class="count-select" data-action="midterm-count" data-course-id="${course.id}" aria-label="Değerlendirme sayısı">
+                <span class="field-label">Not sayısı</span>
+                <select class="count-select" data-action="midterm-count" data-course-id="${course.id}" aria-label="Not sayısı">
                   ${countOptions}
                 </select>
               </label>
@@ -312,7 +400,7 @@
               <div class="assessment-row final-row">
                 <input class="assessment-name-input" type="text" maxlength="50"
                   value="${escapeHtml(course.finalName || "Final")}" data-action="final-name"
-                  data-course-id="${course.id}" aria-label="Son değerlendirme adı">
+                  data-course-id="${course.id}" aria-label="Son notun adı">
                 <label class="input-wrap">
                   <input class="score-input" type="number" min="0" max="100" step="0.5" inputmode="decimal"
                     value="${escapeHtml(course.finalScore)}" data-action="final-score" data-course-id="${course.id}"
@@ -327,6 +415,20 @@
                 </label>
               </div>
             </div>
+            <div class="target-panel">
+              <div class="target-grid">
+                <label>
+                  <span class="field-label">Hedef ders notu</span>
+                  <span class="input-wrap">
+                    <input class="target-score-input" type="number" min="0" max="100" step="0.5" inputmode="decimal"
+                      value="${escapeHtml(course.targetScore)}" data-action="target-score" data-course-id="${course.id}"
+                      aria-label="Hedef ders notu" placeholder="Örn. 70">
+                    <span class="input-suffix">puan</span>
+                  </span>
+                </label>
+                <div class="target-result ${targetResult.status}" aria-live="polite">${escapeHtml(targetResult.text)}</div>
+              </div>
+            </div>
             <div class="course-footer">
               <span class="weight-status ${statusClass}">${statusText}</span>
               <button class="remove-course" type="button" data-action="remove-course" data-course-id="${course.id}">Dersi sil</button>
@@ -338,6 +440,12 @@
     function render() {
       coursesElement.innerHTML = courses.map(courseTemplate).join("");
       emptyNote.style.display = courses.length ? "none" : "block";
+    }
+    function updateTargetUI(card, course) {
+      const targetResult = calculateTarget(course);
+      const element = card.querySelector(".target-result");
+      element.className = `target-result ${targetResult.status}`;
+      element.textContent = targetResult.text;
     }
     function redistributeMidtermWeights(course) {
       const finalWeight = Math.min(100, Math.max(0, toNumber(course.finalWeight) || 0));
@@ -366,6 +474,9 @@
     }
     function updateCourse(event) {
       const target = event.target;
+      if (target.matches(NUMERIC_INPUT_SELECTOR)) {
+        target.value = sanitizeNumericValue(target.value);
+      }
       const action = target.dataset.action;
       if (!action) return;
       const course = courses.find(item => item.id === target.dataset.courseId);
@@ -374,6 +485,7 @@
       if (action === "final-name") course.finalName = target.value;
       if (action === "final-score") course.finalScore = target.value;
       if (action === "final-weight") course.finalWeight = target.value;
+      if (action === "target-score") course.targetScore = target.value;
       if (action === "midterm-name" || action === "midterm-score" || action === "midterm-weight") {
         const midterm = course.midterms.find(item => item.id === target.dataset.itemId);
         if (midterm) {
@@ -383,8 +495,9 @@
         }
       }
       saveCourses();
-      if (action.endsWith("-name")) return;
       const card = target.closest(".course-card");
+      updateTargetUI(card, course);
+      if (action.endsWith("-name") || action === "target-score") return;
       const result = calculateCourse(course);
       card.querySelector(".total-value").textContent = result.average === null ? "—" : result.average.toFixed(2);
       card.querySelector(".total-label").textContent = result.label;
@@ -395,9 +508,22 @@
     }
 
     coursesElement.addEventListener("input", updateCourse);
+    coursesElement.addEventListener("keydown", event => {
+      if (!event.target.matches(NUMERIC_INPUT_SELECTOR)) return;
+      if (["e", "E", "+", "-"].includes(event.key)) event.preventDefault();
+    });
+    coursesElement.addEventListener("beforeinput", event => {
+      if (!event.target.matches(NUMERIC_INPUT_SELECTOR) || !event.data) return;
+      if (/[^0-9.,]/.test(event.data)) event.preventDefault();
+    });
+    coursesElement.addEventListener("paste", event => {
+      if (!event.target.matches(NUMERIC_INPUT_SELECTOR)) return;
+      const pastedText = event.clipboardData.getData("text").trim();
+      if (!/^\d+(?:[.,]\d+)?$/.test(pastedText)) event.preventDefault();
+    });
     coursesElement.addEventListener("change", event => {
       const target = event.target;
-      if (target.matches(".score-input, .weight-input")) {
+      if (target.matches(NUMERIC_INPUT_SELECTOR)) {
         if (target.value !== "") {
           const value = Math.min(100, Math.max(0, Number(target.value) || 0));
           target.value = String(value);
