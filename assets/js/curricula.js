@@ -1966,3 +1966,29 @@ window.CURRICULA = {
     ]
   }
 };
+// 2019 eğitim planı
+// Mevcut 2021 planıyla aynıdır; yalnızca GCC 101 bu planda bulunmaz.
+const curriculum2019 = JSON.parse(
+  JSON.stringify(window.CURRICULA["2021"])
+);
+
+curriculum2019.year = 2019;
+curriculum2019.planYear = 2019;
+
+curriculum2019.semesters.forEach(semester => {
+  semester.courses = semester.courses.filter(
+    course => course.code !== "GCC 101"
+  );
+});
+
+window.CURRICULA["2019"] = curriculum2019;
+
+// 2020 girişliler de 2019 eğitim planına tabidir.
+const curriculum2020 = JSON.parse(
+  JSON.stringify(curriculum2019)
+);
+
+curriculum2020.year = 2020;
+curriculum2020.planYear = 2019;
+
+window.CURRICULA["2020"] = curriculum2020;
