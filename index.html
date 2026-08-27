@@ -1,48 +1,46 @@
 <!DOCTYPE html>
 <html lang="tr">
 <head>
-<!-- Google tag (gtag.js) -->
-<script async src="https://www.googletagmanager.com/gtag/js?id=G-MRHS1P0EK6"></script>
-<script>
-  window.dataLayer = window.dataLayer || [];
-  function gtag(){dataLayer.push(arguments);}
-  gtag('js', new Date());
-
-  gtag('config', 'G-MRHS1P0EK6');
-</script>
+    <!-- Google tag (gtag.js) -->
+    <script async src="https://www.googletagmanager.com/gtag/js?id=G-MRHS1P0EK6"></script>
+    <script>
+        window.dataLayer = window.dataLayer || [];
+        function gtag(){dataLayer.push(arguments);}
+        gtag('js', new Date());
+        gtag('config', 'G-MRHS1P0EK6');
+    </script>
 
     <meta charset="UTF-8">
-    <meta name="description" content="bu site iyte öğrencilerinin GPA'larını kolayca hesaplayabilmeleri için var">
+    <meta name="description" content="İYTE Fizik öğrencileri için GPA hesaplama asistanı">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>İYTE GPA Calculator-Giriş</title>
+    <title>İYTE Fizik GPA Asistanı</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
     <style>
-        /* --- CSS Değişkenleri - Varsayılan (DARK MODE) --- */
         :root {
-            --iyte-red: #d32f2f; /* Koyu tema için optimize edilmiş kırmızı */
+            --iyte-red: #d32f2f;
             --text-color: #ecf0f1;
             --bg-color: #121212;
             --container-bg: #1e1e1e;
-            --input-bg: #2c2c2c;
-            --input-border: #444;
-            --input-text: #fff;
+            --button-bg: #2c2c2c;
+            --button-border: #444;
             --subtitle-color: #bdc3c7;
-            --shadow: rgba(0,0,0,0.5);
-            --placeholder-color: #95a5a6;
+            --shadow: rgba(0, 0, 0, 0.5);
         }
 
-        /* --- LIGHT MODE Sınıfı --- */
         body.light-mode {
             --iyte-red: #b30000;
             --text-color: #2c3e50;
             --bg-color: #f4f6f9;
             --container-bg: #ffffff;
-            --input-bg: #ffffff;
-            --input-border: #ddd;
-            --input-text: #2c3e50;
+            --button-bg: #ffffff;
+            --button-border: #ddd;
             --subtitle-color: #7f8c8d;
-            --shadow: rgba(0,0,0,0.1);
-            --placeholder-color: #95a5a6;
+            --shadow: rgba(0, 0, 0, 0.1);
+        }
+
+        * {
+            box-sizing: border-box;
         }
 
         body {
@@ -51,7 +49,6 @@
             color: var(--text-color);
             margin: 0;
             display: flex;
-            flex-direction: column;
             justify-content: center;
             align-items: center;
             min-height: 100vh;
@@ -59,9 +56,8 @@
             transition: background-color 0.3s, color 0.3s;
         }
 
-        /* Tema Değiştirme Butonu */
         .theme-toggle-btn {
-            position: absolute;
+            position: fixed;
             top: 20px;
             right: 20px;
             background: var(--container-bg);
@@ -71,10 +67,10 @@
             border-radius: 20px;
             cursor: pointer;
             font-size: 1.2rem;
-            transition: all 0.3s;
+            transition: transform 0.2s, background-color 0.3s, color 0.3s;
             box-shadow: 0 2px 5px var(--shadow);
         }
-        
+
         .theme-toggle-btn:hover {
             transform: scale(1.05);
         }
@@ -84,203 +80,134 @@
             padding: 40px;
             border-radius: 15px;
             box-shadow: 0 10px 25px var(--shadow);
-            max-width: 500px;
+            max-width: 520px;
             width: 100%;
             text-align: center;
             border-top: 5px solid var(--iyte-red);
             transition: background-color 0.3s, box-shadow 0.3s;
         }
 
-        h1 { color: var(--iyte-red); margin-bottom: 5px; }
-        p.subtitle { color: var(--subtitle-color); font-size: 0.9rem; margin-top: 0; }
-
-        .form-grid {
-            display: grid;
-            gap: 15px;
-            margin-top: 30px;
-            text-align: left;
+        h1 {
+            color: var(--iyte-red);
+            margin: 0 0 6px;
         }
 
-        label {
-            display: block;
-            font-weight: bold;
-            color: var(--text-color);
-            margin-bottom: 5px;
-            font-size: 0.9rem;
+        .subtitle {
+            color: var(--subtitle-color);
+            font-size: 0.95rem;
+            margin: 0;
         }
 
-        input[type="text"] {
-            width: 100%;
-            padding: 12px;
+        .question {
+            margin: 30px 0 14px;
+            font-weight: 700;
             font-size: 1rem;
-            border: 2px solid var(--input-border);
-            border-radius: 8px;
-            transition: border-color 0.3s, background-color 0.3s;
-            box-sizing: border-box;
-            background-color: var(--input-bg);
-            color: var(--input-text);
-            text-align: center;
-            letter-spacing: 1px;
-            font-weight: bold;
-        }
-        
-        input::placeholder {
-            color: var(--placeholder-color);
         }
 
-        input:focus {
+        .year-grid {
+            display: grid;
+            grid-template-columns: repeat(2, minmax(0, 1fr));
+            gap: 12px;
+        }
+
+        .year-btn {
+            background: var(--button-bg);
+            color: var(--text-color);
+            border: 2px solid var(--button-border);
+            padding: 16px 12px;
+            border-radius: 10px;
+            cursor: pointer;
+            font-size: 1.05rem;
+            font-weight: 700;
+            transition: transform 0.2s, border-color 0.2s, background-color 0.2s;
+        }
+
+        .year-btn:hover,
+        .year-btn:focus-visible {
             border-color: var(--iyte-red);
+            transform: translateY(-2px);
             outline: none;
         }
 
-        button.action-btn {
-            background-color: var(--iyte-red);
-            color: white;
-            border: none;
-            padding: 15px;
-            font-size: 1rem;
-            border-radius: 8px;
-            cursor: pointer;
-            width: 100%;
-            font-weight: bold;
-            margin-top: 20px;
-            transition: background 0.3s;
+        .year-btn:last-child {
+            grid-column: 1 / -1;
         }
 
-        button.action-btn:hover { background-color: #900000; }
-
-        .error-msg {
-            color: #e74c3c;
-            font-size: 0.85rem;
-            margin-top: 15px;
-            display: none;
-            font-weight: bold;
-            background: #fadbd8;
-            padding: 10px;
-            border-radius: 5px;
+        .hint {
+            color: var(--subtitle-color);
+            font-size: 0.78rem;
+            margin: 18px 0 0;
+            line-height: 1.45;
         }
-        
-        .hint { font-size: 0.75rem; color: var(--subtitle-color); margin-top: 5px; }
 
+        @media (max-width: 480px) {
+            .container {
+                padding: 32px 22px;
+            }
+
+            .year-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .year-btn:last-child {
+                grid-column: auto;
+            }
+
+            .theme-toggle-btn {
+                top: 12px;
+                right: 12px;
+            }
+        }
     </style>
 </head>
-<body>
 
-    <button class="theme-toggle-btn" onclick="toggleTheme()" title="Temayı Değiştir">
+<body>
+    <button class="theme-toggle-btn" onclick="toggleTheme()" title="Temayı Değiştir" aria-label="Temayı değiştir">
         <i class="fas fa-sun"></i> / <i class="fas fa-moon"></i>
     </button>
 
-    <div class="container">
-        <h1>İYTE GPA Asistanı</h1>
-        <p class="subtitle">Not ortalamanızı hızlıca hesaplayın</p>
-        
-        <div class="form-grid">
-            
-            <div>
-                <label for="studentId">Öğrenci Numarası</label>
-                <input type="text" id="studentId" placeholder="Örn: 310101016" maxlength="9" inputmode="numeric">
-                <div class="hint">9 haneli okul numaranız</div>
-            </div>
+    <main class="container">
+        <h1>İYTE Fizik GPA Asistanı</h1>
+        <p class="subtitle">2021–2025 girişli Fizik öğrencileri için</p>
 
-            <button class="action-btn" onclick="routeUser()">Hesaplamaya Başla</button>
-            <div id="errorMsg" class="error-msg"></div>
+        <p class="question">İYTE Fizik bölümüne giriş yılını seç:</p>
+
+        <div class="year-grid">
+            <button class="year-btn" onclick="routeUser(2021)">2021</button>
+            <button class="year-btn" onclick="routeUser(2022)">2022</button>
+            <button class="year-btn" onclick="routeUser(2023)">2023</button>
+            <button class="year-btn" onclick="routeUser(2024)">2024</button>
+            <button class="year-btn" onclick="routeUser(2025)">2025</button>
         </div>
-    </div>
+
+        <p class="hint">
+            Yalnızca 2021, 2022, 2023, 2024 ve 2025 Fizik seçenekleri desteklenir.
+        </p>
+    </main>
 
     <script>
-        // --- TEMA YÖNETİMİ ---
         function toggleTheme() {
-            const body = document.body;
-            body.classList.toggle('light-mode');
+            document.body.classList.toggle('light-mode');
         }
-
-        // --- HESAPLAMA MANTIĞI ---
-        document.addEventListener("keypress", function(event) {
-            if (event.key === "Enter") {
-                event.preventDefault();
-                routeUser();
-            }
-        });
 
         function getCurrentSemester() {
             const month = new Date().getMonth() + 1;
+
             if (month >= 9 || month === 1) return '1';
             if (month >= 2 && month <= 6) return '2';
             return '0';
         }
 
-        function routeUser() {
-            const idInput = document.getElementById('studentId');
-            const errorDiv = document.getElementById('errorMsg');
-            const id = idInput.value.trim();
+        function routeUser(entryYear) {
             const semester = getCurrentSemester();
 
-            // 1. Doğrulama
-            if (!/^\d{9}$/.test(id)) {
-                errorDiv.innerText = "Lütfen geçerli, 9 haneli bir öğrenci numarası giriniz.";
-                errorDiv.style.display = 'block';
-                return;
-            }
-            errorDiv.style.display = 'none';
-            
-            // 2. BÖLÜM ve YIL ÇIKARMA
-            const yearPrefix = parseInt(id.substring(0, 2), 10);
-            const entryYear = 1992 + yearPrefix;
-            const deptCode = id.substring(3, 6);
+            const targetFile = `${entryYear}_phys.html`;
 
-            const deptMap = {
-                "101": "phys", "104": "mbg", "103": "math", "102": "chem", "105": "photonics",
-                "201": "cse", "202": "chemeng", "203": "mm", "204": "ceng", "205": "feng",
-                "206": "ece", "208": "materialsc", "209": "ese", "210": "bioeng",
-                "211": "Env", "303": "ID", "301": "arch", "302": "urp"
-            };
-
-            const deptName = deptMap[deptCode];
-
-            if (!deptName) {
-                errorDiv.innerText = `Bölüm kodu (${deptCode}) tanımlanamadı.`;
-                errorDiv.style.display = 'block';
-                return;
-            }
-
-            // 3. MÜFREDAT YILI MANTIĞI
-            let fileYear = entryYear; 
-
-            if (entryYear < 2018 && deptName === "phys") {
-                alert("Sistemde en eski müfredat 2018 müfredatıdır, tabii olduğunuz müfredatı maalesef bulamadım, 2018 müfredatı üzerinden değişiklik yapabilirsiniz.");
-                fileYear = 2018;
-            } 
-            else if (entryYear >= 2018 && entryYear <= 2021 && deptName === "phys") {
-                fileYear = 2018;
-            } 
-            else if (entryYear >= 2025 && deptName === "phys") {
-                fileYear = 2025;
-            }
-            else if (deptName === "cse") { if (entryYear >= 0) fileYear = 2025; }
-            else if (deptName === "ID") { if (entryYear >= 0) fileYear = 2025; }
-            else if (deptName === "materialsc") { if (entryYear >= 0) fileYear = 2024; }    
-            else if (deptName === "math") { if (entryYear >= 0) fileYear = 2024; }    
-            else if (deptName === "chem") { if (entryYear >= 0) fileYear = 2024; }    
-            else if (deptName === "mbg") { if (entryYear >= 0) fileYear = 2025; }    
-            else if (deptName === "photonics") { if (entryYear >= 0) fileYear = 2025; }   
-            else if (deptName === "bioeng") { if (entryYear >= 0) fileYear = 2025; }   
-            else if (deptName === "Env") { if (entryYear >= 0) fileYear = 2025; }
-            else if (deptName === "ese") { if (entryYear >= 0) fileYear = 2025; }
-            else if (deptName === "ece") { if (entryYear >= 0) fileYear = 2025; }
-            else if (deptName === "feng") { if (entryYear >= 0) fileYear = 2025; }
-            else if (deptName === "ceng") { if (entryYear >= 0) fileYear = 2025; }
-            else if (deptName === "mm") { if (entryYear >= 0) fileYear = 2025; }
-            else if (deptName === "chemeng") { if (entryYear >= 0) fileYear = 2025; }
-            else if (deptName === "arch") { if (entryYear >= 0) fileYear = 2025; }
-            else if (deptName === "urp") { if (entryYear >= 0) fileYear = 2025; }
-
-            // 4. YÖNLENDİRME
-            const targetFile = `${fileYear}_${deptName}.html`;
             console.log(`Giriş Yılı: ${entryYear}, Yönlendirilen Dosya: ${targetFile}`);
-            window.location.href = `${targetFile}?id=${id}&sem=${encodeURIComponent(semester)}`;
+
+            // Öğrenci numarası artık kullanılmıyor.
+            window.location.href = `${targetFile}?entry=${entryYear}&sem=${encodeURIComponent(semester)}`;
         }
     </script>
 </body>
 </html>
-
-
