@@ -95,7 +95,12 @@
       align-items: center; gap: 10px;
     }
     .assessment-row.final-row { margin-top: 3px; padding-top: 12px; border-top: 1px solid var(--line); }
-    .assessment-name { font-size: .92rem; font-weight: 600; }
+    .assessment-name-input {
+      width: 100%; min-width: 0; border: 0; border-bottom: 1px solid transparent;
+      background: transparent; color: var(--text); outline: none;
+      padding: 9px 4px 9px 0; font-size: .92rem; font-weight: 600;
+    }
+    .assessment-name-input:focus { border-bottom-color: var(--accent); }
     .input-wrap { position: relative; }
     .score-input, .weight-input { width: 100%; padding: 10px 30px 10px 10px; appearance: textfield; }
     .score-input::-webkit-inner-spin-button, .weight-input::-webkit-inner-spin-button { opacity: .35; }
@@ -151,7 +156,7 @@
     <header class="hero">
       <p class="eyebrow">Hesaplayıcı</p>
       <h1>Vize–Final Ortalaması</h1>
-      <p class="intro">Her dersin vize sayısını ve sınav ağırlıklarını ayrı ayrı belirle. Yüzdeler toplamı 100 olduğunda ortalaman otomatik hesaplanır.</p>
+      <p class="intro">Her dersin değerlendirme sayısını, adlarını ve ağırlıklarını ayrı ayrı belirle. Yüzdeler toplamı 100 olduğunda ortalaman otomatik hesaplanır.</p>
     </header>
     <main>
       <div class="toolbar">
@@ -178,17 +183,40 @@
       return {
         id: makeId(), name: `Ders ${number}`,
         midterms: [
-          { id: makeId(), score: "", weight: 25 },
-          { id: makeId(), score: "", weight: 25 }
+          { id: makeId(), name: "Değerlendirme 1", score: "", weight: 25 },
+          { id: makeId(), name: "Değerlendirme 2", score: "", weight: 25 }
         ],
-        finalScore: "", finalWeight: 50
+        finalName: "Final", finalScore: "", finalWeight: 50
+      };
+    }
+
+    function normalizeCourse(course, courseIndex) {
+      const midterms = Array.isArray(course.midterms) && course.midterms.length
+        ? course.midterms
+        : defaultCourse(courseIndex + 1).midterms;
+      return {
+        ...course,
+        id: course.id || makeId(),
+        name: course.name || `Ders ${courseIndex + 1}`,
+        midterms: midterms.map((item, index) => ({
+          ...item,
+          id: item.id || makeId(),
+          name: typeof item.name === "string" && item.name.trim()
+            ? item.name
+            : `Değerlendirme ${index + 1}`
+        })),
+        finalName: typeof course.finalName === "string" && course.finalName.trim()
+          ? course.finalName
+          : "Final",
+        finalScore: course.finalScore ?? "",
+        finalWeight: course.finalWeight ?? 50
       };
     }
 
     function loadCourses() {
       try {
         const saved = JSON.parse(localStorage.getItem(STORAGE_KEY));
-        if (Array.isArray(saved) && saved.length) return saved;
+        if (Array.isArray(saved) && saved.length) return saved.map(normalizeCourse);
       } catch (_) {}
       return [defaultCourse()];
     }
@@ -232,17 +260,20 @@
     function assessmentRow(courseId, item, index) {
       return `
         <div class="assessment-row">
-          <span class="assessment-name">Vize ${index + 1}</span>
+          <input class="assessment-name-input" type="text" maxlength="50"
+            value="${escapeHtml(item.name || `Değerlendirme ${index + 1}`)}"
+            data-action="midterm-name" data-course-id="${courseId}" data-item-id="${item.id}"
+            aria-label="Değerlendirme ${index + 1} adı">
           <label class="input-wrap">
             <input class="score-input" type="number" min="0" max="100" step="0.5" inputmode="decimal"
               value="${escapeHtml(item.score)}" data-action="midterm-score" data-course-id="${courseId}" data-item-id="${item.id}"
-              aria-label="Vize ${index + 1} notu" placeholder="—">
+              aria-label="Değerlendirme ${index + 1} notu" placeholder="—">
             <span class="input-suffix">puan</span>
           </label>
           <label class="input-wrap">
             <input class="weight-input" type="number" min="0" max="100" step="0.5" inputmode="decimal"
               value="${escapeHtml(item.weight)}" data-action="midterm-weight" data-course-id="${courseId}" data-item-id="${item.id}"
-              aria-label="Vize ${index + 1} yüzdesi">
+              aria-label="Değerlendirme ${index + 1} yüzdesi">
             <span class="input-suffix">%</span>
           </label>
         </div>`;
@@ -255,7 +286,7 @@
       const statusText = result.weightsValid ? "Ağırlık toplamı %100"
         : `Ağırlık toplamı %${formatNumber(result.weightTotal)} — %100 olmalı`;
       const countOptions = Array.from({ length: 10 }, (_, index) => index + 1)
-        .map(count => `<option value="${count}" ${course.midterms.length === count ? "selected" : ""}>${count} vize</option>`).join("");
+        .map(count => `<option value="${count}" ${course.midterms.length === count ? "selected" : ""}>${count}</option>`).join("");
       return `
         <article class="course-card" data-course-card="${course.id}">
           <div class="course-header">
@@ -269,17 +300,19 @@
           <div class="course-body">
             <div class="settings-row">
               <label>
-                <span class="field-label">Vize sayısı</span>
-                <select class="count-select" data-action="midterm-count" data-course-id="${course.id}" aria-label="Vize sayısı">
+                <span class="field-label">Değerlendirme sayısı</span>
+                <select class="count-select" data-action="midterm-count" data-course-id="${course.id}" aria-label="Değerlendirme sayısı">
                   ${countOptions}
                 </select>
               </label>
             </div>
-            <div class="column-headings" aria-hidden="true"><span>Sınav</span><span>Not</span><span>Yüzde</span></div>
+            <div class="column-headings" aria-hidden="true"><span>Bileşen</span><span>Not</span><span>Yüzde</span></div>
             <div class="assessment-list">
               ${course.midterms.map((item, index) => assessmentRow(course.id, item, index)).join("")}
               <div class="assessment-row final-row">
-                <span class="assessment-name">Final</span>
+                <input class="assessment-name-input" type="text" maxlength="50"
+                  value="${escapeHtml(course.finalName || "Final")}" data-action="final-name"
+                  data-course-id="${course.id}" aria-label="Son değerlendirme adı">
                 <label class="input-wrap">
                   <input class="score-input" type="number" min="0" max="100" step="0.5" inputmode="decimal"
                     value="${escapeHtml(course.finalScore)}" data-action="final-score" data-course-id="${course.id}"
@@ -320,7 +353,14 @@
     }
     function changeMidtermCount(course, count) {
       const safeCount = Math.min(10, Math.max(1, count));
-      while (course.midterms.length < safeCount) course.midterms.push({ id: makeId(), score: "", weight: 0 });
+      while (course.midterms.length < safeCount) {
+        course.midterms.push({
+          id: makeId(),
+          name: `Değerlendirme ${course.midterms.length + 1}`,
+          score: "",
+          weight: 0
+        });
+      }
       course.midterms = course.midterms.slice(0, safeCount);
       redistributeMidtermWeights(course);
     }
@@ -331,14 +371,19 @@
       const course = courses.find(item => item.id === target.dataset.courseId);
       if (!course) return;
       if (action === "course-name") course.name = target.value;
+      if (action === "final-name") course.finalName = target.value;
       if (action === "final-score") course.finalScore = target.value;
       if (action === "final-weight") course.finalWeight = target.value;
-      if (action === "midterm-score" || action === "midterm-weight") {
+      if (action === "midterm-name" || action === "midterm-score" || action === "midterm-weight") {
         const midterm = course.midterms.find(item => item.id === target.dataset.itemId);
-        if (midterm) midterm[action === "midterm-score" ? "score" : "weight"] = target.value;
+        if (midterm) {
+          if (action === "midterm-name") midterm.name = target.value;
+          if (action === "midterm-score") midterm.score = target.value;
+          if (action === "midterm-weight") midterm.weight = target.value;
+        }
       }
       saveCourses();
-      if (action === "course-name") return;
+      if (action.endsWith("-name")) return;
       const card = target.closest(".course-card");
       const result = calculateCourse(course);
       card.querySelector(".total-value").textContent = result.average === null ? "—" : result.average.toFixed(2);
