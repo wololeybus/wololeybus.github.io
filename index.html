@@ -1,58 +1,257 @@
-<!doctype html>
-<html lang="tr" data-theme="light">
+<!DOCTYPE html>
+<html lang="tr">
 <head>
-  <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width,initial-scale=1">
-  <meta name="description" content="İYTE Fizik öğrencileri için GPA, müfredat ve ders araçları.">
-  <title>İYTE Fizik Araçları</title>
-  <link rel="stylesheet" href="assets/css/common.css">
-  <link rel="stylesheet" href="assets/css/portal.css">
-  <script async src="https://www.googletagmanager.com/gtag/js?id=G-MRHS1P0EK6"></script>
-  <script>window.dataLayer=window.dataLayer||[];function gtag(){dataLayer.push(arguments)}gtag('js',new Date());gtag('config','G-MRHS1P0EK6');</script>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="color-scheme" content="light dark">
+  <title>Araçlar</title>
+
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700&display=swap" rel="stylesheet">
+
+  <script>
+    (() => {
+      const saved = localStorage.getItem("site-theme");
+      const dark = window.matchMedia("(prefers-color-scheme: dark)").matches;
+      document.documentElement.dataset.theme = saved || (dark ? "dark" : "light");
+    })();
+  </script>
+
+  <style>
+    :root {
+      --bg: #f7f7f5;
+      --card: #ffffff;
+      --text: #171717;
+      --muted: #6b6b68;
+      --line: #deded9;
+      --accent: #a51d2d;
+    }
+
+    html[data-theme="dark"] {
+      --bg: #121212;
+      --card: #181818;
+      --text: #eeeeeb;
+      --muted: #999996;
+      --line: #30302e;
+      --accent: #df5364;
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      margin: 0;
+      min-height: 100vh;
+      background: var(--bg);
+      color: var(--text);
+      font-family: "Manrope", system-ui, sans-serif;
+      transition: background .2s ease, color .2s ease;
+    }
+
+    a {
+      color: inherit;
+    }
+
+    .page {
+      width: min(960px, calc(100% - 40px));
+      margin: 0 auto;
+      padding: 24px 0 48px;
+    }
+
+    .topbar {
+      display: flex;
+      justify-content: flex-end;
+      min-height: 42px;
+    }
+
+    .theme-toggle {
+      border: 1px solid var(--line);
+      background: transparent;
+      color: var(--text);
+      border-radius: 8px;
+      padding: 7px 10px;
+      font: inherit;
+      font-size: .85rem;
+      cursor: pointer;
+    }
+
+    .hero {
+      padding: 86px 0 110px;
+      max-width: 760px;
+    }
+
+    .hero p {
+      margin: 0;
+      font-size: clamp(2rem, 5vw, 4.3rem);
+      line-height: 1.08;
+      letter-spacing: -0.045em;
+      font-weight: 600;
+    }
+
+    section {
+      margin-top: 64px;
+    }
+
+    h2 {
+      margin: 0 0 18px;
+      font-size: 1rem;
+      text-transform: uppercase;
+      letter-spacing: .09em;
+      font-weight: 700;
+    }
+
+    .grid {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 14px;
+    }
+
+    .card {
+      display: flex;
+      flex-direction: column;
+      min-height: 190px;
+      padding: 22px;
+      border: 1px solid var(--line);
+      border-radius: 12px;
+      background: var(--card);
+      text-decoration: none;
+    }
+
+    a.card:hover {
+      border-color: var(--accent);
+    }
+
+    .card h3 {
+      margin: 0;
+      font-size: 1.3rem;
+      line-height: 1.25;
+      letter-spacing: -0.02em;
+    }
+
+    .card p {
+      margin: 10px 0 0;
+      color: var(--muted);
+      line-height: 1.55;
+      font-size: .93rem;
+    }
+
+    .card .link {
+      margin-top: auto;
+      padding-top: 28px;
+      font-size: .9rem;
+      font-weight: 600;
+      color: var(--accent);
+    }
+
+    .quote-card {
+      justify-content: center;
+    }
+
+    .quote-card h3 {
+      max-width: 330px;
+      font-size: 1.75rem;
+      line-height: 1.2;
+    }
+
+    .resource-card {
+      min-height: auto;
+    }
+
+    footer {
+      margin-top: 72px;
+      padding-top: 18px;
+      border-top: 1px solid var(--line);
+      color: var(--muted);
+      font-size: .82rem;
+    }
+
+    @media (max-width: 680px) {
+      .page {
+        width: min(100% - 28px, 960px);
+      }
+
+      .hero {
+        padding: 64px 0 82px;
+      }
+
+      .grid {
+        grid-template-columns: 1fr;
+      }
+
+      section {
+        margin-top: 48px;
+      }
+    }
+  </style>
 </head>
+
 <body>
-  <header class="site-shell topbar">
-    <a class="brand" href="./"><span class="brand-mark">F</span><span>İYTE Fizik Araçları</span></a>
-    <div class="nav-actions">
-      <a class="nav-link" href="calculator/">GPA</a>
-      <a class="nav-link" href="curricula/">Müfredatlar</a>
-      <a class="nav-link" href="resources/">Kaynaklar</a>
-      <button class="icon-btn" id="themeToggle" aria-label="Temayı değiştir">☾</button>
+  <div class="page">
+    <div class="topbar">
+      <button class="theme-toggle" id="themeToggle" type="button">
+        Tema
+      </button>
     </div>
-  </header>
 
-  <main class="site-shell">
-    <section class="hero">
-      <div class="hero-inner">
-        <div class="eyebrow">İYTE • Fizik</div>
-        <h1>Fizik öğrencileri için tek giriş noktası.</h1>
-        <p>GPA hesabı, 2021–2025 eğitim planları ve ileride eklenecek ders kaynakları aynı çatı altında. Hesaplayıcı artık tek motorla, seçtiğin giriş yılına göre çalışıyor.</p>
-      </div>
-    </section>
+    <header class="hero">
+      <p>
+        lorem ipsum dolor sit amet consectetur adipiscing elit sed do eiusmod tempor incididunt ut labore
+      </p>
+    </header>
 
-    <section class="tool-grid" aria-label="Araçlar">
-      <a class="tool-card card" href="calculator/">
-        <div class="tool-icon">∑</div>
-        <h2>GPA Hesaplayıcı</h2>
-        <p>Giriş yılını seç, müfredatını otomatik yükle ve dönem/genel ortalamanı hesapla.</p>
-        <div class="go">Hesaplayıcıyı aç →</div>
-      </a>
-      <a class="tool-card card" href="curricula/">
-        <div class="tool-icon">≡</div>
-        <h2>Müfredatlar</h2>
-        <p>2021–2025 Fizik eğitim planlarını dönem dönem tek sayfadan görüntüle.</p>
-        <div class="go">Müfredatlara git →</div>
-      </a>
-      <a class="tool-card card" href="resources/">
-        <div class="tool-icon">↗</div>
-        <h2>Ders Kaynakları</h2>
-        <p>Notlar, bağlantılar ve diğer öğrenci araçları için genişletilebilir alan.</p>
-        <div class="go">Kaynaklara git →</div>
-      </a>
-    </section>
-  </main>
+    <main>
+      <section>
+        <h2>Araçlar</h2>
 
-  <footer class="site-shell footer">Bağımsız öğrenci aracı • Resmî İYTE sistemi değildir.</footer>
-  <script src="assets/js/common.js"></script>
+        <div class="grid">
+          <a class="card" href="calculator/">
+            <div>
+              <h3>GPA Calculator</h3>
+              <p>Müfredatına göre derslerini ve notlarını gir, genel ortalamanı hesapla.</p>
+            </div>
+            <div class="link">Aç →</div>
+          </a>
+
+          <article class="card quote-card">
+            <h3>Yeryüzü aşkın yüzü oluncaya dek</h3>
+          </article>
+        </div>
+      </section>
+
+      <section>
+        <h2>Kaynaklar</h2>
+
+        <a
+          class="card resource-card"
+          href="https://drive.google.com/drive/folders/1vE4Bax-eMtONWAZDRN2FE5ZOpiy3RrxB"
+          target="_blank"
+          rel="noopener noreferrer"
+        >
+          <div>
+            <h3>Nesilden Nesile Fizik</h3>
+            <p>İYTE Fizik öğrencilerinden kalan ders materyalleri ve bölüm dokümanları için ortak arşiv.</p>
+          </div>
+          <div class="link">Drive arşivini aç ↗</div>
+        </a>
+      </section>
+    </main>
+
+    <footer>
+      İşe yarayan şeyler burada biriksin.
+    </footer>
+  </div>
+
+  <script>
+    const root = document.documentElement;
+    const button = document.getElementById("themeToggle");
+
+    button.addEventListener("click", () => {
+      const next = root.dataset.theme === "dark" ? "light" : "dark";
+      root.dataset.theme = next;
+      localStorage.setItem("site-theme", next);
+    });
+  </script>
 </body>
 </html>
