@@ -1,0 +1,71 @@
+.calc-layout { min-height: 100vh; display: grid; grid-template-columns: 285px minmax(0,1fr) 300px; }
+.sidebar { background: var(--surface); padding: 20px; border-color: var(--border); overflow-y: auto; }
+.sidebar-left { border-right: 1px solid var(--border); }
+.sidebar-right { border-left: 1px solid var(--border); }
+.calc-main { min-width: 0; padding: 28px; overflow-y: auto; }
+.calc-container { max-width: 900px; margin: 0 auto; }
+.calc-brand { display:flex; justify-content:space-between; align-items:center; gap:12px; margin-bottom:18px; }
+.calc-brand a { text-decoration:none; font-weight:850; color:var(--red); }
+.brand-subtitle { color:var(--muted); font-size:.78rem; margin-top:3px; }
+.stat-card { border: 2px solid var(--red); border-radius: 14px; padding: 18px; margin: 16px 0 12px; }
+.stat-value { color: var(--red); font-size: 2.65rem; font-weight: 850; line-height: 1; }
+.stat-status { font-size:.8rem; font-weight:800; color:var(--muted); margin-top:8px; }
+.info-card { padding:14px; border:1px solid var(--border); border-radius:10px; background:var(--surface-2); margin-bottom:12px; }
+.info-label { color:var(--muted); text-transform:uppercase; font-size:.68rem; font-weight:800; }
+.info-value { font-size:1.35rem; font-weight:850; margin-top:3px; }
+.reg-box { border:1px solid var(--border); border-radius:10px; overflow:hidden; margin-top:12px; }
+.reg-header { display:flex; justify-content:space-between; padding:11px 12px; background:var(--surface-2); font-size:.82rem; font-weight:800; cursor:pointer; }
+.reg-content { display:none; padding:12px; font-size:.8rem; line-height:1.5; }
+.reg-box.open .reg-content { display:block; }
+.reg-ok { color:var(--success); font-weight:800; } .reg-warn { color:var(--warning); font-weight:800; } .reg-alert { color:var(--danger); font-weight:800; }
+.year-strip { display:flex; gap:10px; align-items:center; justify-content:space-between; margin-bottom:16px; flex-wrap:wrap; }
+.year-strip h1 { margin:0; font-size:1.35rem; }
+.year-select { width:auto; min-width:140px; }
+.semester-block { background:var(--surface); border:1px solid var(--border); border-radius:12px; margin-bottom:16px; overflow:hidden; box-shadow:0 4px 12px rgba(0,0,0,.03); }
+.semester-header { display:flex; align-items:center; justify-content:space-between; gap:12px; padding:14px 16px; cursor:pointer; user-select:none; }
+.semester-title { font-weight:800; }
+.semester-spa { margin-left:8px; font-size:.76rem; padding:3px 7px; border:1px solid var(--border); border-radius:6px; background:var(--surface-2); }
+.semester-content { display:none; padding:0 14px 14px; overflow-x:auto; }
+.semester-block.open .semester-content { display:block; }
+.add-course-btn { border:0; border-radius:999px; padding:6px 11px; background:var(--text); color:var(--surface); font-size:.75rem; font-weight:800; }
+table { width:100%; border-collapse:collapse; margin-top:4px; }
+th { text-align:left; padding:8px; color:var(--muted); text-transform:uppercase; font-size:.68rem; }
+td { padding:8px; border-top:1px solid var(--border); vertical-align:middle; }
+input, select { width:100%; background:var(--surface); color:var(--text); border:1px solid var(--border); border-radius:7px; padding:8px; }
+.credit-input { max-width:70px; text-align:center; font-weight:750; } .grade-select { min-width:68px; font-weight:750; }
+.remove-btn { border:0; background:transparent; color:var(--danger); font-size:1.25rem; font-weight:900; }
+.prereq-fail { background: color-mix(in srgb, var(--danger) 9%, transparent); box-shadow: inset 4px 0 var(--danger); }
+.fail-msg { display:block; color:var(--danger); font-size:.67rem; font-weight:800; margin-top:3px; }
+.panel-title { margin:18px 0 8px; color:var(--muted); text-transform:uppercase; font-size:.7rem; font-weight:850; letter-spacing:.05em; }
+.profile-switcher { display:grid; grid-template-columns:repeat(3,1fr); gap:5px; }
+.profile-btn { padding:8px 4px; border:1px solid var(--border); border-radius:7px; background:var(--surface); color:var(--muted); font-size:.75rem; font-weight:750; }
+.profile-btn.active { background:var(--red); border-color:var(--red); color:white; }
+.tool-box { border:1px solid var(--border); background:var(--surface-2); border-radius:10px; padding:12px; margin-bottom:10px; }
+.tool-btn { width:100%; margin-top:7px; border:0; border-radius:8px; padding:10px; font-weight:800; background:var(--text); color:var(--surface); }
+.tool-btn.secondary { background:var(--surface); color:var(--text); border:1px solid var(--border); }
+.tool-btn.danger { background:transparent; color:var(--danger); border:1px solid var(--danger); }
+.tool-btn.undo { background:var(--warning); color:#111; display:none; }
+.stats-list { font-size:.8rem; line-height:1.7; }
+.empty-screen { max-width:560px; margin:80px auto; padding:28px; text-align:center; }
+.empty-screen h1 { margin-top:0; }
+.year-grid { display:grid; grid-template-columns:repeat(5,1fr); gap:8px; margin-top:20px; }
+.year-pick { padding:13px 8px; border:1px solid var(--border); background:var(--surface); color:var(--text); border-radius:9px; font-weight:850; }
+.year-pick:hover { border-color:var(--red); color:var(--red); }
+.hidden { display:none !important; }
+
+@media (max-width: 1100px) {
+  .calc-layout { display:block; }
+  .sidebar-left { position:sticky; top:0; z-index:20; border-right:0; border-bottom:1px solid var(--border); padding:10px 14px; display:grid; grid-template-columns:1fr auto; gap:8px; }
+  .sidebar-left .stat-card { grid-column:1/-1; margin:5px 0; padding:10px 12px; display:flex; align-items:center; justify-content:space-between; }
+  .sidebar-left .stat-value { font-size:1.8rem; }
+  .sidebar-left .info-card, .sidebar-left .reg-box { display:none; }
+  .calc-main { padding:16px 10px; }
+  .sidebar-right { border-left:0; border-top:1px solid var(--border); }
+  input, select { font-size:16px; }
+}
+@media (max-width: 620px) {
+  .year-grid { grid-template-columns:repeat(2,1fr); }
+  .semester-header { padding:12px 10px; }
+  .semester-content { padding:0 6px 10px; }
+  th,td { padding:7px 4px; font-size:.83rem; }
+}
