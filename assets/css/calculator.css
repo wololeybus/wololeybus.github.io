@@ -69,3 +69,7 @@ input, select { width:100%; background:var(--surface); color:var(--text); border
   .semester-content { padding:0 6px 10px; }
   th,td { padding:7px 4px; font-size:.83rem; }
 }
+text-decoration: none;
+display: flex;
+align-items: center;
+justify-content: center;
