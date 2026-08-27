@@ -1,0 +1,81 @@
+<!doctype html>
+<html lang="tr" data-theme="light">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1">
+  <meta name="description" content="İYTE Fizik 2021–2025 müfredatları için GPA hesaplayıcı.">
+  <title>İYTE Fizik GPA Hesaplayıcı</title>
+  <link rel="stylesheet" href="../assets/css/common.css">
+  <link rel="stylesheet" href="../assets/css/calculator.css">
+  <script async src="https://www.googletagmanager.com/gtag/js?id=G-MRHS1P0EK6"></script>
+  <script>window.dataLayer=window.dataLayer||[];function gtag(){dataLayer.push(arguments)}gtag('js',new Date());gtag('config','G-MRHS1P0EK6');</script>
+</head>
+<body>
+  <section id="yearGate" class="empty-screen card hidden">
+    <span class="badge">GPA Hesaplayıcı</span>
+    <h1>Giriş yılını seç</h1>
+    <p class="muted">Seçtiğin yıla ait müfredat tek hesaplama motorunda yüklenecek.</p>
+    <div class="year-grid" id="yearGrid"></div>
+    <p><a href="../" class="muted">← Ana sayfaya dön</a></p>
+  </section>
+
+  <div class="calc-layout hidden" id="calculatorApp">
+    <aside class="sidebar sidebar-left">
+      <div class="calc-brand">
+        <div><a href="../">İYTE FİZİK</a><div class="brand-subtitle" id="brandSubtitle">GPA ASİSTANI</div></div>
+        <button class="icon-btn theme-toggle" aria-label="Temayı değiştir">☾</button>
+      </div>
+      <div class="stat-card" id="gpaCard"><div class="stat-value" id="gpaResult">0.00</div><div class="stat-status" id="gpaStatus">Başlangıç</div></div>
+      <div class="info-card"><div class="info-label">Not girilen kredi</div><div class="info-value" id="totalCredits">0</div></div>
+      <div class="reg-box" id="regBox">
+        <div class="reg-header" id="regHeader"><span>🎓 Akademik Durum</span><span id="regChevron">▼</span></div>
+        <div class="reg-content"><div id="regDynamicStatus"></div><p class="muted">Genel not ortalaması 2,00’ın altında olan öğrenciler başarısız sayılır...</p></div>
+      </div>
+    </aside>
+
+    <main class="calc-main">
+      <div class="calc-container">
+        <div class="year-strip">
+          <div><span class="badge">Tek hesaplama motoru</span><h1 id="pageTitle">GPA Hesaplayıcı</h1></div>
+          <select id="yearSelect" class="year-select" aria-label="Giriş yılı"></select>
+        </div>
+        <form id="gpaForm"><div id="semesterContainer"></div></form>
+      </div>
+    </main>
+
+    <aside class="sidebar sidebar-right">
+      <div class="panel-title">Profil / Senaryo</div>
+      <div class="profile-switcher">
+        <button class="profile-btn active" data-profile="1">Profil 1</button>
+        <button class="profile-btn" data-profile="2">Profil 2</button>
+        <button class="profile-btn" data-profile="3">Profil 3</button>
+      </div>
+
+      <div class="panel-title">Veri & Yedekleme</div>
+      <div class="tool-box">
+        <button class="tool-btn secondary" id="exportBtn" type="button">💾 Yedek indir (.json)</button>
+        <button class="tool-btn secondary" id="importBtn" type="button">📂 Yedeği geri yükle</button>
+        <input type="file" id="fileInput" accept=".json,application/json" hidden>
+      </div>
+
+      <div class="panel-title">Hedef Hesaplayıcı</div>
+      <div class="tool-box">
+        <input type="number" min="0" max="4" step="0.01" id="targetGPA" placeholder="Hedef GPA (örn. 3.00)">
+        <button class="tool-btn" id="autoFillBtn" type="button">✨ Hedefe göre doldur</button>
+        <div id="targetResult" class="muted" style="margin-top:9px;font-size:.8rem"></div>
+        <button class="tool-btn undo" id="btnUndo" type="button">↩ Geri al</button>
+      </div>
+
+      <div class="panel-title">İstatistikler</div>
+      <div class="tool-box"><div id="statsContainer" class="stats-list muted">Henüz not girilmedi.</div></div>
+
+      <button class="tool-btn danger" id="resetBtn" type="button">Bu profili sıfırla</button>
+      <p class="muted" style="font-size:.72rem;line-height:1.5;margin-top:18px">Kayıtlar giriş yılı ve profil bazında ayrı tutulur. Böylece farklı müfredatlar birbirine karışmaz.</p>
+    </aside>
+  </div>
+
+  <script src="../assets/js/curricula.js"></script>
+  <script src="../assets/js/common.js"></script>
+  <script src="../assets/js/calculator.js"></script>
+</body>
+</html>
