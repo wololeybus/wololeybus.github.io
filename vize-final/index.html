@@ -1,0 +1,391 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="color-scheme" content="light dark">
+  <meta name="description" content="Birden fazla ders için ayarlanabilir vize ve final ortalaması hesaplama aracı.">
+  <title>Vize–Final Ortalaması</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <script>
+    (() => {
+      const saved = localStorage.getItem("site-theme");
+      const dark = window.matchMedia("(prefers-color-scheme: dark)").matches;
+      document.documentElement.dataset.theme = saved || (dark ? "dark" : "light");
+    })();
+  </script>
+  <style>
+    :root {
+      --bg: #f7f7f5; --card: #fff; --text: #171717; --muted: #6b6b68;
+      --line: #deded9; --accent: #a51d2d; --danger: #b42318;
+      --success: #18794e; --input: #fff;
+    }
+    html[data-theme="dark"] {
+      --bg: #121212; --card: #181818; --text: #eeeeeb; --muted: #999996;
+      --line: #30302e; --accent: #df5364; --danger: #ff8a80;
+      --success: #81c995; --input: #202020;
+    }
+    * { box-sizing: border-box; }
+    body {
+      margin: 0; min-height: 100vh; background: var(--bg); color: var(--text);
+      font-family: "Manrope", system-ui, sans-serif;
+      transition: background .2s ease, color .2s ease;
+    }
+    button, input, select { font: inherit; }
+    button { cursor: pointer; }
+    .page { width: min(960px, calc(100% - 40px)); margin: 0 auto; padding: 24px 0 64px; }
+    .topbar {
+      min-height: 42px; display: flex; justify-content: space-between;
+      align-items: center; gap: 14px;
+    }
+    .back-link { color: var(--muted); text-decoration: none; font-size: .88rem; font-weight: 600; }
+    .back-link:hover, .back-link:focus-visible { color: var(--accent); }
+    .theme-toggle, .danger-button, .add-button {
+      border: 1px solid var(--line); background: transparent; color: var(--text);
+      border-radius: 8px; padding: 8px 11px; font-weight: 600;
+    }
+    .theme-toggle { font-size: .85rem; }
+    .hero { padding: 72px 0 54px; max-width: 700px; }
+    .eyebrow {
+      margin: 0 0 12px; color: var(--accent); font-size: .78rem; font-weight: 700;
+      letter-spacing: .09em; text-transform: uppercase;
+    }
+    h1 {
+      margin: 0; font-size: clamp(2.2rem, 6vw, 4.4rem); line-height: 1.04;
+      letter-spacing: -.045em; font-weight: 600;
+    }
+    .intro { margin: 18px 0 0; color: var(--muted); line-height: 1.65; max-width: 620px; }
+    .toolbar {
+      display: flex; align-items: center; justify-content: space-between;
+      gap: 12px; margin-bottom: 16px;
+    }
+    .toolbar h2 { margin: 0; font-size: 1rem; text-transform: uppercase; letter-spacing: .09em; }
+    .toolbar-actions { display: flex; gap: 8px; }
+    .add-button { background: var(--accent); border-color: var(--accent); color: #fff; }
+    .danger-button { color: var(--muted); font-size: .82rem; }
+    .danger-button:hover, .danger-button:focus-visible { color: var(--danger); border-color: var(--danger); }
+    .courses { display: grid; gap: 14px; }
+    .course-card { border: 1px solid var(--line); border-radius: 12px; background: var(--card); overflow: hidden; }
+    .course-header {
+      padding: 18px 20px; display: grid; grid-template-columns: minmax(0, 1fr) auto;
+      align-items: center; gap: 14px; border-bottom: 1px solid var(--line);
+    }
+    .course-name {
+      width: 100%; min-width: 0; padding: 0; border: 0; outline: 0;
+      background: transparent; color: var(--text); font-size: 1.18rem; font-weight: 700;
+    }
+    .course-name:focus { color: var(--accent); }
+    .course-total { text-align: right; }
+    .total-value { display: block; font-size: 1.65rem; line-height: 1; font-weight: 700; letter-spacing: -.04em; }
+    .total-label { display: block; margin-top: 5px; color: var(--muted); font-size: .7rem; }
+    .course-body { padding: 20px; }
+    .settings-row { display: flex; align-items: end; justify-content: space-between; gap: 14px; margin-bottom: 18px; }
+    .field-label { display: block; margin-bottom: 7px; color: var(--muted); font-size: .76rem; font-weight: 600; }
+    .count-select, .score-input, .weight-input {
+      border: 1px solid var(--line); border-radius: 8px; background: var(--input);
+      color: var(--text); outline: none;
+    }
+    .count-select { min-width: 112px; padding: 9px 10px; }
+    .count-select:focus, .score-input:focus, .weight-input:focus { border-color: var(--accent); }
+    .assessment-list { display: grid; gap: 9px; }
+    .assessment-row, .column-headings {
+      display: grid; grid-template-columns: minmax(100px, 1fr) minmax(82px, 118px) minmax(82px, 118px);
+      align-items: center; gap: 10px;
+    }
+    .assessment-row.final-row { margin-top: 3px; padding-top: 12px; border-top: 1px solid var(--line); }
+    .assessment-name { font-size: .92rem; font-weight: 600; }
+    .input-wrap { position: relative; }
+    .score-input, .weight-input { width: 100%; padding: 10px 30px 10px 10px; appearance: textfield; }
+    .score-input::-webkit-inner-spin-button, .weight-input::-webkit-inner-spin-button { opacity: .35; }
+    .input-suffix {
+      position: absolute; right: 10px; top: 50%; transform: translateY(-50%);
+      color: var(--muted); font-size: .72rem; pointer-events: none;
+    }
+    .column-headings { margin-bottom: 7px; color: var(--muted); font-size: .7rem; }
+    .column-headings span:not(:first-child) { padding-left: 2px; }
+    .course-footer {
+      margin-top: 18px; padding-top: 14px; border-top: 1px solid var(--line);
+      display: flex; align-items: center; justify-content: space-between; gap: 14px;
+    }
+    .weight-status { color: var(--muted); font-size: .78rem; line-height: 1.4; }
+    .weight-status.invalid { color: var(--danger); }
+    .weight-status.valid { color: var(--success); }
+    .remove-course {
+      border: 0; background: transparent; color: var(--muted); padding: 4px 0; font-size: .78rem;
+    }
+    .remove-course:hover, .remove-course:focus-visible { color: var(--danger); }
+    .empty-note {
+      display: none; padding: 36px 20px; border: 1px dashed var(--line); border-radius: 12px;
+      color: var(--muted); text-align: center; line-height: 1.6;
+    }
+    .privacy-note { margin: 20px 0 0; color: var(--muted); font-size: .76rem; line-height: 1.5; }
+    footer { margin-top: 64px; padding-top: 18px; border-top: 1px solid var(--line); color: var(--muted); font-size: .82rem; }
+    @media (max-width: 680px) {
+      .page { width: min(100% - 28px, 960px); }
+      .hero { padding: 56px 0 42px; }
+      .toolbar { align-items: flex-start; flex-direction: column; }
+      .toolbar-actions { width: 100%; }
+      .toolbar-actions button { flex: 1; }
+      .course-header, .course-body { padding-left: 15px; padding-right: 15px; }
+      .assessment-row, .column-headings {
+        grid-template-columns: minmax(76px, 1fr) minmax(70px, 94px) minmax(70px, 94px); gap: 7px;
+      }
+      .score-input, .weight-input { padding-left: 8px; padding-right: 25px; }
+    }
+    @media (max-width: 390px) {
+      .course-header { grid-template-columns: 1fr; }
+      .course-total { text-align: left; }
+      .total-value, .total-label { display: inline; }
+      .total-label { margin-left: 6px; }
+    }
+  </style>
+</head>
+<body>
+  <div class="page">
+    <div class="topbar">
+      <a class="back-link" href="../">← Araçlara dön</a>
+      <button class="theme-toggle" id="themeToggle" type="button" aria-label="Açık ve koyu tema arasında geçiş yap">Tema</button>
+    </div>
+    <header class="hero">
+      <p class="eyebrow">Hesaplayıcı</p>
+      <h1>Vize–Final Ortalaması</h1>
+      <p class="intro">Her dersin vize sayısını ve sınav ağırlıklarını ayrı ayrı belirle. Yüzdeler toplamı 100 olduğunda ortalaman otomatik hesaplanır.</p>
+    </header>
+    <main>
+      <div class="toolbar">
+        <h2>Dersler</h2>
+        <div class="toolbar-actions">
+          <button class="danger-button" id="resetButton" type="button">Tümünü sıfırla</button>
+          <button class="add-button" id="addCourseButton" type="button">+ Ders ekle</button>
+        </div>
+      </div>
+      <div class="courses" id="courses" aria-live="polite"></div>
+      <div class="empty-note" id="emptyNote">Henüz ders yok. Başlamak için “Ders ekle”ye bas.</div>
+      <p class="privacy-note">Bilgiler yalnızca bu tarayıcıda saklanır; sayfayı kapattığında kaybolmaz.</p>
+    </main>
+    <footer>İşe yarayan şeyler burada biriksin.</footer>
+  </div>
+  <script>
+    const STORAGE_KEY = "iyte-vize-final-v1";
+    const root = document.documentElement;
+    const coursesElement = document.getElementById("courses");
+    const emptyNote = document.getElementById("emptyNote");
+    const makeId = () => `${Date.now().toString(36)}-${Math.random().toString(36).slice(2, 8)}`;
+
+    function defaultCourse(number = 1) {
+      return {
+        id: makeId(), name: `Ders ${number}`,
+        midterms: [
+          { id: makeId(), score: "", weight: 25 },
+          { id: makeId(), score: "", weight: 25 }
+        ],
+        finalScore: "", finalWeight: 50
+      };
+    }
+
+    function loadCourses() {
+      try {
+        const saved = JSON.parse(localStorage.getItem(STORAGE_KEY));
+        if (Array.isArray(saved) && saved.length) return saved;
+      } catch (_) {}
+      return [defaultCourse()];
+    }
+
+    let courses = loadCourses();
+    function saveCourses() { localStorage.setItem(STORAGE_KEY, JSON.stringify(courses)); }
+    function escapeHtml(value) {
+      return String(value).replaceAll("&", "&amp;").replaceAll("<", "&lt;")
+        .replaceAll(">", "&gt;").replaceAll('"', "&quot;").replaceAll("'", "&#039;");
+    }
+    function toNumber(value) {
+      if (value === "" || value === null || value === undefined) return null;
+      const parsed = Number(value);
+      return Number.isFinite(parsed) ? parsed : null;
+    }
+    function formatNumber(value) { return Number.isInteger(value) ? String(value) : value.toFixed(1); }
+
+    function calculateCourse(course) {
+      const assessments = course.midterms.map(item => ({ score: toNumber(item.score), weight: toNumber(item.weight) || 0 }));
+      assessments.push({ score: toNumber(course.finalScore), weight: toNumber(course.finalWeight) || 0 });
+      const weightTotal = assessments.reduce((sum, item) => sum + item.weight, 0);
+      const completed = assessments.filter(item => item.score !== null);
+      const completedWeight = completed.reduce((sum, item) => sum + item.weight, 0);
+      const weightedPoints = completed.reduce((sum, item) => sum + item.score * item.weight, 0);
+      const weightsValid = Math.abs(weightTotal - 100) < .01;
+      const allScoresEntered = completed.length === assessments.length;
+      let average = null;
+      let label = "Ortalama";
+      if (weightsValid && completedWeight > 0) {
+        if (allScoresEntered) {
+          average = weightedPoints / 100;
+          label = "Ders ortalaması";
+        } else {
+          average = weightedPoints / completedWeight;
+          label = "Girilenlere göre";
+        }
+      }
+      return { weightTotal, weightsValid, average, label };
+    }
+
+    function assessmentRow(courseId, item, index) {
+      return `
+        <div class="assessment-row">
+          <span class="assessment-name">Vize ${index + 1}</span>
+          <label class="input-wrap">
+            <input class="score-input" type="number" min="0" max="100" step="0.5" inputmode="decimal"
+              value="${escapeHtml(item.score)}" data-action="midterm-score" data-course-id="${courseId}" data-item-id="${item.id}"
+              aria-label="Vize ${index + 1} notu" placeholder="—">
+            <span class="input-suffix">puan</span>
+          </label>
+          <label class="input-wrap">
+            <input class="weight-input" type="number" min="0" max="100" step="0.5" inputmode="decimal"
+              value="${escapeHtml(item.weight)}" data-action="midterm-weight" data-course-id="${courseId}" data-item-id="${item.id}"
+              aria-label="Vize ${index + 1} yüzdesi">
+            <span class="input-suffix">%</span>
+          </label>
+        </div>`;
+    }
+
+    function courseTemplate(course) {
+      const result = calculateCourse(course);
+      const resultText = result.average === null ? "—" : result.average.toFixed(2);
+      const statusClass = result.weightsValid ? "valid" : "invalid";
+      const statusText = result.weightsValid ? "Ağırlık toplamı %100"
+        : `Ağırlık toplamı %${formatNumber(result.weightTotal)} — %100 olmalı`;
+      const countOptions = Array.from({ length: 10 }, (_, index) => index + 1)
+        .map(count => `<option value="${count}" ${course.midterms.length === count ? "selected" : ""}>${count} vize</option>`).join("");
+      return `
+        <article class="course-card" data-course-card="${course.id}">
+          <div class="course-header">
+            <input class="course-name" type="text" maxlength="80" value="${escapeHtml(course.name)}"
+              data-action="course-name" data-course-id="${course.id}" aria-label="Ders adı">
+            <div class="course-total">
+              <span class="total-value">${resultText}</span>
+              <span class="total-label">${result.label}</span>
+            </div>
+          </div>
+          <div class="course-body">
+            <div class="settings-row">
+              <label>
+                <span class="field-label">Vize sayısı</span>
+                <select class="count-select" data-action="midterm-count" data-course-id="${course.id}" aria-label="Vize sayısı">
+                  ${countOptions}
+                </select>
+              </label>
+            </div>
+            <div class="column-headings" aria-hidden="true"><span>Sınav</span><span>Not</span><span>Yüzde</span></div>
+            <div class="assessment-list">
+              ${course.midterms.map((item, index) => assessmentRow(course.id, item, index)).join("")}
+              <div class="assessment-row final-row">
+                <span class="assessment-name">Final</span>
+                <label class="input-wrap">
+                  <input class="score-input" type="number" min="0" max="100" step="0.5" inputmode="decimal"
+                    value="${escapeHtml(course.finalScore)}" data-action="final-score" data-course-id="${course.id}"
+                    aria-label="Final notu" placeholder="—">
+                  <span class="input-suffix">puan</span>
+                </label>
+                <label class="input-wrap">
+                  <input class="weight-input" type="number" min="0" max="100" step="0.5" inputmode="decimal"
+                    value="${escapeHtml(course.finalWeight)}" data-action="final-weight" data-course-id="${course.id}"
+                    aria-label="Final yüzdesi">
+                  <span class="input-suffix">%</span>
+                </label>
+              </div>
+            </div>
+            <div class="course-footer">
+              <span class="weight-status ${statusClass}">${statusText}</span>
+              <button class="remove-course" type="button" data-action="remove-course" data-course-id="${course.id}">Dersi sil</button>
+            </div>
+          </div>
+        </article>`;
+    }
+
+    function render() {
+      coursesElement.innerHTML = courses.map(courseTemplate).join("");
+      emptyNote.style.display = courses.length ? "none" : "block";
+    }
+    function redistributeMidtermWeights(course) {
+      const finalWeight = Math.min(100, Math.max(0, toNumber(course.finalWeight) || 0));
+      const midtermTotal = 100 - finalWeight;
+      const each = Number((midtermTotal / course.midterms.length).toFixed(2));
+      let assigned = 0;
+      course.midterms.forEach((item, index) => {
+        item.weight = index === course.midterms.length - 1
+          ? Number((midtermTotal - assigned).toFixed(2))
+          : each;
+        assigned += item.weight;
+      });
+    }
+    function changeMidtermCount(course, count) {
+      const safeCount = Math.min(10, Math.max(1, count));
+      while (course.midterms.length < safeCount) course.midterms.push({ id: makeId(), score: "", weight: 0 });
+      course.midterms = course.midterms.slice(0, safeCount);
+      redistributeMidtermWeights(course);
+    }
+    function updateCourse(event) {
+      const target = event.target;
+      const action = target.dataset.action;
+      if (!action) return;
+      const course = courses.find(item => item.id === target.dataset.courseId);
+      if (!course) return;
+      if (action === "course-name") course.name = target.value;
+      if (action === "final-score") course.finalScore = target.value;
+      if (action === "final-weight") course.finalWeight = target.value;
+      if (action === "midterm-score" || action === "midterm-weight") {
+        const midterm = course.midterms.find(item => item.id === target.dataset.itemId);
+        if (midterm) midterm[action === "midterm-score" ? "score" : "weight"] = target.value;
+      }
+      saveCourses();
+      if (action === "course-name") return;
+      const card = target.closest(".course-card");
+      const result = calculateCourse(course);
+      card.querySelector(".total-value").textContent = result.average === null ? "—" : result.average.toFixed(2);
+      card.querySelector(".total-label").textContent = result.label;
+      const status = card.querySelector(".weight-status");
+      status.className = `weight-status ${result.weightsValid ? "valid" : "invalid"}`;
+      status.textContent = result.weightsValid ? "Ağırlık toplamı %100"
+        : `Ağırlık toplamı %${formatNumber(result.weightTotal)} — %100 olmalı`;
+    }
+
+    coursesElement.addEventListener("input", updateCourse);
+    coursesElement.addEventListener("change", event => {
+      const target = event.target;
+      if (target.matches(".score-input, .weight-input")) {
+        if (target.value !== "") {
+          const value = Math.min(100, Math.max(0, Number(target.value) || 0));
+          target.value = String(value);
+          target.dispatchEvent(new Event("input", { bubbles: true }));
+        }
+        return;
+      }
+      if (target.dataset.action !== "midterm-count") return;
+      const course = courses.find(item => item.id === target.dataset.courseId);
+      if (!course) return;
+      changeMidtermCount(course, Number(target.value));
+      saveCourses(); render();
+    });
+    coursesElement.addEventListener("click", event => {
+      const button = event.target.closest('[data-action="remove-course"]');
+      if (!button) return;
+      courses = courses.filter(item => item.id !== button.dataset.courseId);
+      saveCourses(); render();
+    });
+    document.getElementById("addCourseButton").addEventListener("click", () => {
+      const course = defaultCourse(courses.length + 1);
+      courses.push(course); saveCourses(); render();
+      document.querySelector(`[data-course-card="${course.id}"]`).scrollIntoView({ behavior: "smooth", block: "center" });
+    });
+    document.getElementById("resetButton").addEventListener("click", () => {
+      if (!window.confirm("Tüm dersleri ve girilen notları silmek istediğine emin misin?")) return;
+      courses = [defaultCourse()]; saveCourses(); render();
+    });
+    document.getElementById("themeToggle").addEventListener("click", () => {
+      const next = root.dataset.theme === "dark" ? "light" : "dark";
+      root.dataset.theme = next; localStorage.setItem("site-theme", next);
+    });
+    render();
+  </script>
+</body>
+</html>
