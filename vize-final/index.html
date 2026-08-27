@@ -261,19 +261,19 @@
       return `
         <div class="assessment-row">
           <input class="assessment-name-input" type="text" maxlength="50"
-            value="${escapeHtml(item.name || `Değerlendirme ${index + 1}`)}"
+            value="${escapeHtml(item.name || `Not ${index + 1}`)}"
             data-action="midterm-name" data-course-id="${courseId}" data-item-id="${item.id}"
-            aria-label="Değerlendirme ${index + 1} adı">
+            aria-label="Not ${index + 1} adı">
           <label class="input-wrap">
             <input class="score-input" type="number" min="0" max="100" step="0.5" inputmode="decimal"
               value="${escapeHtml(item.score)}" data-action="midterm-score" data-course-id="${courseId}" data-item-id="${item.id}"
-              aria-label="Değerlendirme ${index + 1} notu" placeholder="—">
+              aria-label="Not ${index + 1} notu" placeholder="—">
             <span class="input-suffix">puan</span>
           </label>
           <label class="input-wrap">
             <input class="weight-input" type="number" min="0" max="100" step="0.5" inputmode="decimal"
               value="${escapeHtml(item.weight)}" data-action="midterm-weight" data-course-id="${courseId}" data-item-id="${item.id}"
-              aria-label="Değerlendirme ${index + 1} yüzdesi">
+              aria-label="Not ${index + 1} yüzdesi">
             <span class="input-suffix">%</span>
           </label>
         </div>`;
