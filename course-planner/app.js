@@ -2,8 +2,10 @@
   "use strict";
 
   const DATA = window.COURSE_PLANNER_DATA;
+
   if (!DATA || !Array.isArray(DATA.courses)) {
-    document.body.innerHTML = "<p style='padding:2rem;font-family:sans-serif'>Ders verisi yüklenemedi.</p>";
+    document.body.innerHTML =
+      "<p style='padding:2rem;font-family:sans-serif'>Ders verisi yüklenemedi.</p>";
     return;
   }
 
@@ -26,18 +28,38 @@
     { start: "16:30", end: "17:15" }
   ];
 
-  const STORAGE_KEY = `iyte-course-planner:${DATA.termId}`;
-  const FILTER_KEY = `iyte-course-planner-filter:${DATA.termId}`;
+  const STORAGE_KEY =
+    `iyte-course-planner:${DATA.termId}`;
+
+  const FILTER_KEY =
+    `iyte-course-planner-filter:${DATA.termId}`;
+
   const SLOT_HEIGHT = 74;
 
-  // Aynı sınıftaki dersler farklı renk ailesi alır.
-  // 1. sınıftan lisansüstüne gidildikçe tonlar koyulaşır.
+  /*
+   * Aynı sınıftaki dersler farklı renkler alır.
+   */
   const COURSE_HUES = [
-    210, 145, 28, 275, 345,
-    185, 55, 230, 10, 310,
-    110, 255, 165, 35, 195
+    210,
+    145,
+    28,
+    275,
+    345,
+    185,
+    55,
+    230,
+    10,
+    310,
+    110,
+    255,
+    165,
+    35,
+    195
   ];
 
+  /*
+   * Sınıf yükseldikçe renkler koyulaşır.
+   */
   const LEVEL_LIGHTNESS = {
     "1": 68,
     "2": 60,
@@ -47,30 +69,68 @@
   };
 
   function courseColor(course) {
-    // data-2026-fall.js zaten renk ürettiyse doğrudan onu kullan.
-    if (course.color?.background && course.color?.border && course.color?.accent) {
+    /*
+     * data-2026-fall.js içinde önceden
+     * renk oluşturulduysa onu kullan.
+     */
+    if (
+      course.color?.background &&
+      course.color?.border &&
+      course.color?.accent
+    ) {
       return {
         ...course.color,
-        hue: course.color.hue ?? 210,
-        lightness: LEVEL_LIGHTNESS[String(course.level)] ?? 52
+
+        hue:
+          course.color.hue ??
+          210,
+
+        lightness:
+          LEVEL_LIGHTNESS[
+            String(course.level)
+          ] ?? 52,
+
+        canvasBackground:
+          course.color.canvasBackground ||
+          course.color.background,
+
+        canvasAccent:
+          course.color.canvasAccent ||
+          course.color.accent
       };
     }
 
-    // Renk verisi yoksa app.js kendi üretsin.
-    const sameLevelCourses = DATA.courses.filter(
-      item => item.level === course.level
-    );
+    /*
+     * Veri dosyasında renk yoksa
+     * burada otomatik üret.
+     */
+    const sameLevelCourses =
+      DATA.courses.filter(
+        item =>
+          item.level ===
+          course.level
+      );
 
-    const index = Math.max(
-      0,
-      sameLevelCourses.findIndex(
-        item => item.id === course.id
-      )
-    );
+    const index =
+      Math.max(
+        0,
+        sameLevelCourses.findIndex(
+          item =>
+            item.id ===
+            course.id
+        )
+      );
 
-    const hue = COURSE_HUES[index % COURSE_HUES.length];
+    const hue =
+      COURSE_HUES[
+        index %
+        COURSE_HUES.length
+      ];
+
     const lightness =
-      LEVEL_LIGHTNESS[String(course.level)] ?? 52;
+      LEVEL_LIGHTNESS[
+        String(course.level)
+      ] ?? 52;
 
     return {
       hue,
@@ -93,40 +153,82 @@
     };
   }
 
-  const byId = new Map(
-    DATA.courses.map(course => [course.id, course])
-  );
+  const byId =
+    new Map(
+      DATA.courses.map(
+        course => [
+          course.id,
+          course
+        ]
+      )
+    );
 
-  let selected = new Set(loadSelected());
+  let selected =
+    new Set(
+      loadSelected()
+    );
+
   let activeFilter =
-    localStorage.getItem(FILTER_KEY) || "all";
+    localStorage.getItem(
+      FILTER_KEY
+    ) || "all";
+
   let searchQuery = "";
+
   let toastTimer = null;
 
-  const $ = selector =>
-    document.querySelector(selector);
+  const $ =
+    selector =>
+      document.querySelector(
+        selector
+      );
 
-  const $$ = selector =>
-    [...document.querySelectorAll(selector)];
+  const $$ =
+    selector =>
+      [
+        ...document.querySelectorAll(
+          selector
+        )
+      ];
 
-  const courseList = $("#courseList");
-  const calendar = $("#calendar");
-  const selectedList = $("#selectedList");
-  const conflictsSection = $("#conflictsSection");
-  const conflictList = $("#conflictList");
-  const toast = $("#toast");
-  const modalBackdrop = $("#modalBackdrop");
+  const courseList =
+    $("#courseList");
+
+  const calendar =
+    $("#calendar");
+
+  const selectedList =
+    $("#selectedList");
+
+  const conflictsSection =
+    $("#conflictsSection");
+
+  const conflictList =
+    $("#conflictList");
+
+  const toast =
+    $("#toast");
+
+  const modalBackdrop =
+    $("#modalBackdrop");
 
   function loadSelected() {
     try {
-      const raw = JSON.parse(
-        localStorage.getItem(STORAGE_KEY) || "[]"
-      );
+      const raw =
+        JSON.parse(
+          localStorage.getItem(
+            STORAGE_KEY
+          ) || "[]"
+        );
 
       return Array.isArray(raw)
-        ? raw.filter(id => byId.has(id))
+        ? raw.filter(
+            id =>
+              byId.has(
+                String(id).trim()
+              )
+          )
         : [];
-
     } catch {
       return [];
     }
@@ -135,53 +237,91 @@
   function saveSelected() {
     localStorage.setItem(
       STORAGE_KEY,
-      JSON.stringify([...selected])
+      JSON.stringify(
+        [...selected]
+      )
     );
   }
 
   function normalize(text) {
-    return String(text || "")
-      .toLocaleLowerCase("tr-TR")
+    return String(
+      text || ""
+    )
+      .toLocaleLowerCase(
+        "tr-TR"
+      )
       .normalize("NFD")
-      .replace(/[\u0300-\u036f]/g, "");
+      .replace(
+        /[\u0300-\u036f]/g,
+        ""
+      );
   }
 
   function levelLabel(course) {
-    return course.level === "graduate"
+    return (
+      course.level ===
+      "graduate"
+    )
       ? "Lisansüstü"
       : `${course.level}. sınıf`;
   }
 
   function dayLabel(dayId) {
-    return DAYS.find(
-      day => day.id === dayId
-    )?.label || dayId;
+    return (
+      DAYS.find(
+        day =>
+          day.id ===
+          dayId
+      )?.label ||
+      dayId
+    );
   }
 
-  function formatSessions(course, short = false) {
+  function formatSessions(
+    course,
+    short = false
+  ) {
     return course.sessions
-      .map(session => {
-        const day = DAYS.find(
-          item => item.id === session.day
-        );
+      .map(
+        session => {
+          const day =
+            DAYS.find(
+              item =>
+                item.id ===
+                session.day
+            );
 
-        return `${short ? day.short : day.label} ${session.start}–${session.end}`;
-      })
+          return `${
+            short
+              ? day.short
+              : day.label
+          } ${session.start}–${session.end}`;
+        }
+      )
       .join(" · ");
   }
 
-  function getSlotRange(session) {
-    const startIndex = SLOTS.findIndex(
-      slot => slot.start === session.start
-    );
+  function getSlotRange(
+    session
+  ) {
+    const startIndex =
+      SLOTS.findIndex(
+        slot =>
+          slot.start ===
+          session.start
+      );
 
-    const endIndex = SLOTS.findIndex(
-      slot => slot.end === session.end
-    );
+    const endIndex =
+      SLOTS.findIndex(
+        slot =>
+          slot.end ===
+          session.end
+      );
 
     if (
       startIndex < 0 ||
-      endIndex < startIndex
+      endIndex <
+        startIndex
     ) {
       return null;
     }
@@ -189,6 +329,7 @@
     return {
       startIndex,
       endIndex,
+
       span:
         endIndex -
         startIndex +
@@ -196,53 +337,87 @@
     };
   }
 
-  function sessionsOverlap(a, b) {
-    if (a.day !== b.day) {
+  function sessionsOverlap(
+    a,
+    b
+  ) {
+    if (
+      a.day !== b.day
+    ) {
       return false;
     }
 
-    const ar = getSlotRange(a);
-    const br = getSlotRange(b);
+    const ar =
+      getSlotRange(a);
+
+    const br =
+      getSlotRange(b);
 
     if (!ar || !br) {
       return false;
     }
 
     return (
-      ar.startIndex <= br.endIndex &&
-      br.startIndex <= ar.endIndex
+      ar.startIndex <=
+        br.endIndex &&
+      br.startIndex <=
+        ar.endIndex
     );
   }
 
-  function pairConflicts(courseA, courseB) {
+  function pairConflicts(
+    courseA,
+    courseB
+  ) {
     const overlaps = [];
 
-    for (const a of courseA.sessions) {
-      for (const b of courseB.sessions) {
-
-        if (!sessionsOverlap(a, b)) {
+    for (
+      const a
+      of courseA.sessions
+    ) {
+      for (
+        const b
+        of courseB.sessions
+      ) {
+        if (
+          !sessionsOverlap(
+            a,
+            b
+          )
+        ) {
           continue;
         }
 
-        const ar = getSlotRange(a);
-        const br = getSlotRange(b);
+        const ar =
+          getSlotRange(a);
 
-        const startIndex = Math.max(
-          ar.startIndex,
-          br.startIndex
-        );
+        const br =
+          getSlotRange(b);
 
-        const endIndex = Math.min(
-          ar.endIndex,
-          br.endIndex
-        );
+        const startIndex =
+          Math.max(
+            ar.startIndex,
+            br.startIndex
+          );
+
+        const endIndex =
+          Math.min(
+            ar.endIndex,
+            br.endIndex
+          );
 
         overlaps.push({
           day: a.day,
+
           start:
-            SLOTS[startIndex].start,
+            SLOTS[
+              startIndex
+            ].start,
+
           end:
-            SLOTS[endIndex].end
+            SLOTS[
+              endIndex
+            ].end
         });
       }
     }
@@ -251,31 +426,38 @@
   }
 
   function getConflicts() {
-    const courses = [...selected]
-      .map(id => byId.get(id))
-      .filter(Boolean);
+    const courses =
+      [...selected]
+        .map(
+          id =>
+            byId.get(id)
+        )
+        .filter(Boolean);
 
     const conflicts = [];
 
     for (
       let i = 0;
-      i < courses.length;
+      i <
+        courses.length;
       i++
     ) {
-
       for (
         let j = i + 1;
-        j < courses.length;
+        j <
+          courses.length;
         j++
       ) {
-
         const overlaps =
           pairConflicts(
             courses[i],
             courses[j]
           );
 
-        for (const overlap of overlaps) {
+        for (
+          const overlap
+          of overlaps
+        ) {
           conflicts.push({
             a: courses[i],
             b: courses[j],
@@ -288,37 +470,67 @@
     return conflicts;
   }
 
-  function conflictCourseIds(conflicts) {
-    const ids = new Set();
+  function conflictCourseIds(
+    conflicts
+  ) {
+    const ids =
+      new Set();
 
-    conflicts.forEach(conflict => {
-      ids.add(conflict.a.id);
-      ids.add(conflict.b.id);
-    });
+    conflicts.forEach(
+      conflict => {
+        ids.add(
+          conflict.a.id
+        );
+
+        ids.add(
+          conflict.b.id
+        );
+      }
+    );
 
     return ids;
   }
 
-  function showToast(message) {
-    toast.textContent = message;
+  function showToast(
+    message
+  ) {
+    toast.textContent =
+      message;
 
-    toast.classList.add("show");
-
-    clearTimeout(toastTimer);
-
-    toastTimer = setTimeout(
-      () =>
-        toast.classList.remove("show"),
-      3200
+    toast.classList.add(
+      "show"
     );
+
+    clearTimeout(
+      toastTimer
+    );
+
+    toastTimer =
+      setTimeout(
+        () =>
+          toast.classList.remove(
+            "show"
+          ),
+        3200
+      );
   }
 
   function addCourse(
     id,
-    { silent = false } = {}
+    {
+      silent = false
+    } = {}
   ) {
+    /*
+     * Kritik düzeltme:
+     * data-course-id içinde
+     * boşluk/satır atlaması varsa temizle.
+     */
+    id =
+      String(id).trim();
 
-    const course = byId.get(id);
+    const course =
+      byId.get(id);
 
     if (
       !course ||
@@ -332,7 +544,9 @@
 
         .map(
           otherId =>
-            byId.get(otherId)
+            byId.get(
+              otherId
+            )
         )
 
         .filter(Boolean)
@@ -352,19 +566,19 @@
     renderAll();
 
     if (!silent) {
-
-      if (existingConflicts.length) {
-
+      if (
+        existingConflicts.length
+      ) {
         showToast(
           `⚠ ${course.code}, ${
             existingConflicts
-              .map(c => c.code)
+              .map(
+                c => c.code
+              )
               .join(", ")
           } ile çakışıyor. Yine de programa eklendi.`
         );
-
       } else {
-
         showToast(
           `${course.code} programa eklendi.`
         );
@@ -374,10 +588,15 @@
 
   function removeCourse(
     id,
-    { silent = false } = {}
+    {
+      silent = false
+    } = {}
   ) {
+    id =
+      String(id).trim();
 
-    const course = byId.get(id);
+    const course =
+      byId.get(id);
 
     if (
       !course ||
@@ -400,19 +619,31 @@
   }
 
   function toggleCourse(id) {
+    id =
+      String(id).trim();
+
     selected.has(id)
       ? removeCourse(id)
       : addCourse(id);
   }
 
-  function matchesFilter(course) {
-
-    if (activeFilter === "all") {
+  function matchesFilter(
+    course
+  ) {
+    if (
+      activeFilter ===
+      "all"
+    ) {
       return true;
     }
 
+    /*
+     * technicalElective: true
+     * olan her şey Teknik seçmeli.
+     */
     if (
-      activeFilter === "technical"
+      activeFilter ===
+      "technical"
     ) {
       return (
         course.technicalElective ===
@@ -421,11 +652,10 @@
     }
 
     /*
-     * technicalElective: true olan
-     * dersler kendi sınıf filtresinde
-     * tekrar gösterilmez.
-     *
-     * Tamamı Teknik seçmeli altında.
+     * Teknik seçmeliler
+     * 3. sınıf / 4. sınıf /
+     * lisansüstü altında
+     * ayrıca gösterilmez.
      */
     if (
       course.technicalElective ===
@@ -435,250 +665,181 @@
     }
 
     return (
-      course.level === activeFilter
+      course.level ===
+      activeFilter
     );
   }
 
-  function matchesSearch(course) {
-
+  function matchesSearch(
+    course
+  ) {
     if (!searchQuery) {
       return true;
     }
 
-    const haystack = normalize([
-      course.code,
-      course.name,
-      course.instructor,
-      course.room,
-      course.note
-    ].join(" "));
+    const haystack =
+      normalize([
+        course.code,
+        course.name,
+        course.instructor,
+        course.room,
+        course.note
+      ].join(" "));
 
     return haystack.includes(
-      normalize(searchQuery)
+      normalize(
+        searchQuery
+      )
     );
   }
 
   function renderCourseList() {
-
     const filtered =
       DATA.courses.filter(
         course =>
-          matchesFilter(course) &&
-          matchesSearch(course)
+          matchesFilter(
+            course
+          ) &&
+          matchesSearch(
+            course
+          )
       );
 
-    $("#resultCount").textContent =
-      `${filtered.length} ders`;
+    $("#resultCount")
+      .textContent =
+        `${filtered.length} ders`;
 
     if (!filtered.length) {
-
-      courseList.innerHTML = `
-        <div
-          style="
-            padding:22px;
-            color:var(--muted);
-            font-size:.78rem;
-            line-height:1.6
-          "
-        >
-          Bu filtrede ders bulunamadı.
-        </div>
-      `;
+      courseList.innerHTML =
+        `<div style="padding:22px;color:var(--muted);font-size:.78rem;line-height:1.6">Bu filtrede ders bulunamadı.</div>`;
 
       return;
     }
 
     courseList.innerHTML =
-      filtered.map(course => {
+      filtered
+        .map(
+          course => {
+            const isSelected =
+              selected.has(
+                course.id
+              );
 
-        const isSelected =
-          selected.has(course.id);
+            const colors =
+              courseColor(
+                course
+              );
 
-        const colors =
-          courseColor(course);
+            const badges = [
+              `<span class="badge">${escapeHtml(levelLabel(course))}</span>`,
 
-        const badges = [
+              course.technicalElective
+                ? `<span class="badge technical">Teknik seçmeli</span>`
+                : ""
+            ].join("");
 
-          `<span class="badge">${
-            escapeHtml(
-              levelLabel(course)
-            )
-          }</span>`,
-
-          course.technicalElective
-
-            ? `
-              <span
-                class="badge technical"
-              >
-                Teknik seçmeli
-              </span>
-            `
-
-            : ""
-
-        ].join("");
-
-        return `
-          <article
-
-            class="
-              course-card
-              ${
-                isSelected
-                  ? "selected"
-                  : ""
-              }
-            "
-
-            draggable="true"
-
-            data-course-id="
-              ${course.id}
-            "
-
-            style="
-              border-left:
-                4px solid
-                ${colors.accent}
-            "
-          >
-
-            <div>
-
-              <div class="course-code">
-                ${
-                  escapeHtml(
-                    course.code
-                  )
-                }
-              </div>
-
-              <div class="course-name">
-                ${
-                  escapeHtml(
-                    course.name
-                  )
-                }
-              </div>
-
-              <div class="course-meta">
-                ${
-                  escapeHtml(
-                    course.instructor ||
-                    "—"
-                  )
-                }
-              </div>
-
-              <div class="course-time">
-                ${
-                  escapeHtml(
-                    formatSessions(
-                      course,
-                      true
-                    )
-                  )
-                }
-              </div>
-
-              <div class="badges">
-                ${badges}
-              </div>
-
-            </div>
-
-            <div class="course-actions">
-
-              <button
-
-                class="
-                  add-course
-                  ${
-                    isSelected
-                      ? "remove"
-                      : ""
-                  }
-                "
-
-                type="button"
-
-                data-action="toggle"
-
-                data-course-id="
-                  ${course.id}
-                "
-              >
-
-                ${
-                  isSelected
-                    ? "Kaldır"
-                    : "Ekle"
-                }
-
-              </button>
-
-              <button
-                class="info-button"
-                type="button"
-                data-action="info"
+            return `
+              <article
+                class="course-card ${isSelected ? "selected" : ""}"
+                draggable="true"
                 data-course-id="${course.id}"
+                style="border-left:4px solid ${colors.accent}"
               >
-                Bilgi
-              </button>
+                <div>
+                  <div class="course-code">
+                    ${escapeHtml(course.code)}
+                  </div>
 
-            </div>
+                  <div class="course-name">
+                    ${escapeHtml(course.name)}
+                  </div>
 
-          </article>
-        `;
-      }).join("");
+                  <div class="course-meta">
+                    ${escapeHtml(course.instructor || "—")}
+                  </div>
+
+                  <div class="course-time">
+                    ${escapeHtml(formatSessions(course, true))}
+                  </div>
+
+                  <div class="badges">
+                    ${badges}
+                  </div>
+                </div>
+
+                <div class="course-actions">
+                  <button
+                    class="add-course ${isSelected ? "remove" : ""}"
+                    type="button"
+                    data-action="toggle"
+                    data-course-id="${course.id}"
+                  >
+                    ${isSelected ? "Kaldır" : "Ekle"}
+                  </button>
+
+                  <button
+                    class="info-button"
+                    type="button"
+                    data-action="info"
+                    data-course-id="${course.id}"
+                  >
+                    Bilgi
+                  </button>
+                </div>
+              </article>
+            `;
+          }
+        )
+        .join("");
 
     courseList
       .querySelectorAll(
         ".course-card"
       )
-      .forEach(card => {
+      .forEach(
+        card => {
+          card.addEventListener(
+            "dragstart",
+            event => {
+              const id =
+                String(
+                  card.dataset
+                    .courseId
+                ).trim();
 
-        card.addEventListener(
-          "dragstart",
-          event => {
+              event.dataTransfer
+                .setData(
+                  "text/plain",
+                  id
+                );
 
-            const id =
-              card.dataset.courseId;
+              event.dataTransfer
+                .effectAllowed =
+                  "copy";
 
-            event.dataTransfer
-              .setData(
-                "text/plain",
-                id
+              card.classList.add(
+                "dragging"
               );
+            }
+          );
 
-            event.dataTransfer
-              .effectAllowed =
-                "copy";
-
-            card.classList.add(
-              "dragging"
-            );
-          }
-        );
-
-        card.addEventListener(
-          "dragend",
-          () =>
-            card.classList.remove(
-              "dragging"
-            )
-        );
-
-      });
+          card.addEventListener(
+            "dragend",
+            () =>
+              card.classList.remove(
+                "dragging"
+              )
+          );
+        }
+      );
   }
 
   function renderSelected() {
-
     const courses =
       [...selected]
         .map(
-          id => byId.get(id)
+          id =>
+            byId.get(id)
         )
         .filter(Boolean);
 
@@ -687,14 +848,8 @@
         `${courses.length} seçili`;
 
     if (!courses.length) {
-
-      selectedList.innerHTML = `
-        <span
-          class="selected-empty"
-        >
-          Henüz ders eklenmedi.
-        </span>
-      `;
+      selectedList.innerHTML =
+        `<span class="selected-empty">Henüz ders eklenmedi.</span>`;
 
       return;
     }
@@ -710,50 +865,30 @@
             )
         )
 
-        .map(course => {
+        .map(
+          course => {
+            const colors =
+              courseColor(
+                course
+              );
 
-          const colors =
-            courseColor(course);
-
-          return `
-            <button
-
-              class="selected-chip"
-
-              type="button"
-
-              data-remove-id="
-                ${course.id}
-              "
-
-              title="
-                Programdan kaldır
-              "
-
-              style="
-                background:
-                  ${colors.background};
-
-                border-color:
-                  ${colors.border};
-              "
-            >
-
-              ${
-                escapeHtml(
-                  course.code
-                )
-              }
-
-              <span
-                aria-hidden="true"
+            return `
+              <button
+                class="selected-chip"
+                type="button"
+                data-remove-id="${course.id}"
+                title="Programdan kaldır"
+                style="
+                  background:${colors.background};
+                  border-color:${colors.border}
+                "
               >
-                ×
-              </span>
-
-            </button>
-          `;
-        })
+                ${escapeHtml(course.code)}
+                <span aria-hidden="true">×</span>
+              </button>
+            `;
+          }
+        )
 
         .join("");
   }
@@ -762,7 +897,6 @@
     dayId,
     conflicts
   ) {
-
     const conflictIds =
       conflictCourseIds(
         conflicts
@@ -770,8 +904,10 @@
 
     const events = [];
 
-    for (const id of selected) {
-
+    for (
+      const id
+      of selected
+    ) {
       const course =
         byId.get(id);
 
@@ -784,7 +920,6 @@
           session,
           sessionIndex
         ) => {
-
           if (
             session.day !==
             dayId
@@ -807,24 +942,21 @@
             sessionIndex,
             ...range
           });
-
         }
       );
     }
 
     events.sort(
       (a, b) =>
-
         a.startIndex -
           b.startIndex ||
 
         b.endIndex -
           a.endIndex ||
 
-        a.course.code
-          .localeCompare(
-            b.course.code
-          )
+        a.course.code.localeCompare(
+          b.course.code
+        )
     );
 
     const clusters = [];
@@ -833,24 +965,25 @@
 
     let clusterEnd = -1;
 
-    for (const event of events) {
-
+    for (
+      const event
+      of events
+    ) {
       if (
         !current.length ||
         event.startIndex <=
           clusterEnd
       ) {
-
-        current.push(event);
+        current.push(
+          event
+        );
 
         clusterEnd =
           Math.max(
             clusterEnd,
             event.endIndex
           );
-
       } else {
-
         clusters.push(
           current
         );
@@ -864,7 +997,9 @@
       }
     }
 
-    if (current.length) {
+    if (
+      current.length
+    ) {
       clusters.push(
         current
       );
@@ -876,14 +1011,12 @@
       const cluster
       of clusters
     ) {
-
       const laneEnds = [];
 
       for (
         const event
         of cluster
       ) {
-
         let lane =
           laneEnds.findIndex(
             end =>
@@ -891,17 +1024,16 @@
               event.startIndex
           );
 
-        if (lane === -1) {
-
+        if (
+          lane === -1
+        ) {
           lane =
             laneEnds.length;
 
           laneEnds.push(
             event.endIndex
           );
-
         } else {
-
           laneEnds[lane] =
             event.endIndex;
         }
@@ -915,7 +1047,6 @@
 
       cluster.forEach(
         event => {
-
           event.lanes =
             lanes;
 
@@ -923,28 +1054,22 @@
             conflictIds.has(
               event.course.id
             ) &&
-
             conflicts.some(
               c =>
-
                 (
                   c.a.id ===
                     event.course.id ||
-
                   c.b.id ===
                     event.course.id
                 ) &&
-
                 c.day ===
                   dayId &&
-
                 event.startIndex <=
                   SLOTS.findIndex(
                     s =>
                       s.end ===
                       c.end
                   ) &&
-
                 event.endIndex >=
                   SLOTS.findIndex(
                     s =>
@@ -964,7 +1089,6 @@
   }
 
   function renderCalendar() {
-
     const conflicts =
       getConflicts();
 
@@ -972,137 +1096,95 @@
       selected.size === 0;
 
     calendar.innerHTML = `
-
-      <div
-        class="calendar-corner"
-      >
+      <div class="calendar-corner">
         Saat
       </div>
 
       ${
         DAYS.map(
-          day => `
-            <div
-              class="day-header"
-            >
-              ${day.label}
-            </div>
-          `
+          day =>
+            `<div class="day-header">${day.label}</div>`
         ).join("")
       }
 
-      <div
-        class="time-column"
-      >
-
+      <div class="time-column">
         ${
           SLOTS.map(
-            (slot, index) => `
-              <div
+            (
+              slot,
+              index
+            ) =>
+              `<div
                 class="time-slot"
-                style="
-                  top:
-                    ${
-                      index *
-                      SLOT_HEIGHT
-                    }px
-                "
+                style="top:${index * SLOT_HEIGHT}px"
               >
-                <span>
-                  ${slot.start}
-                </span>
-
-                <span
-                  class="slot-end"
-                >
-                  ${slot.end}
-                </span>
-              </div>
-            `
+                <span>${slot.start}</span>
+                <span class="slot-end">${slot.end}</span>
+              </div>`
           ).join("")
         }
-
       </div>
 
       ${
-        DAYS.map(day => {
+        DAYS.map(
+          day => {
+            const events =
+              layoutDayEvents(
+                day.id,
+                conflicts
+              );
 
-          const events =
-            layoutDayEvents(
-              day.id,
-              conflicts
-            );
+            return `
+              <div
+                class="day-column"
+                data-day="${day.id}"
+              >
+                ${
+                  SLOTS.map(
+                    (
+                      slot,
+                      index
+                    ) =>
+                      `<div
+                        class="day-slot"
+                        style="top:${index * SLOT_HEIGHT}px"
+                        aria-hidden="true"
+                      ></div>`
+                  ).join("")
+                }
 
-          return `
-            <div
-              class="day-column"
-              data-day="${day.id}"
-            >
-
-              ${
-                SLOTS.map(
-                  (
-                    slot,
-                    index
-                  ) => `
-                    <div
-                      class="day-slot"
-
-                      style="
-                        top:
-                          ${
-                            index *
-                            SLOT_HEIGHT
-                          }px
-                      "
-
-                      aria-hidden="true"
-                    ></div>
-                  `
-                ).join("")
-              }
-
-              ${
-                events
-                  .map(
-                    renderEvent
-                  )
-                  .join("")
-              }
-
-            </div>
-          `;
-
-        }).join("")
+                ${
+                  events
+                    .map(
+                      renderEvent
+                    )
+                    .join("")
+                }
+              </div>
+            `;
+          }
+        ).join("")
       }
 
       ${
         isEmpty
-
           ? `
-            <div
-              class="empty-calendar"
-            >
+            <div class="empty-calendar">
               <div>
-                Soldaki bir dersi
-                sürükleyip takvime
-                bırak veya
-                <strong>Ekle</strong>
-                düğmesine bas.
-                Ders, gerçek gün ve
-                saatlerine kendisi
-                yerleşir.
+                Soldaki bir dersi sürükleyip takvime bırak
+                veya <strong>Ekle</strong> düğmesine bas.
+                Ders, gerçek gün ve saatlerine kendisi yerleşir.
               </div>
             </div>
           `
-
           : ""
       }
     `;
   }
 
-  function renderEvent(event) {
-
+  function renderEvent(
+    event
+  ) {
     const top =
       event.startIndex *
         SLOT_HEIGHT +
@@ -1127,7 +1209,6 @@
       );
 
     const classes = [
-
       "event",
 
       event.course.level ===
@@ -1138,7 +1219,6 @@
       event.isConflict
         ? "conflict"
         : ""
-
     ]
       .filter(Boolean)
       .join(" ");
@@ -1150,149 +1230,77 @@
       height >= 125 &&
       event.course.room;
 
-    /*
-     * Çakışmada dersin kendi rengi
-     * korunur.
-     *
-     * Sadece kırmızı çerçeve eklenir.
-     */
     const borderColor =
       event.isConflict
-
         ? "#d92d20"
-
         : colors.border;
 
-    const eventShadow =
+    /*
+     * Ders kendi rengini korur.
+     * Çakışma varsa yalnızca
+     * kırmızı uyarı çerçevesi gelir.
+     */
+    const shadow =
       event.isConflict
-
-        ? `
-          0 0 0 2px
-          rgba(217,45,32,.35),
-
-          inset 4px 0 0
-          ${colors.accent}
-        `
-
-        : `
-          inset 4px 0 0
-          ${colors.accent}
-        `;
+        ? `0 0 0 2px rgba(217,45,32,.35), inset 4px 0 0 ${colors.accent}`
+        : `inset 4px 0 0 ${colors.accent}`;
 
     return `
       <button
-
         class="${classes}"
-
         type="button"
-
-        data-event-course-id="
-          ${event.course.id}
-        "
-
+        data-event-course-id="${event.course.id}"
         style="
           top:${top}px;
-
           height:${height}px;
-
-          left:
-            calc(
-              ${left}% + 4px
-            );
-
-          width:
-            calc(
-              ${laneWidth}% - 8px
-            );
-
-          background:
-            ${colors.background};
-
-          border-color:
-            ${borderColor};
-
-          box-shadow:
-            ${eventShadow};
+          left:calc(${left}% + 4px);
+          width:calc(${laneWidth}% - 8px);
+          background:${colors.background};
+          border-color:${borderColor};
+          box-shadow:${shadow}
         "
-
-        title="${
-          escapeHtml(
-            `${event.course.code} — ${event.course.name}
+        title="${escapeHtml(
+          `${event.course.code} — ${event.course.name}
 ${formatSessions(event.course)}
 Tıklayınca ders bilgisi açılır.`
-          )
-        }"
+        )}"
       >
-
-        <span
-          class="event-code"
-        >
-          ${
-            escapeHtml(
-              event.course.code
-            )
-          }
+        <span class="event-code">
+          ${escapeHtml(event.course.code)}
         </span>
 
         ${
           showName
-
             ? `
-              <span
-                class="event-name"
-              >
-                ${
-                  escapeHtml(
-                    event.course.name
-                  )
-                }
+              <span class="event-name">
+                ${escapeHtml(event.course.name)}
               </span>
             `
-
             : ""
         }
 
         ${
           showRoom
-
             ? `
-              <span
-                class="event-room"
-              >
-                ${
-                  escapeHtml(
-                    event.course.room
-                  )
-                }
+              <span class="event-room">
+                ${escapeHtml(event.course.room)}
               </span>
             `
-
             : ""
         }
 
         <span
-
-          class="
-            event-remove
-          "
-
-          data-event-remove-id="
-            ${event.course.id}
-          "
-
-          aria-label="
-            Dersi kaldır
-          "
+          class="event-remove"
+          data-event-remove-id="${event.course.id}"
+          aria-label="Dersi kaldır"
         >
           ×
         </span>
-
       </button>
     `;
   }
 
   function renderConflicts() {
-
     const conflicts =
       getConflicts();
 
@@ -1301,67 +1309,44 @@ Tıklayınca ders bilgisi açılır.`
         `${conflicts.length} çakışma`;
 
     conflictsSection.hidden =
-      conflicts.length === 0;
+      conflicts.length ===
+      0;
 
     conflictList.innerHTML =
-      conflicts.map(
-        conflict => `
+      conflicts
+        .map(
+          conflict => `
+            <div class="conflict-item">
+              <strong>
+                ${escapeHtml(conflict.a.code)}
+                ×
+                ${escapeHtml(conflict.b.code)}
+              </strong>
 
-          <div
-            class="conflict-item"
-          >
-
-            <strong>
-              ${
-                escapeHtml(
-                  conflict.a.code
-                )
-              }
-
-              ×
-
-              ${
-                escapeHtml(
-                  conflict.b.code
-                )
-              }
-            </strong>
-
-            <span>
-              ${
-                escapeHtml(
-                  dayLabel(
-                    conflict.day
-                  )
-                )
-              }
-
-              ${conflict.start}–${conflict.end}
-            </span>
-
-          </div>
-        `
-      ).join("");
+              <span>
+                ${escapeHtml(dayLabel(conflict.day))}
+                ${conflict.start}–${conflict.end}
+              </span>
+            </div>
+          `
+        )
+        .join("");
   }
 
   function renderStats() {
-
     const conflicts =
       getConflicts();
 
     const courses =
       [...selected]
-
         .map(
           id =>
             byId.get(id)
         )
-
         .filter(Boolean);
 
     const dayIds =
       new Set(
-
         courses.flatMap(
           course =>
             course.sessions.map(
@@ -1369,7 +1354,6 @@ Tıklayınca ders bilgisi açılır.`
                 session.day
             )
         )
-
       );
 
     const freeDays =
@@ -1402,14 +1386,12 @@ Tıklayınca ders bilgisi açılır.`
     $("#statFree")
       .textContent =
         freeDays.length
-
           ? freeDays
               .map(
                 day =>
                   day.short
               )
               .join(", ")
-
           : "Yok";
 
     $("#statConflicts")
@@ -1420,11 +1402,8 @@ Tıklayınca ders bilgisi açılır.`
 
     $("#statGradDetail")
       .textContent =
-
         technicalCount
-
           ? `${technicalCount} teknik seçmeli seçili`
-
           : "Teknik seçmeli seçili değil";
   }
 
@@ -1438,23 +1417,23 @@ Tıklayınca ders bilgisi açılır.`
   }
 
   function updateFilterButtons() {
-
     $$(".filter-chip")
       .forEach(
         button => {
-
           button.classList.toggle(
             "active",
-
             button.dataset.filter ===
               activeFilter
           );
-
         }
       );
   }
 
-  function openCourseInfo(id) {
+  function openCourseInfo(
+    id
+  ) {
+    id =
+      String(id).trim();
 
     const course =
       byId.get(id);
@@ -1473,16 +1452,9 @@ Tıklayınca ders bilgisi açılır.`
 
     $("#modalDetails")
       .innerHTML = `
-
         <dt>Düzey</dt>
-
         <dd>
-          ${
-            escapeHtml(
-              levelLabel(course)
-            )
-          }
-
+          ${escapeHtml(levelLabel(course))}
           ${
             course.technicalElective
               ? " · Teknik seçmeli"
@@ -1490,51 +1462,26 @@ Tıklayınca ders bilgisi açılır.`
           }
         </dd>
 
-        <dt>
-          Öğretim elemanı
-        </dt>
-
+        <dt>Öğretim elemanı</dt>
         <dd>
-          ${
-            escapeHtml(
-              course.instructor ||
-              "—"
-            )
-          }
+          ${escapeHtml(course.instructor || "—")}
         </dd>
 
-        <dt>
-          Derslik
-        </dt>
-
+        <dt>Derslik</dt>
         <dd>
-          ${
-            escapeHtml(
-              course.room ||
-              "Programda belirtilmemiş"
-            )
-          }
+          ${escapeHtml(
+            course.room ||
+            "Programda belirtilmemiş"
+          )}
         </dd>
 
-        <dt>
-          Saatler
-        </dt>
-
+        <dt>Saatler</dt>
         <dd>
           ${
             course.sessions
               .map(
-                session => `
-                  ${
-                    escapeHtml(
-                      dayLabel(
-                        session.day
-                      )
-                    )
-                  }
-
-                  ${session.start}–${session.end}
-                `
+                session =>
+                  `${escapeHtml(dayLabel(session.day))} ${session.start}–${session.end}`
               )
               .join("<br>")
           }
@@ -1544,21 +1491,24 @@ Tıklayınca ders bilgisi açılır.`
     $("#modalNote").hidden =
       !course.note;
 
-    $("#modalNote").textContent =
-      course.note || "";
+    $("#modalNote")
+      .textContent =
+        course.note ||
+        "";
 
-    modalBackdrop.classList.add(
-      "open"
-    );
+    modalBackdrop
+      .classList.add(
+        "open"
+      );
 
-    modalBackdrop.setAttribute(
-      "aria-hidden",
-      "false"
-    );
+    modalBackdrop
+      .setAttribute(
+        "aria-hidden",
+        "false"
+      );
   }
 
   function closeModal() {
-
     modalBackdrop
       .classList.remove(
         "open"
@@ -1571,32 +1521,28 @@ Tıklayınca ders bilgisi açılır.`
       );
   }
 
-  function escapeHtml(value) {
-
+  function escapeHtml(
+    value
+  ) {
     return String(
       value ?? ""
     )
-
       .replace(
         /&/g,
         "&amp;"
       )
-
       .replace(
         /</g,
         "&lt;"
       )
-
       .replace(
         />/g,
         "&gt;"
       )
-
       .replace(
         /"/g,
         "&quot;"
       )
-
       .replace(
         /'/g,
         "&#039;"
@@ -1604,8 +1550,9 @@ Tıklayınca ders bilgisi açılır.`
   }
 
   function resetPlanner() {
-
-    if (!selected.size) {
+    if (
+      !selected.size
+    ) {
       return;
     }
 
@@ -1629,19 +1576,15 @@ Tıklayınca ders bilgisi açılır.`
   }
 
   function exportPng() {
-
     const courses =
       [...selected]
-
         .map(
           id =>
             byId.get(id)
         )
-
         .filter(Boolean);
 
     if (!courses.length) {
-
       showToast(
         "PNG oluşturmak için önce en az bir ders ekle."
       );
@@ -1733,8 +1676,7 @@ Tıklayınca ders bilgisi açılır.`
     ctx.strokeStyle =
       "#cfcfcf";
 
-    ctx.lineWidth =
-      1;
+    ctx.lineWidth = 1;
 
     ctx.fillStyle =
       "#f4f4f2";
@@ -1768,8 +1710,10 @@ Tıklayınca ders bilgisi açılır.`
     );
 
     DAYS.forEach(
-      (day, i) => {
-
+      (
+        day,
+        i
+      ) => {
         ctx.fillText(
           day.label,
 
@@ -1781,7 +1725,6 @@ Tıklayınca ders bilgisi açılır.`
           gridTop +
             headerH / 2
         );
-
       }
     );
 
@@ -1790,7 +1733,6 @@ Tıklayınca ders bilgisi açılır.`
       r <= 8;
       r++
     ) {
-
       const y =
         gridTop +
         headerH +
@@ -1818,7 +1760,6 @@ Tıklayınca ders bilgisi açılır.`
       c <= 6;
       c++
     ) {
-
       const x =
         gridLeft +
         (
@@ -1826,7 +1767,7 @@ Tıklayınca ders bilgisi açılır.`
             ? 0
             : timeW +
               dayW *
-              (c - 1)
+                (c - 1)
         );
 
       ctx.beginPath();
@@ -1838,7 +1779,6 @@ Tıklayınca ders bilgisi açılır.`
 
       ctx.lineTo(
         x,
-
         gridTop +
           headerH +
           rowH * 8
@@ -1848,8 +1788,10 @@ Tıklayınca ders bilgisi açılır.`
     }
 
     SLOTS.forEach(
-      (slot, r) => {
-
+      (
+        slot,
+        r
+      ) => {
         const y =
           gridTop +
           headerH +
@@ -1883,11 +1825,13 @@ Tıklayınca ders bilgisi açılır.`
           y +
             rowH / 2
         );
-
       }
     );
 
-    // Satır arka planlarının üstüne grid tekrar çizilir.
+    /*
+     * Satır arka planlarından sonra
+     * grid tekrar çizilir.
+     */
     ctx.strokeStyle =
       "#cfcfcf";
 
@@ -1896,7 +1840,6 @@ Tıklayınca ders bilgisi açılır.`
       r <= 8;
       r++
     ) {
-
       const y =
         gridTop +
         headerH +
@@ -1924,7 +1867,6 @@ Tıklayınca ders bilgisi açılır.`
       c <= 6;
       c++
     ) {
-
       const x =
         gridLeft +
         (
@@ -1932,7 +1874,7 @@ Tıklayınca ders bilgisi açılır.`
             ? 0
             : timeW +
               dayW *
-              (c - 1)
+                (c - 1)
         );
 
       ctx.beginPath();
@@ -1944,7 +1886,6 @@ Tıklayınca ders bilgisi açılır.`
 
       ctx.lineTo(
         x,
-
         gridTop +
           headerH +
           rowH * 8
@@ -1960,61 +1901,55 @@ Tıklayınca ders bilgisi açılır.`
       const course
       of courses
     ) {
+      course.sessions.forEach(
+        session => {
+          const range =
+            getSlotRange(
+              session
+            );
 
-      course.sessions
-        .forEach(
-          session => {
-
-            const range =
-              getSlotRange(
-                session
-              );
-
-            if (!range) {
-              return;
-            }
-
-            const dayIndex =
-              DAYS.findIndex(
-                day =>
-                  day.id ===
-                  session.day
-              );
-
-            for (
-              let slot =
-                range.startIndex;
-
-              slot <=
-                range.endIndex;
-
-              slot++
-            ) {
-
-              const key =
-                `${dayIndex}:${slot}`;
-
-              if (
-                !cellCourses.has(
-                  key
-                )
-              ) {
-
-                cellCourses.set(
-                  key,
-                  []
-                );
-              }
-
-              cellCourses
-                .get(key)
-                .push(
-                  course
-                );
-            }
-
+          if (!range) {
+            return;
           }
-        );
+
+          const dayIndex =
+            DAYS.findIndex(
+              day =>
+                day.id ===
+                session.day
+            );
+
+          for (
+            let slot =
+              range.startIndex;
+
+            slot <=
+              range.endIndex;
+
+            slot++
+          ) {
+            const key =
+              `${dayIndex}:${slot}`;
+
+            if (
+              !cellCourses.has(
+                key
+              )
+            ) {
+              cellCourses.set(
+                key,
+                []
+              );
+            }
+
+            cellCourses
+              .get(key)
+              .push(
+                course
+              );
+          }
+        }
+      );
     }
 
     ctx.textAlign =
@@ -2030,7 +1965,6 @@ Tıklayınca ders bilgisi açılır.`
       ]
       of cellCourses.entries()
     ) {
-
       const [
         dayIndex,
         slotIndex
@@ -2060,9 +1994,10 @@ Tıklayınca ders bilgisi açılır.`
         Math.max(
           28,
           (
-            rowH - 14
+            rowH -
+            14
           ) /
-          cell.length
+            cell.length
         );
 
       cell.forEach(
@@ -2070,29 +2005,19 @@ Tıklayınca ders bilgisi açılır.`
           course,
           i
         ) => {
-
           const cy =
             y +
             i *
-            perCourseH;
+              perCourseH;
 
           const colors =
             courseColor(
               course
             );
 
-          /*
-           * PNG'de dersin kendi rengi.
-           */
           ctx.fillStyle =
             colors.canvasBackground ||
-
-            `hsla(
-              ${colors.hue},
-              70%,
-              ${colors.lightness}%,
-              0.20
-            )`;
+            colors.background;
 
           ctx.fillRect(
             x,
@@ -2101,9 +2026,6 @@ Tıklayınca ders bilgisi açılır.`
             perCourseH - 4
           );
 
-          /*
-           * Soldaki ders renk şeridi.
-           */
           ctx.fillStyle =
             colors.canvasAccent ||
             colors.accent;
@@ -2115,12 +2037,9 @@ Tıklayınca ders bilgisi açılır.`
             perCourseH - 4
           );
 
-          /*
-           * Çakışma varsa renk değişmez.
-           * Yalnızca kırmızı dış çerçeve.
-           */
-          if (hasConflict) {
-
+          if (
+            hasConflict
+          ) {
             ctx.strokeStyle =
               "#d92d20";
 
@@ -2148,9 +2067,9 @@ Tıklayınca ders bilgisi açılır.`
           );
 
           if (
-            perCourseH > 42
+            perCourseH >
+            42
           ) {
-
             ctx.font =
               "500 11px system-ui, sans-serif";
 
@@ -2172,19 +2091,17 @@ Tıklayınca ders bilgisi açılır.`
                     perCourseH -
                     33
                   ) /
-                  14
+                    14
                 )
               )
             );
           }
-
         }
       );
     }
 
     canvas.toBlob(
       blob => {
-
         if (!blob) {
           return;
         }
@@ -2219,8 +2136,8 @@ Tıklayınca ders bilgisi açılır.`
         showToast(
           "PNG oluşturuldu."
         );
-
       },
+
       "image/png"
     );
   }
@@ -2234,39 +2151,38 @@ Tıklayınca ders bilgisi açılır.`
     lineHeight,
     maxLines
   ) {
-
     const words =
       String(text)
         .split(/\s+/);
 
     let line = "";
+
     let lineCount = 0;
 
     for (
       let i = 0;
-      i < words.length;
+      i <
+        words.length;
       i++
     ) {
-
       const test =
         line
           ? `${line} ${words[i]}`
           : words[i];
 
       if (
-        ctx
-          .measureText(test)
-          .width >
+        ctx.measureText(
+          test
+        ).width >
           maxWidth &&
         line
       ) {
-
         ctx.fillText(
           line,
           x,
           y +
             lineCount *
-            lineHeight
+              lineHeight
         );
 
         lineCount++;
@@ -2280,9 +2196,7 @@ Tıklayınca ders bilgisi açılır.`
 
         line =
           words[i];
-
       } else {
-
         line =
           test;
       }
@@ -2293,32 +2207,33 @@ Tıklayınca ders bilgisi açılır.`
       lineCount <
         maxLines
     ) {
-
       ctx.fillText(
         line,
         x,
         y +
           lineCount *
-          lineHeight
+            lineHeight
       );
     }
   }
 
-  // Delegated interactions.
+  /*
+   * Genel click eventleri.
+   */
   document.addEventListener(
     "click",
     event => {
-
       const toggle =
         event.target.closest(
           "[data-action='toggle']"
         );
 
       if (toggle) {
-
         toggleCourse(
-          toggle.dataset
-            .courseId
+          String(
+            toggle.dataset
+              .courseId
+          ).trim()
         );
 
         return;
@@ -2330,10 +2245,11 @@ Tıklayınca ders bilgisi açılır.`
         );
 
       if (info) {
-
         openCourseInfo(
-          info.dataset
-            .courseId
+          String(
+            info.dataset
+              .courseId
+          ).trim()
         );
 
         return;
@@ -2344,12 +2260,15 @@ Tıklayınca ders bilgisi açılır.`
           "[data-remove-id]"
         );
 
-      if (selectedChip) {
-
+      if (
+        selectedChip
+      ) {
         removeCourse(
-          selectedChip
-            .dataset
-            .removeId
+          String(
+            selectedChip
+              .dataset
+              .removeId
+          ).trim()
         );
 
         return;
@@ -2360,14 +2279,17 @@ Tıklayınca ders bilgisi açılır.`
           "[data-event-remove-id]"
         );
 
-      if (removeEvent) {
-
+      if (
+        removeEvent
+      ) {
         event.stopPropagation();
 
         removeCourse(
-          removeEvent
-            .dataset
-            .eventRemoveId
+          String(
+            removeEvent
+              .dataset
+              .eventRemoveId
+          ).trim()
         );
 
         return;
@@ -2378,15 +2300,17 @@ Tıklayınca ders bilgisi açılır.`
           "[data-event-course-id]"
         );
 
-      if (eventBlock) {
-
+      if (
+        eventBlock
+      ) {
         openCourseInfo(
-          eventBlock
-            .dataset
-            .eventCourseId
+          String(
+            eventBlock
+              .dataset
+              .eventCourseId
+          ).trim()
         );
       }
-
     }
   );
 
@@ -2394,7 +2318,6 @@ Tıklayınca ders bilgisi açılır.`
     .addEventListener(
       "input",
       event => {
-
         searchQuery =
           event.target
             .value
@@ -2407,11 +2330,9 @@ Tıklayınca ders bilgisi açılır.`
   $$(".filter-chip")
     .forEach(
       button => {
-
         button.addEventListener(
           "click",
           () => {
-
             activeFilter =
               button.dataset
                 .filter;
@@ -2426,7 +2347,6 @@ Tıklayınca ders bilgisi açılır.`
             updateFilterButtons();
           }
         );
-
       }
     );
 
@@ -2453,7 +2373,6 @@ Tıklayınca ders bilgisi açılır.`
     .addEventListener(
       "click",
       () => {
-
         const root =
           document.documentElement;
 
@@ -2476,7 +2395,6 @@ Tıklayınca ders bilgisi açılır.`
   calendar.addEventListener(
     "dragover",
     event => {
-
       event.preventDefault();
 
       event.dataTransfer
@@ -2492,30 +2410,26 @@ Tıklayınca ders bilgisi açılır.`
   calendar.addEventListener(
     "dragleave",
     event => {
-
       if (
         !calendar.contains(
           event.relatedTarget
         )
       ) {
-
-        calendar.classList
-          .remove(
+        calendar
+          .classList.remove(
             "drop-active"
           );
       }
-
     }
   );
 
   calendar.addEventListener(
     "drop",
     event => {
-
       event.preventDefault();
 
-      calendar.classList
-        .remove(
+      calendar
+        .classList.remove(
           "drop-active"
         );
 
@@ -2523,12 +2437,12 @@ Tıklayınca ders bilgisi açılır.`
         event.dataTransfer
           .getData(
             "text/plain"
-          );
+          )
+          .trim();
 
       if (id) {
         addCourse(id);
       }
-
     }
   );
 
@@ -2542,29 +2456,24 @@ Tıklayınca ders bilgisi açılır.`
     .addEventListener(
       "click",
       event => {
-
         if (
           event.target ===
           modalBackdrop
         ) {
-
           closeModal();
         }
-
       }
     );
 
   document.addEventListener(
     "keydown",
     event => {
-
       if (
         event.key ===
         "Escape"
       ) {
         closeModal();
       }
-
     }
   );
 
