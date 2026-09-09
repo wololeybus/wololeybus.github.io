@@ -514,3 +514,152 @@ window.COURSE_PLANNER_DATA = {
     }
   ]
 };
+/*
+ * COURSE PLANNER — RENK VE GRUP SİSTEMİ
+ *
+ * 1. Aynı sınıftaki dersler farklı renkler alır.
+ * 2. 1. sınıftan lisansüstüne doğru renkler koyulaşır.
+ * 3. Aynı ders, haftanın farklı günlerinde aynı renkte görünür.
+ * 4. technicalElective: true olan HER ders teknik seçmeli kabul edilir.
+ */
+
+(function setupCoursePlannerVisuals() {
+  const data = window.COURSE_PLANNER_DATA;
+
+  if (!data || !Array.isArray(data.courses)) {
+    return;
+  }
+
+  /*
+   * Aynı sınıftaki farklı dersler için renk aileleri.
+   *
+   * Sırasıyla:
+   * mavi
+   * yeşil
+   * turuncu
+   * mor
+   * pembe
+   * turkuaz
+   * sarı
+   * lacivert
+   * kırmızı-turuncu
+   * fuşya
+   * açık yeşil
+   * mor-mavi
+   */
+  const COURSE_HUES = [
+    210,
+    145,
+    28,
+    275,
+    345,
+    185,
+    55,
+    230,
+    10,
+    310,
+    110,
+    255,
+    165,
+    35,
+    195
+  ];
+
+  /*
+   * Sınıf yükseldikçe lightness azalıyor.
+   * Böylece renkler giderek koyulaşıyor.
+   */
+  const LEVEL_LIGHTNESS = {
+    "1": 68,
+    "2": 60,
+    "3": 52,
+    "4": 44,
+    "graduate": 36
+  };
+
+  /*
+   * Her seviyenin kaçıncı dersinde olduğumuzu tutuyoruz.
+   */
+  const levelCounters = {
+    "1": 0,
+    "2": 0,
+    "3": 0,
+    "4": 0,
+    "graduate": 0
+  };
+
+  data.courses.forEach((course) => {
+
+    /*
+     * ÖNEMLİ:
+     *
+     * technicalElective: true olan HER ŞEY
+     * teknik seçmeli grubuna girer.
+     *
+     * level değeri artık bunun önüne geçmez.
+     */
+    if (course.technicalElective === true) {
+      course.group = "technical-elective";
+    } else {
+      course.group = course.level;
+    }
+
+    /*
+     * Dersin kendi gerçek level'ını renk için kullanıyoruz.
+     *
+     * Yani PHYS 341 teknik seçmeli olarak listelense bile
+     * 3. sınıf koyuluğunda renk alır.
+     *
+     * Lisansüstü teknik seçmeliler ise en koyu tonları alır.
+     */
+    const level = String(course.level);
+
+    const courseIndex =
+      levelCounters[level] !== undefined
+        ? levelCounters[level]
+        : 0;
+
+    const hue =
+      COURSE_HUES[
+        courseIndex % COURSE_HUES.length
+      ];
+
+    const lightness =
+      LEVEL_LIGHTNESS[level] ?? 52;
+
+    const saturation = 70;
+
+    /*
+     * Her derse renk bilgisi ekleniyor.
+     */
+    course.color = {
+      hue: hue,
+
+      background:
+        `hsl(${hue} ${saturation}% ${lightness}% / 0.22)`,
+
+      border:
+        `hsl(
+          ${hue}
+          ${Math.min(saturation + 4, 100)}%
+          ${Math.min(lightness + 10, 80)}%
+        )`,
+
+      accent:
+        `hsl(
+          ${hue}
+          ${Math.min(saturation + 8, 100)}%
+          ${Math.min(lightness + 15, 84)}%
+        )`
+    };
+
+    /*
+     * Bir sonraki aynı-level ders
+     * farklı renk alsın.
+     */
+    if (levelCounters[level] !== undefined) {
+      levelCounters[level]++;
+    }
+  });
+
+})();
