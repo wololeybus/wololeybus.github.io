@@ -204,6 +204,7 @@ window.COURSE_PLANNER_DATA = {
       name: "Advanced Physics Internship",
       instructor: "Prof.Dr. Günnur Aygün",
       level: "3",
+      technicalElective: true,
       note: "Kaynak çizelgede PHYS 341 Salı günü 08:45–12:30 ve 13:30–15:15 saat hücrelerinde yer alıyor.",
       sessions: [
         { day: "tuesday", start: "08:45", end: "12:30" },
@@ -240,6 +241,7 @@ window.COURSE_PLANNER_DATA = {
       name: "Physics Internship",
       instructor: "Prof.Dr. Günnur Aygün",
       level: "3",
+      technicalElective: true,
       sessions: [
         { day: "tuesday", start: "16:30", end: "17:15" }
       ]
@@ -252,6 +254,7 @@ window.COURSE_PLANNER_DATA = {
       name: "Cooperative Education Course",
       instructor: "Prof.Dr. Günnur Aygün",
       level: "4",
+      technicalElective: true,
       sessions: [
         { day: "monday", start: "08:45", end: "12:30" },
         { day: "monday", start: "13:30", end: "15:15" }
@@ -263,6 +266,7 @@ window.COURSE_PLANNER_DATA = {
       name: "Research Project I (1+4)",
       instructor: "—",
       level: "4",
+      technicalElective: true,
       sessions: [
         { day: "friday", start: "08:45", end: "09:30" }
       ]
@@ -273,6 +277,7 @@ window.COURSE_PLANNER_DATA = {
       name: "Medical Physics",
       instructor: "Doç.Dr. Günnur Güler",
       room: "Fizik Bölümü F1",
+      technicalElective: true,
       level: "4",
       sessions: [
         { day: "wednesday", start: "09:45", end: "12:30" }
@@ -297,6 +302,7 @@ window.COURSE_PLANNER_DATA = {
       instructor: "Prof.Dr. Lütfi Özyüzer",
       room: "Fizik Bölümü F2",
       level: "4",
+      technicalElective: true,
       sessions: [
         { day: "thursday", start: "13:30", end: "16:15" }
       ]
@@ -307,6 +313,7 @@ window.COURSE_PLANNER_DATA = {
       name: "Supplementary Curricular Courses",
       instructor: "Doç.Dr. Günnur Güler",
       level: "4",
+      technicalElective: true,
       sessions: [
         { day: "friday", start: "13:30", end: "16:15" }
       ]
@@ -318,6 +325,7 @@ window.COURSE_PLANNER_DATA = {
       instructor: "Doç.Dr. Shahram Jalalzadeh",
       room: "Fizik Bölümü F1",
       level: "4",
+      technicalElective: true,
       sessions: [
         { day: "monday", start: "14:30", end: "17:15" }
       ]
