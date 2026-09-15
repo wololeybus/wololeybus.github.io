@@ -258,13 +258,11 @@
   }
 
   function levelLabel(course) {
-    return (
-      course.level ===
-      "graduate"
-    )
-      ? "Lisansüstü"
-      : `${course.level}. sınıf`;
-  }
+  if (course.socialElective) return "Sosyal seçmeli";
+  return course.level === "graduate"
+    ? "Lisansüstü"
+    : `${course.level}. sınıf`;
+}
 
   function dayLabel(dayId) {
     return (
