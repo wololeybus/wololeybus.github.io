@@ -627,7 +627,9 @@
 
   function matchesFilter(
     course
-  ) {
+  ) {if (activeFilter === "social") {
+  return course.socialElective === true;
+}
     if (
       activeFilter ===
       "all"
