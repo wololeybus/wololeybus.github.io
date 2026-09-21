@@ -243,6 +243,7 @@
           </div>
         </div>
         <p class="sync-note" id="syncNote">GPA verisi kontrol ediliyor…</p>
+        <p class="sync-note"><a id="planSource" target="_blank" rel="noopener noreferrer">Seçili yılın eğitim planı ↗</a> · <a href="../backup/">Tüm araçları yedekle</a></p>
       </section>
 
       <section class="overview" aria-label="Mezuniyet özeti">
@@ -321,7 +322,9 @@
   </div>
 
   <script src="../assets/js/curricula.js"></script>
-  <script src="../assets/js/course-metadata.js?v=20260921-gpa"></script>
+  <script src="../assets/js/curricula-2026.js"></script>
+  <script src="../assets/js/graduation-rules.js?v=20260921-plans"></script>
+  <script src="../assets/js/course-metadata.js?v=20260921-plans"></script>
   <script>
     (() => {
       "use strict";
@@ -329,57 +332,7 @@
       const gradePoints = { AA: 4, BA: 3.5, BB: 3, CB: 2.5, CC: 2, DC: 1.5, DD: 1, FD: .5, FF: 0, NA: 0 };
       const failingGrades = new Set(["FF", "FD", "NA"]);
 
-      const oldPlanEcts = [
-        [6, 2, 7, 5, 2, 5, 3],
-        [6, 2, 4, 8, 5, 2, 3, 2],
-        [6, 7, 6, 4, 3, 2, 2],
-        [7, 2, 7, 7, 3, 2, 2],
-        [8, 8, 6, 8],
-        [8, 6, 8, 8],
-        [9, 9, 6, 6],
-        [9, 6, 6, 6, 3]
-      ];
-
-      const plan2021Ects = oldPlanEcts.map(semester => [...semester]);
-      plan2021Ects[0] = [6, 2, 7, 5, 2, 3, 5];
-
-      const newPlanEcts = [
-        [6, 2, 7, 5, 2, 3, 2],
-        [6, 2, 5, 8, 5, 2, 3, 2],
-        [6, 7, 6, 4, 3, 2, 2],
-        [6, 2, 6, 6, 3, 3, 2, 2],
-        [7, 6, 6, 7, 4],
-        [7, 6, 7, 5, 5],
-        [6, 6, 6, 6, 6],
-        [6, 6, 6, 6, 6]
-      ];
-
-      const plan2025Ects = [
-        [2, 5, 2, 2, 7, 5, 2, 3],
-        [5, 2, 5, 8, 5, 2, 2, 3],
-        [6, 7, 6, 4, 3, 2, 2],
-        [6, 2, 6, 6, 3, 3, 2, 2],
-        [7, 6, 6, 7, 4],
-        [7, 6, 7, 5, 5],
-        [6, 6, 6, 6, 6],
-        [6, 6, 6, 6, 6]
-      ];
-
-      const ectsByYear = {
-        2021: plan2021Ects,
-        2022: oldPlanEcts,
-        2023: newPlanEcts,
-        2024: newPlanEcts,
-        2025: plan2025Ects
-      };
-
-      const requirements = {
-        2021: { ects: 242, social: 3, technical: 5 },
-        2022: { ects: 242, social: 3, technical: 5 },
-        2023: { ects: 240, social: 3, technical: 9 },
-        2024: { ects: 240, social: 3, technical: 9 },
-        2025: { ects: 240, social: 3, technical: 9 }
-      };
+      const requirements = window.IYTE_GRADUATION.requirements;
 
       const curricula = window.CURRICULA || {};
       const validYears = Object.keys(curricula).map(Number).sort((a, b) => a - b);
@@ -477,8 +430,8 @@
           const name = isElective ? (savedElective.name ?? savedGpa.name ?? course.name) : course.name;
           const credit = isElective ? number(savedElective.credit ?? savedGpa.credit, course.credit) : number(course.credit);
           const ects = isElective
-            ? number(savedElective.ects, ectsByYear[year]?.[semesterIndex]?.[rowIndex] ?? 0)
-            : number(ectsByYear[year]?.[semesterIndex]?.[rowIndex]);
+            ? number(savedElective.ects, window.IYTE_GRADUATION.ectsFor(year, course.code) ?? 0)
+            : number(window.IYTE_GRADUATION.ectsFor(year, course.code));
           const category = isElective ? (savedElective.category || defaultCategory) : "required";
           const grade = savedGpa.grade || "";
           return {
@@ -675,6 +628,7 @@
           ? "GPA verisi bulundu. Bu sayfa açıldığında ve seçim değiştiğinde yeniden okunur."
           : "Bu yıl ve profil için GPA kaydı yok; dersleri elle işaretleyebilirsin.";
         $("#gpaLink").href = `../calculator/?year=${year}`;
+        $("#planSource").href = window.IYTE_GRADUATION.source(year);
       }
 
       function switchContext(nextYear, nextProfile) {

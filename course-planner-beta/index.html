@@ -10,7 +10,7 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="style.css?v=20260921-gpa">
+  <link rel="stylesheet" href="style.css?v=20260921-plans">
 
   <script>
     (() => {
@@ -125,6 +125,25 @@
             </div>
           </header>
 
+          <details class="saved-plans">
+            <summary><strong>Planlarım</strong><span id="planSummary">Planım</span></summary>
+            <p>Seçili planın dersleri ve tahmini notları otomatik kaydedilir. Farklı bir program denemek için adını yazıp kopyasını oluştur.</p>
+            <div class="plan-controls">
+              <label>Açık plan<select id="planSelect"></select></label>
+              <label>Plan adı<input id="planName" maxlength="60" placeholder="Örn. Hafif dönem"></label>
+              <button class="button" id="copyPlan" type="button">Kopyasını oluştur</button>
+              <button class="button subtle" id="renamePlan" type="button">Adı değiştir</button>
+              <button class="button danger" id="deletePlan" type="button">Planı sil</button>
+            </div>
+            <div class="plan-table-scroll"><table>
+              <caption>Programları karşılaştır</caption>
+              <thead><tr><th>Plan</th><th>Yıl / Profil</th><th>Ders</th><th>Yerel kredi</th><th>Kampüs günü</th><th>Dönem GPA</th><th>Tahmini GNO</th></tr></thead>
+              <tbody id="planComparison"></tbody>
+            </table></div>
+            <p>? işareti, yerel kredisi henüz girilmemiş ders olduğunu belirtir. GPA hesabında her planın kendi ders seçimleri ve tahmini notları kullanılır.</p>
+            <p id="planMessage" role="status"></p>
+          </details>
+
           <div class="selected-section">
             <div class="selected-head">
               <span>Seçili dersler</span>
@@ -185,9 +204,10 @@
 <script src="../course-planner/social-electives-2026-fall.js"></script>
 <script src="../assets/js/curricula.js"></script>
 <script src="../assets/js/curricula-2026.js"></script>
-<script src="../assets/js/course-metadata.js?v=20260921-gpa"></script>
-<script src="../assets/js/academic-model.js?v=20260921-gpa"></script>
-<script src="planner-gpa.js?v=20260921-gpa"></script>
-<script src="app.js?v=20260921-gpa"></script>
+<script src="../assets/js/course-metadata.js?v=20260921-plans"></script>
+<script src="../assets/js/academic-model.js?v=20260921-plans"></script>
+<script src="planner-gpa.js?v=20260921-plans"></script>
+<script src="plans.js?v=20260921-plans"></script>
+<script src="app.js?v=20260921-plans"></script>
 </body>
 </html>

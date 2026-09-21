@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <meta name="color-scheme" content="light dark">
+  <title>Yedekleme | İYTE Fizik Araçları</title>
+  <link rel="stylesheet" href="style.css?v=20260921-plans">
+  <script>document.documentElement.dataset.theme=localStorage.getItem('site-theme') || (matchMedia('(prefers-color-scheme:dark)').matches?'dark':'light');</script>
+</head>
+<body>
+  <main>
+    <nav><a href="../">← Araçlar</a><a href="../course-planner-beta/">Planlayıcı →</a></nav>
+    <header><p class="eyebrow">İYTE Fizik Araçları</p><h1>Kayıtların bir arada.</h1><p>Notlarını, programlarını ve tahminlerini tek dosyada sakla; başka bir cihazda kaldığın yerden devam et.</p></header>
+    <section>
+      <h2>Yedek indir</h2>
+      <p>Tüm giriş yılları ve profillerdeki GPA notları, mezuniyet işaretleri, eski ve yeni ders programları, alternatif planlar, tahmini notlar ve vize–final kayıtları birlikte indirilir.</p>
+      <ul id="currentSummary"></ul>
+      <button id="downloadBackup" type="button">Tüm kayıtları indir (.json)</button>
+    </section>
+    <section>
+      <h2>Yedeği geri yükle</h2>
+      <p>Dosya seçmek kayıtlarını değiştirmez. Önizlemeyi kontrol edip geri yüklemeyi başlatabilirsin.</p>
+      <label for="backupFile">Yedek dosyası</label>
+      <input id="backupFile" type="file" accept=".json,application/json">
+      <div id="backupPreview" hidden>
+        <p id="backupDate"></p><ul id="incomingSummary"></ul>
+        <label for="restoreMode">Mevcut kayıtlara ne olsun?</label>
+        <select id="restoreMode">
+          <option value="replace">Yedekteki kayıtlarla değiştir</option>
+          <option value="merge">Birleştir; aynı kayıt varsa yedektekini kullan</option>
+        </select>
+        <p id="restoreExplanation">Bu sitedeki mevcut kayıtların yerini yedekteki kayıtlar alır.</p>
+        <button id="restoreBackup" type="button">Yedeği geri yükle</button>
+      </div>
+      <p id="backupMessage" role="status" aria-live="polite"></p>
+      <button id="undoRestore" class="secondary" type="button" hidden>Son geri yüklemeyi geri al</button>
+      <p class="small">Geri alma bu sayfa açık kaldığı sürece kullanılabilir. Geri yükledikten sonra açık araç sekmelerini yenile.</p>
+    </section>
+    <footer>Dosya cihazında işlenir; bir hesaba giriş yapman gerekmez.</footer>
+  </main>
+  <script src="../course-planner-beta/plans.js?v=20260921-plans"></script>
+  <script src="../assets/js/site-backup.js?v=20260921-plans"></script>
+  <script src="app.js?v=20260921-plans"></script>
+</body>
+</html>
