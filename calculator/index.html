@@ -120,8 +120,13 @@
           placeholder="Hedef GPA (örn. 3.00)"
         >
 
+        <details style="margin:12px 0">
+          <summary>Öneriye katılacak dersler</summary>
+          <p class="muted" style="font-size:.8rem">Notu olmayan dersler başlangıçta seçilidir. Tekrar alacağın dersleri de seçebilirsin. Seçilmeyen mevcut notlar GNO hesabında korunur.</p>
+          <div id="targetCourses" style="max-height:260px;overflow:auto"></div>
+        </details>
         <button class="tool-btn" id="autoFillBtn" type="button">
-          ✨ Hedefe göre doldur
+          ✨ Hedefe göre öner
         </button>
 
         <div
@@ -166,6 +171,7 @@
   <script src="../assets/js/curricula.js"></script>
   <script src="../assets/js/curricula-2026.js"></script>
   <script src="../assets/js/common.js"></script>
+  <script src="../assets/js/academic-model.js"></script>
   <script src="../assets/js/calculator.js"></script>
 </body>
 </html>

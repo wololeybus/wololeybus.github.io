@@ -182,6 +182,7 @@
   let searchQuery = "";
 
   let toastTimer = null;
+  let gpaPanel = null;
 
   const PASSING_GRADES =
     new Set(["AA", "BA", "BB", "CB", "CC", "DC", "DD"]);
@@ -279,6 +280,24 @@
       semester.courses.some(item => normalizeCourseCode(item.code) === code)
     );
     return required ? "" : `${academicContext.year} müfredatında zorunlu değil`;
+  }
+
+  const prerequisites = {
+    PHYS204:'PHYS 203', PHYS212:'PHYS 201', PHYS305:'PHYS 222',
+    PHYS302:'PHYS 301', PHYS322:'PHYS 321', PHYS432:'PHYS 431'
+  };
+  function prerequisiteNote(course) {
+    const required = prerequisites[normalizeCourseCode(course.code)];
+    if (!required) return '';
+    const status = academicStatus.get(normalizeCourseCode(required));
+    return status?.completed && !FAILED_GRADES.has(status.grade) ? '' : `Önkoşul tamamlanmamış: ${required}`;
+  }
+  function neededCourse(course) {
+    if (course.socialElective || course.technicalElective || course.level === 'graduate') return false;
+    const required = window.CURRICULA?.[String(academicContext.year)]?.semesters.some(sem =>
+      sem.courses.some(item => normalizeCourseCode(item.code) === normalizeCourseCode(course.code)));
+    const status = statusFor(course);
+    return Boolean(required) && !(status?.completed && !FAILED_GRADES.has(status.grade));
   }
 
   const $ =
@@ -725,7 +744,8 @@
 
   function matchesFilter(
     course
-  ) {if (activeFilter === "social") {
+  ) {if (activeFilter === "needed") return neededCourse(course);
+if (activeFilter === "social") {
   return course.socialElective === true;
 }
     if (
@@ -833,7 +853,9 @@
                 course
               );
 
+            const prerequisite = prerequisiteNote(course);
             const badges = [
+              prerequisite ? `<span class="badge prerequisite-note">${escapeHtml(prerequisite)}</span>` : "",
               `<span class="badge">${escapeHtml(levelLabel(course))}</span>`,
 
               course.technicalElective
@@ -1527,6 +1549,7 @@ Tıklayınca ders bilgisi açılır.`
   }
 
   function renderAll() {
+    gpaPanel?.render();
     renderCourseList();
     renderSelected();
     renderCalendar();
@@ -2613,6 +2636,7 @@ Tıklayınca ders bilgisi açılır.`
       ? "Son notlar ve tamamlanma işaretleri bu yıl ve profilin kayıtlarından okunur."
       : "Bu yıl ve profilde not veya tamamlanma kaydı bulunamadı. GPA hesaplayıcısındaki yıl ve profilini seç.";
     renderCourseList();
+    gpaPanel?.render();
   }
 
   $("#academicYear").innerHTML = Object.keys(window.CURRICULA || {})
@@ -2637,6 +2661,12 @@ Tıklayınca ders bilgisi açılır.`
     }
   });
   window.addEventListener("pageshow", refreshAcademicStatus);
+
+  gpaPanel = window.IYTE_PLANNER_GPA?.create({
+    getContext: () => academicContext,
+    getCourses: () => [...selected].map(id => byId.get(id)).filter(Boolean),
+    termId: DATA.termId
+  });
 
   if (localStorage.getItem(STORAGE_KEY) === null) saveSelected();
   refreshAcademicStatus();

@@ -91,7 +91,9 @@
             <div class="search-wrap">
               <input class="search-input" id="searchInput" type="search" autocomplete="off" placeholder="Ders, kod veya hoca ara…" aria-label="Ders ara">
             </div>
+            <p class="academic-filter-help">“Almam gerekenler”, bu dönemin kataloğundaki tamamlanmamış zorunlu dersleri gösterir. Seçmeliler kendi filtrelerindedir; eksik önkoşullar dersin yanında belirtilir.</p>
             <div class="filters" aria-label="Ders filtresi">
+              <button class="filter-chip" type="button" data-filter="needed">Almam gerekenler</button>
               <button class="filter-chip active" type="button" data-filter="all">Tümü</button>
               <button class="filter-chip" type="button" data-filter="1">1. sınıf</button>
               <button class="filter-chip" type="button" data-filter="2">2. sınıf</button>
@@ -130,6 +132,16 @@
             </div>
             <div class="selected-list" id="selectedList"></div>
           </div>
+
+          <details class="mini-gpa" id="miniGpa">
+            <summary><strong>Dönem sonu GPA</strong><span id="miniGpaSummary">Programa ders ekle</span></summary>
+            <p id="miniGpaBaseline"></p>
+            <div class="mini-gpa-scroll"><table>
+              <thead><tr><th>Kat</th><th>Ders</th><th>Yerel kredi</th><th>Tahmini not</th></tr></thead>
+              <tbody id="miniGpaRows"></tbody>
+            </table></div>
+            <p id="miniGpaMessage" role="status"></p>
+          </details>
 
           <div class="calendar-scroll">
             <div class="calendar" id="calendar"></div>
@@ -173,7 +185,9 @@
 <script src="../course-planner/social-electives-2026-fall.js"></script>
 <script src="../assets/js/curricula.js"></script>
 <script src="../assets/js/curricula-2026.js"></script>
-<script src="course-metadata.js"></script>
+<script src="../assets/js/course-metadata.js"></script>
+<script src="../assets/js/academic-model.js"></script>
+<script src="planner-gpa.js"></script>
 <script src="app.js"></script>
 </body>
 </html>
