@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="color-scheme" content="light dark">
+  <title>Derslerim — Sınav ve Ödev Takvimi | İYTE Fizik</title>
+  <link rel="stylesheet" href="style.css?v=20260921-calendar">
+  <script>try { document.documentElement.dataset.theme=localStorage.getItem('site-theme')||(matchMedia('(prefers-color-scheme: dark)').matches?'dark':'light'); } catch {}</script>
+</head>
+<body>
+  <div class="page">
+    <nav><a href="../">← Araçlar</a><div><a href="../course-planner-beta/">Ders planlayıcı</a><button id="theme" class="quiet" type="button">Tema</button></div></nav>
+    <header class="hero"><p class="eyebrow" id="termLabel">Ders takvimi</p><h1>Derslerim</h1><p>Sınavlar, ödevler ve duyurular. Derslerini seç, yaklaşanları birlikte takip et.</p></header>
+    <div class="notice" id="connection" role="status">Ortak takvim kontrol ediliyor…</div>
+    <main class="layout">
+      <aside class="panel">
+        <div class="panel-title"><h2>Ders seçimi</h2><span id="selectedCount" class="badge">0 ders</span></div>
+        <p class="hint">Seçimlerin bu tarayıcıda saklanır.</p>
+        <button id="importPlanner" class="secondary wide" type="button">Planlayıcıdaki dersleri al</button>
+        <label for="search">Ders ara</label><input id="search" type="search" placeholder="PHYS 301, Kuantum…" autocomplete="off">
+        <label for="level">Ders grubu</label><select id="level"><option value="all">Tüm dersler</option><option value="1">1. sınıf</option><option value="2">2. sınıf</option><option value="3">3. sınıf</option><option value="4">4. sınıf</option><option value="social">Sosyal seçmeli</option><option value="technical">Teknik seçmeli</option><option value="graduate">Lisansüstü</option></select>
+        <div id="courses" class="course-list" aria-label="Dersler"></div>
+      </aside>
+      <section class="panel timeline" aria-label="Sınav ve ödevler">
+        <div class="panel-title"><div><h2>Ders takvimi</h2><p class="hint" id="count"></p></div><button id="newEntry" type="button">+ Kayıt ekle</button></div>
+        <div class="filters">
+          <label>Göster<select id="scope"><option value="mine">Seçtiğim dersler</option><option value="all">Tüm dersler</option></select></label>
+          <label>Tür<select id="kind"><option value="all">Hepsi</option><option value="exam">Sınav</option><option value="homework">Ödev</option><option value="announcement">Duyuru</option></select></label>
+          <label class="checkbox"><input id="past" type="checkbox">Geçmiş kayıtlar</label>
+          <button id="refresh" class="quiet" type="button">Yenile</button>
+        </div>
+        <p class="hint">Saatler Türkiye saatidir. Kayıtlar öğrenci katkısıdır; resmî duyuruları da kontrol et.</p>
+        <div id="entries"></div>
+        <p id="message" role="status" aria-live="polite"></p>
+      </section>
+    </main>
+    <footer><a href="../backup/">Kişisel kayıtlarını yedekle</a><p>Ortak alana eklenen kayıt ve nickname herkese görünür. Nickname bir hesap veya kimlik doğrulaması değildir.</p></footer>
+  </div>
+  <dialog id="editor" aria-labelledby="editorTitle">
+    <form id="entryForm">
+      <div class="panel-title"><h2 id="editorTitle">Derse kayıt ekle</h2><button id="closeEditor" class="quiet" type="button" aria-label="Kapat">×</button></div>
+      <label for="entryCourse">Ders</label><select id="entryCourse" name="course_id" required></select>
+      <div class="form-row"><div><label for="entryKind">Kayıt türü</label><select id="entryKind" name="kind"><option value="exam">Sınav</option><option value="homework">Ödev</option><option value="announcement">Duyuru</option></select></div><div><label for="nickname">Nickname</label><input id="nickname" name="nickname" required minlength="2" maxlength="32" placeholder="Örn. wololeybus" autocomplete="off"></div></div>
+      <label for="title">Başlık</label><input id="title" name="title" required minlength="2" maxlength="100" placeholder="Örn. 1. ara sınav / Problem seti 2">
+      <div class="form-row"><div><label for="date">Tarih / son teslim</label><input id="date" name="event_date" type="date" required></div><div><label for="time">Saat (isteğe bağlı)</label><input id="time" name="event_time" type="time"></div></div>
+      <label for="location">Derslik / yer (isteğe bağlı)</label><input id="location" name="location" maxlength="120" placeholder="Örn. F Blok 204">
+      <label for="details">Açıklama (isteğe bağlı)</label><textarea id="details" name="details" rows="3" maxlength="1000" placeholder="Kapsam, teslim biçimi veya ek bilgi"></textarea>
+      <div class="trap" aria-hidden="true"><label for="website">Website</label><input id="website" name="website" tabindex="-1" autocomplete="off"></div>
+      <p class="hint">Kayıt herkese açıktır. Gerçek ad, öğrenci numarası, e-posta veya not dökümü paylaşma. Düzeltme gerektiğinde “Hatalı bilgi bildir” düğmesini kullanabilirsin.</p>
+      <div id="createChallenge"></div><p id="formMessage" role="status"></p>
+      <div class="actions"><button id="submitEntry" type="submit">Kaydı paylaş</button></div>
+    </form>
+  </dialog>
+  <div id="reportChallenge" class="report-challenge"></div>
+  <script src="../course-planner/data-2026-fall.js?v=20260921-calendar"></script>
+  <script src="../course-planner/social-electives-2026-fall.js?v=20260921-calendar"></script>
+  <script src="config.js?v=20260921-calendar"></script>
+  <script type="module" src="app.mjs?v=20260921-calendar"></script>
+</body>
+</html>

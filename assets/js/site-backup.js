@@ -7,6 +7,7 @@
     if (/^iyte_gpa_target_20\d{2}_p[123]$/.test(key) || /^iyte_planner_gpa_scenario_[\w-]+_20\d{2}_p[123]$/.test(key))return 'GPA tahminleri';
     if (/^iyte_grad_20\d{2}_p[123]$/.test(key))return 'Mezuniyet takibi';
     if (/^iyte-course-planner(?:-beta)?(?::|-filter:|-context:|-plans:)[\w-]+$/.test(key))return 'Ders programları';
+    if (/^iyte-calendar-courses:[a-z0-9-]{1,60}$/.test(key))return 'Takvim ders seçimleri';
     if (key==='iyte-vize-final-v1')return 'Vize–final notları';
     if (['iyte_grad_year','iyte_grad_profile','site-theme','iyte_tools_theme'].includes(key))return 'Görünüm ve tercihler';
     return null;
@@ -26,6 +27,7 @@
     if(key.includes('-plans:'))return window.IYTE_PLANS.validate(value,key.split(':')[1]);
     if(key.includes('-context:'))return object(value) && Number.isInteger(value.year) && value.year>=2019 && value.year<=2026 && [1,2,3].includes(value.profile);
     if(/^iyte-course-planner(?:-beta)?:/.test(key))return Array.isArray(value) && value.every(id=>typeof id==='string');
+    if(key.startsWith('iyte-calendar-courses:'))return Array.isArray(value) && value.length<=500 && value.every(id=>typeof id==='string' && /^[a-z0-9-]{1,60}$/.test(id));
     if(key==='iyte-vize-final-v1')return Array.isArray(value) && value.every(c=>object(c) && (!c.midterms || Array.isArray(c.midterms) && c.midterms.every(object)));
     if(!object(value))return false;
     if(/^iyte_gpa_20/.test(key)) {

@@ -1,0 +1,3 @@
+[functions.course-calendar]
+# Visitors do not have accounts. Writes require a server-verified Turnstile token.
+verify_jwt = false
