@@ -165,11 +165,15 @@ check('beta year/profile controls do not change graduation preferences', () => {
 });
 check('2026 curriculum is available in beta', () => assert.match(env.node('#academicYear').innerHTML, /value="2026"/));
 
-const { execFileSync } = require('node:child_process');
+const { createHash } = require('node:crypto');
 check('stable planner files remain byte-for-byte unchanged', () => {
-  for (const path of ['course-planner/app.js','course-planner/index.html','course-planner/style.css']) {
-    const original = execFileSync('git', ['show', '7aed138aa69d75836eff2d56e9e091807783656c:' + path], {cwd: root});
-    assert.deepEqual(fs.readFileSync(root + path), original);
+  const baseline = {
+  "course-planner/app.js": "91e57816faf95a586720fe3902eb91f9683a7ffd7bcf3062213e34e5b04a0e05",
+  "course-planner/index.html": "a17075d9e4cc05b1c21f0d66ed67a560a28bccf27f2da98e7d5489d0c9fccfb1",
+  "course-planner/style.css": "8d51cf3a390f423b638a7e8816a600f0a6317972154edda5a1b1bf8e596bc03b"
+};
+  for (const [path, hash] of Object.entries(baseline)) {
+    assert.equal(createHash('sha256').update(fs.readFileSync(root + path)).digest('hex'), hash);
   }
 });
 
