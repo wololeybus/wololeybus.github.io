@@ -321,6 +321,7 @@
   </div>
 
   <script src="../assets/js/curricula.js"></script>
+  <script src="../assets/js/course-metadata.js"></script>
   <script>
     (() => {
       "use strict";
@@ -439,6 +440,7 @@
         if (year === 2024 && (code === "ELS IV" || code === "ELS V")) return "technical";
         if (code.startsWith("ELT")) return "technical";
         if (code.startsWith("ELS")) return "social";
+        if (window.IYTE_COURSE_METADATA?.get(code)?.category === "social") return "social";
         return "required";
       }
 
@@ -495,8 +497,10 @@
             const rawId = course.id || `${semesterIndex}_${index}`;
             const key = `d:${rawId}`;
             const saved = tracker.extras[key] || {};
-            const guessed = String(course.code || "").toUpperCase().startsWith("ELT") ? "technical"
-              : String(course.code || "").toUpperCase().startsWith("ELS") ? "social" : "other";
+            const code = String(course.code || "").toUpperCase();
+            const metadataCategory = window.IYTE_COURSE_METADATA?.get(code)?.category;
+            const guessed = code.startsWith("ELT") ? "technical"
+              : code.startsWith("ELS") || metadataCategory === "social" ? "social" : "other";
             const category = saved.category || guessed;
             const defaultEcts = category === "technical" ? 6 : category === "social" ? 3 : 0;
             const grade = course.grade || "";
@@ -739,6 +743,8 @@
         $("#yearSelect").innerHTML = validYears.map(value => `<option value="${value}">${value} girişli</option>`).join("");
         $("#yearSelect").value = String(year);
         $("#profileSelect").value = String(profile);
+        localStorage.setItem("iyte_grad_year", year);
+        localStorage.setItem("iyte_grad_profile", profile);
         setQueryYear();
         bindEvents();
         render();

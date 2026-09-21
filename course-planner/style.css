@@ -288,6 +288,12 @@ h1 {
 .course-card:hover { border-color: var(--line); background: var(--card-soft); }
 .course-card.dragging { opacity: .45; }
 .course-card.selected { background: var(--accent-soft); }
+.course-card.completed { opacity: .72; }
+.course-card.completed.selected { opacity: 1; }
+.course-card.completed .course-code::after {
+  content: "  ✓";
+  color: #2f9e6f;
+}
 
 .course-code {
   font-size: .82rem;
@@ -327,6 +333,17 @@ h1 {
   color: var(--muted);
   font-size: .63rem;
   font-weight: 800;
+}
+
+.badge.grade {
+  color: var(--text);
+  border-color: var(--line);
+}
+
+.badge.completed {
+  color: #207a55;
+  border-color: color-mix(in srgb, #2f9e6f 45%, var(--line));
+  background: color-mix(in srgb, #2f9e6f 12%, transparent);
 }
 
 .badge.technical {

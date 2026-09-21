@@ -177,6 +177,78 @@
 
   let toastTimer = null;
 
+  const PASSING_GRADES =
+    new Set(["AA", "BA", "BB", "CB", "CC", "DC", "DD"]);
+
+  function normalizeCourseCode(value) {
+    return window.IYTE_COURSE_METADATA?.normalizeCode(value) ||
+      String(value || "")
+        .toLocaleUpperCase("tr-TR")
+        .replace(/[^A-ZÇĞİÖŞÜ0-9]/g, "");
+  }
+
+  function normalizeCourseName(value) {
+    return normalize(value)
+      .replace(/\s*[—–-]\s*sube\s*\d+\s*$/i, "")
+      .trim()
+      .replace(/\s+/g, " ");
+  }
+
+  function loadAcademicStatus() {
+    const curricula = window.CURRICULA || {};
+    const years = Object.keys(curricula).map(Number).filter(Number.isFinite).sort();
+    const savedYear = Number(localStorage.getItem("iyte_grad_year"));
+    const year = years.includes(savedYear) ? savedYear : years.at(-1);
+    const savedProfile = Number(localStorage.getItem("iyte_grad_profile"));
+    const profile = [1, 2, 3].includes(savedProfile) ? savedProfile : 1;
+    const curriculum = curricula[String(year)];
+    if (!curriculum) return new Map();
+
+    let gpa = null;
+    let tracker = null;
+    try { gpa = JSON.parse(localStorage.getItem(`iyte_gpa_${year}_p${profile}`)); } catch {}
+    try { tracker = JSON.parse(localStorage.getItem(`iyte_grad_${year}_p${profile}`)); } catch {}
+    gpa = gpa && Number(gpa.year) === year ? gpa : null;
+    tracker = tracker && typeof tracker === "object" ? tracker : {};
+
+    const statuses = new Map();
+    const addStatus = (code, name, grade, key) => {
+      const manual = tracker.overrides?.[key] || "auto";
+      if (!grade && manual === "auto") return;
+      const completed = manual === "completed" ||
+        (manual !== "pending" && PASSING_GRADES.has(grade));
+      const status = { code, name, grade: grade || "", completed, manual, year, profile };
+      const normalizedCode = normalizeCourseCode(code);
+      if (normalizedCode) statuses.set(normalizedCode, status);
+      const normalizedName = normalizeCourseName(name);
+      if (normalizedName) statuses.set(`name:${normalizedName}`, status);
+    };
+
+    curriculum.semesters.forEach((semester, semesterIndex) => {
+      semester.courses.forEach((course, rowIndex) => {
+        const key = `s${semesterIndex}r${rowIndex}`;
+        const saved = gpa?.static?.[key] || {};
+        const elective = tracker.electives?.[key] || {};
+        addStatus(course.code, elective.name ?? saved.name ?? course.name, saved.grade, key);
+      });
+
+      (gpa?.dynamic?.[semesterIndex] || []).forEach((course, index) => {
+        const key = `d:${course.id || `${semesterIndex}_${index}`}`;
+        addStatus(course.code, course.name, course.grade, key);
+      });
+    });
+
+    return statuses;
+  }
+
+  let academicStatus = loadAcademicStatus();
+
+  function statusFor(course) {
+    return academicStatus.get(normalizeCourseCode(course.code)) ||
+      academicStatus.get(`name:${normalizeCourseName(course.name)}`) ||
+      (course.nameEn && academicStatus.get(`name:${normalizeCourseName(course.nameEn)}`)) || null;
+  }
+
   const $ =
     selector =>
       document.querySelector(
@@ -725,6 +797,8 @@
                 course.id
               );
 
+            const academic = statusFor(course);
+
             const colors =
               courseColor(
                 course
@@ -735,12 +809,20 @@
 
               course.technicalElective
                 ? `<span class="badge technical">Teknik seçmeli</span>`
+                : "",
+
+              academic?.grade
+                ? `<span class="badge grade">Son not: ${escapeHtml(academic.grade)}</span>`
+                : "",
+
+              academic?.completed
+                ? `<span class="badge completed">✓ Tamamlandı</span>`
                 : ""
             ].join("");
 
             return `
               <article
-                class="course-card ${isSelected ? "selected" : ""}"
+                class="course-card ${isSelected ? "selected" : ""} ${academic?.completed ? "completed" : ""}"
                 draggable="true"
                 data-course-id="${course.id}"
                 style="border-left:4px solid ${colors.accent}"
@@ -2484,6 +2566,19 @@ Tıklayınca ders bilgisi açılır.`
   $("#plannerTerm")
     .textContent =
       DATA.termLabel;
+
+  function refreshAcademicStatus() {
+    academicStatus = loadAcademicStatus();
+    renderCourseList();
+  }
+
+  window.addEventListener("storage", event => {
+    if (event.storageArea === localStorage &&
+        (event.key === null || /^iyte_(?:gpa_|grad_)/.test(event.key))) {
+      refreshAcademicStatus();
+    }
+  });
+  window.addEventListener("pageshow", refreshAcademicStatus);
 
   renderAll();
 
