@@ -21,6 +21,8 @@ function setup(seed = {}, search = '') {
     return nodes.get(key);
   }
   const localStorage = {
+    get length() { return data.size; },
+    key: index => [...data.keys()][index] ?? null,
     getItem: key => data.get(key) ?? null,
     setItem: (key, value) => data.set(key, String(value)),
     removeItem: key => data.delete(key)
@@ -41,6 +43,9 @@ function setup(seed = {}, search = '') {
   const run = path => vm.runInContext(fs.readFileSync(root + path, 'utf8'), ctx, { filename: path });
   run('assets/js/curricula.js');
   run('assets/js/curricula-2026.js');
+  run('assets/js/graduation-rules.js');
+  run('course-planner-beta/plans.js');
+  run('assets/js/site-backup.js');
   run('assets/js/course-metadata.js');
   run('assets/js/academic-model.js');
   run('course-planner-beta/planner-gpa.js');
@@ -131,7 +136,8 @@ check('pageshow reloads GPA and manual pending takes precedence', () => {
   assert.ok(!env.card('math145').includes('✓ Tamamlandı'));
 });
 env.data.set('iyte_grad_profile', '1');
-env.emit('storage', 'iyte_grad_profile');
+env.node('#academicProfile').value='1';
+env.node('#academicProfile').handlers.change();
 check('profiles do not leak grades into one another', () => assert.ok(!env.card('math145').includes('Son not:')));
 
 const invalid = setup({ iyte_grad_year: '2025', iyte_gpa_2025_p1: '{invalid', iyte_grad_2025_p1: '{invalid' });
@@ -233,7 +239,6 @@ check('only the old homepage entry is removed; the return link remains', () => {
   assert.ok(home.includes('href="course-planner-beta/"'));
   assert.ok(beta.includes('href="../course-planner/">Eski planlayıcıya dön'));
 });
-console.log(`${checks} integration scenarios passed (Node VM; browser layout not tested).`);
 
 check('term, exclusions, retakes, duplicates and incomplete projections', () => {
   const A=empty.ctx.IYTE_ACADEMIC;
@@ -287,7 +292,6 @@ check('social metadata keeps known ECTS and ignores unrelated courses',()=>{
   assert.equal(empty.ctx.IYTE_COURSE_METADATA.get('HUM 203').category,'social');
   assert.equal(empty.ctx.IYTE_COURSE_METADATA.get('PHYS 101'),null);
 });
-console.log(`All ${checks} integration checks passed.`);
 
 check('graduation recognizes social codes and preserves manual overrides',()=>{
   const state={year:2021,dynamic:{0:[{id:'social',code:'ART201',name:'Drawing',credit:3,grade:'AA'}]}};
@@ -318,5 +322,93 @@ check('target button never writes suggested grades to real inputs or storage',()
   assert.match(e.node('#targetResult').innerHTML,/FD → <strong>AA/);
   e.node('#targetGPA').value='';e.node('#autoFillBtn').handlers.click();
   assert.match(e.node('#targetResult').textContent,/hedef gir/);
+});
+
+check('all graduation years render, every course has ECTS and plan totals agree',()=>{
+  for(let year=2019;year<=2026;year++) {
+    const e=setup({iyte_grad_year:String(year)});
+    e.graduation();
+    const rules=e.ctx.IYTE_GRADUATION;
+    const courses=e.ctx.CURRICULA[year].semesters.flatMap(s=>s.courses);
+    for(const c of courses)assert.ok(rules.ectsFor(year,c.code)>0,`${year} ${c.code}`);
+    const total=courses.reduce((sum,c)=>sum+rules.ectsFor(year,c.code),0);
+    assert.equal(total,rules.requirements[year].ects);
+    assert.match(e.node('#ectsValue').textContent,new RegExp(` / ${total}$`));
+  }
+  assert.equal(empty.ctx.IYTE_GRADUATION.ectsFor(2019,'GCC101'),undefined);
+  assert.equal(empty.ctx.IYTE_GRADUATION.ectsFor(2026,'OHS101'),1);
+  assert.equal(empty.ctx.IYTE_GRADUATION.ectsFor(2026,'ENG102'),3);
+  assert.equal(empty.ctx.IYTE_GRADUATION.ectsFor(2019,'MBG101'),5);
+});
+check('completed 2019, 2020 and 2026 curricula meet tracker totals',()=>{
+  for(const year of [2019,2020,2026]) {
+    const staticGrades={};
+    empty.ctx.CURRICULA[year].semesters.forEach((s,si)=>s.courses.forEach((c,ri)=>{staticGrades[`s${si}r${ri}`]={grade:'AA',credit:c.credit};}));
+    const e=setup({iyte_grad_year:String(year),[`iyte_gpa_${year}_p1`]:JSON.stringify({year,static:staticGrades})});
+    e.graduation();assert.equal(e.node('#statusTitle').textContent,'Koşullar tamam görünüyor', String(year)+' '+e.node('#remainingList').innerHTML);
+  }
+});
+check('named plans migrate existing program and predictions, copies remain independent',()=>{
+  const e=setup({iyte_grad_year:'2021',
+    'iyte-course-planner-beta:2026-fall':'["math145"]',
+    'iyte_planner_gpa_scenario_2026-fall_2021_p1':JSON.stringify({MATH145:{grade:'BA'}})});
+  e.planner();
+  const key='iyte-course-planner-beta-plans:2026-fall';
+  assert.match(e.node('#miniGpaSummary').textContent,/Dönem 3.50/);
+  e.node('#planName').value='Hafif dönem';e.node('#copyPlan').handlers.click();
+  const copyId=JSON.parse(e.data.get(key)).activeId;
+  e.node('#miniGpaRows').handlers.change({target:{dataset:{gpaId:'MATH145',field:'grade'},value:'AA'}});
+  e.clickCourse('phys111');
+  let state=JSON.parse(e.data.get(key));
+  assert.equal(state.plans.length,2);
+  assert.equal(state.plans[0].scenarios['2021_p1'].MATH145.grade,'BA');
+  assert.equal(state.plans[1].scenarios['2021_p1'].MATH145.grade,'AA');
+  assert.equal(state.plans[0].selected.length,1);assert.equal(state.plans[1].selected.length,2);
+  e.node('#planSelect').handlers.change({target:{value:'initial'}});
+  assert.match(e.node('#miniGpaSummary').textContent,/Dönem 3.50/);
+  assert.equal(e.node('#statCourses').textContent,'1');
+  e.node('#planSelect').handlers.change({target:{value:copyId}});
+  e.node('#academicProfile').value='2';e.node('#academicProfile').handlers.change();
+  const reopened=setup(Object.fromEntries(e.data));reopened.planner();
+  assert.equal(reopened.node('#academicProfile').value,'2');
+  assert.equal(reopened.node('#statCourses').textContent,'2');
+  reopened.node('#deletePlan').handlers.click();
+  assert.equal(JSON.parse(reopened.data.get(key)).plans.length,1);
+  assert.equal(reopened.node('#academicProfile').value,'1');
+  assert.equal(reopened.node('#statCourses').textContent,'1');
+});
+check('comparison distinguishes workload from courses excluded from GPA',()=>{
+  const e=setup();e.planner();
+  const plan={context:{year:2026,profile:1},selected:['math145','phys111'],scenarios:{'2026_p1':{MATH145:{grade:'AA'},PHYS111:{grade:'FF',include:false}}}};
+  const s=e.ctx.IYTE_PLANS.summary(plan,e.ctx.COURSE_PLANNER_DATA.courses);
+  assert.equal(s.courses,2);assert.equal(s.credits,6);assert.equal(s.days,3);assert.equal(s.termGpa,4);
+});
+check('full backup round trip includes every tool and ignores unrelated storage',()=>{
+  const e=setup({iyte_grad_year:'2021',iyte_gpa_2021_p1:JSON.stringify({year:2021,static:{}}),
+    iyte_grad_2021_p1:JSON.stringify({overrides:{},extras:{},electives:{}}),
+    'iyte-vize-final-v1':JSON.stringify([{id:'x',name:'X',midterms:[]}]),
+    'iyte_gpa_target_2021_p1':'{"s0r0":true}',
+    'iyte-course-planner:2026-fall':'["math145"]','unrelated':'private'});
+  e.planner();const B=e.ctx.IYTE_BACKUP, backup=B.capture();
+  assert.equal(backup.data.unrelated,undefined);B.validate(backup);
+  const target=setup({unrelated:'keep',iyte_gpa_2025_p3:'{"year":2025}'});
+  const before=target.ctx.IYTE_BACKUP.restore(JSON.parse(JSON.stringify(backup)));
+  assert.equal(target.data.get('unrelated'),'keep');assert.equal(target.data.has('iyte_gpa_2025_p3'),false);
+  for(const [key,value]of Object.entries(backup.data))assert.equal(target.data.get(key),value);
+  target.ctx.IYTE_BACKUP.restore(before);
+  assert.equal(target.data.get('iyte_gpa_2025_p3'),'{"year":2025}');assert.equal(target.data.has('iyte-vize-final-v1'),false);
+  target.ctx.IYTE_BACKUP.restore(backup,'merge');assert.equal(target.data.has('iyte_gpa_2025_p3'),true);
+});
+check('bad backup is rejected before writes; quota failure restores existing records',()=>{
+  const e=setup({iyte_grad_year:'2021',unrelated:'keep'}), B=e.ctx.IYTE_BACKUP;
+  const original=JSON.stringify(Object.fromEntries(e.data));
+  for(const data of [{unrelated:'overwrite'},{iyte_gpa_2021_p1:'{"year":2021,"dynamic":{"0":{}}}'},{'iyte-course-planner-beta-plans:2026-fall':'{}'}]) {
+    assert.throws(()=>B.restore({format:'iyte-physics-tools',version:1,data}));
+    assert.equal(JSON.stringify(Object.fromEntries(e.data)),original);
+  }
+  const storage=e.ctx.localStorage, normal=storage.setItem;
+  storage.setItem=(key,value)=>{if(key==='iyte_grad_profile')throw new Error('quota');normal(key,value);};
+  assert.throws(()=>B.restore({format:'iyte-physics-tools',version:1,data:{iyte_grad_year:'2026',iyte_grad_profile:'2'}}),/önceki kayıtlar/);
+  assert.equal(e.data.get('iyte_grad_year'),'2021');assert.equal(e.data.get('unrelated'),'keep');
 });
 console.log(`All ${checks} checks passed.`);

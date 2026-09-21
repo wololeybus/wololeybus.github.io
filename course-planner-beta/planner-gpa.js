@@ -4,11 +4,12 @@
   const escape = value => String(value ?? '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
   const format = value => value == null ? '—' : value.toFixed(2);
   window.IYTE_PLANNER_GPA = {
-    create({getContext,getCourses,termId}) {
+    create({getContext,getCourses,termId,readScenario,writeScenario,onChange}) {
       const container = document.querySelector('#miniGpaRows');
       const key = () => { const {year,profile}=getContext(); return `iyte_planner_gpa_scenario_${termId}_${year}_p${profile}`; };
+      const read = () => readScenario ? readScenario() : A.read(key());
       function render() {
-        const {year,profile}=getContext(), saved=A.read(key());
+        const {year,profile}=getContext(), saved=read();
         const actual=A.records(year,profile), unique=new Map();
         getCourses().forEach(course => { const id=A.code(course.code)||course.id; if(!unique.has(id))unique.set(id,course); });
         const planned=[...unique].map(([id,course]) => {
@@ -33,9 +34,10 @@
       container.addEventListener('change', event => {
         const {gpaId,field}=event.target.dataset;
         if(!gpaId || !['include','credit','grade'].includes(field))return;
-        const saved=A.read(key());
+        const saved=read();
         saved[gpaId]={...saved[gpaId],[field]:field==='include'?event.target.checked:event.target.value};
-        localStorage.setItem(key(),JSON.stringify(saved)); render();
+        if(writeScenario)writeScenario(saved);else localStorage.setItem(key(),JSON.stringify(saved));
+        render(); onChange?.();
       });
       window.addEventListener('storage', event => {if(event.storageArea===localStorage && (event.key===null || event.key===key()))render();});
       return {render};

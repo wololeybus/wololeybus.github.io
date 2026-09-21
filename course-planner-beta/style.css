@@ -809,3 +809,18 @@ footer {
 }
 
 .academic-filter-help { font-size:.75rem; line-height:1.5; opacity:.75; margin:0 0 10px; }
+.saved-plans { margin:16px; padding:12px; border:1px solid var(--line); border-radius:10px; font-size:.8rem; }
+.saved-plans summary { display:flex; justify-content:space-between; gap:12px; cursor:pointer; }
+.saved-plans summary::before { content:'▸'; }
+.saved-plans[open] summary::before { content:'▾'; }
+.saved-plans summary strong { margin-right:auto; }
+.saved-plans p { font-size:.75rem; color:var(--muted); line-height:1.6; }
+.plan-controls { display:flex; flex-wrap:wrap; align-items:end; gap:8px; }
+.plan-controls label { display:grid; gap:5px; flex:1 1 160px; }
+.plan-controls input,.plan-controls select { width:100%; min-width:0; border:1px solid var(--line); padding:9px; border-radius:7px; background:var(--card); color:var(--text); font:inherit; }
+.plan-table-scroll { overflow:auto; margin-top:16px; }
+.plan-table-scroll table { border-collapse:collapse; width:100%; min-width:580px; text-align:left; }
+.plan-table-scroll caption { text-align:left; font-weight:700; margin-bottom:8px; }
+.plan-table-scroll th,.plan-table-scroll td { padding:9px; border-bottom:1px solid var(--line); }
+.plan-table-scroll .active-plan { background:var(--accent-soft); }
+@media print { .saved-plans { display:none; } }

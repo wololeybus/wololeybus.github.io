@@ -183,6 +183,8 @@
 
   let toastTimer = null;
   let gpaPanel = null;
+  let planStore = null;
+  let planPanel = null;
 
   const PASSING_GRADES =
     new Set(["AA", "BA", "BB", "CB", "CC", "DC", "DD"]);
@@ -352,6 +354,7 @@
   }
 
   function saveSelected() {
+    planStore?.selected([...selected], academicContext);
     localStorage.setItem(
       STORAGE_KEY,
       JSON.stringify(
@@ -1550,6 +1553,7 @@ Tıklayınca ders bilgisi açılır.`
 
   function renderAll() {
     gpaPanel?.render();
+    planPanel?.render();
     renderCourseList();
     renderSelected();
     renderCalendar();
@@ -2637,6 +2641,7 @@ Tıklayınca ders bilgisi açılır.`
       : "Bu yıl ve profilde not veya tamamlanma kaydı bulunamadı. GPA hesaplayıcısındaki yıl ve profilini seç.";
     renderCourseList();
     gpaPanel?.render();
+    planPanel?.render();
   }
 
   $("#academicYear").innerHTML = Object.keys(window.CURRICULA || {})
@@ -2651,6 +2656,8 @@ Tıklayınca ders bilgisi açılır.`
         profile: Number($("#academicProfile").value)
       }));
       refreshAcademicStatus();
+      planStore?.selected([...selected], academicContext);
+      planPanel?.render();
     });
   });
 
@@ -2662,10 +2669,34 @@ Tıklayınca ders bilgisi açılır.`
   });
   window.addEventListener("pageshow", refreshAcademicStatus);
 
+  function openSavedPlan(plan) {
+    selected = new Set(plan.selected.filter(id => byId.has(id)));
+    academicContext = {...plan.context};
+    localStorage.setItem(CONTEXT_KEY, JSON.stringify(academicContext));
+    localStorage.setItem(STORAGE_KEY, JSON.stringify([...selected]));
+    refreshAcademicStatus();
+    renderAll();
+  }
+
+  if (window.IYTE_PLANS) {
+    planStore = window.IYTE_PLANS.createStore({termId: DATA.termId, initialSelected: [...selected], initialContext: academicContext});
+    planPanel = window.IYTE_PLANS.mount({store: planStore, courses: DATA.courses, onOpen: openSavedPlan});
+    openSavedPlan(planStore.active());
+    window.addEventListener('storage', event => {
+      if (event.storageArea === localStorage && event.key === planStore.key) {
+        planStore.reload(); openSavedPlan(planStore.active());
+      }
+    });
+  }
   gpaPanel = window.IYTE_PLANNER_GPA?.create({
     getContext: () => academicContext,
     getCourses: () => [...selected].map(id => byId.get(id)).filter(Boolean),
-    termId: DATA.termId
+    termId: DATA.termId,
+    ...(planStore ? {
+      readScenario: () => planStore.scenario(academicContext),
+      writeScenario: scenario => planStore.saveScenario(academicContext, scenario),
+      onChange: () => planPanel.render()
+    } : {})
   });
 
   if (localStorage.getItem(STORAGE_KEY) === null) saveSelected();
