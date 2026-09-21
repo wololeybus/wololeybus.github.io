@@ -388,7 +388,7 @@ check('full backup round trip includes every tool and ignores unrelated storage'
     iyte_grad_2021_p1:JSON.stringify({overrides:{},extras:{},electives:{}}),
     'iyte-vize-final-v1':JSON.stringify([{id:'x',name:'X',midterms:[]}]),
     'iyte_gpa_target_2021_p1':'{"s0r0":true}',
-    'iyte-course-planner:2026-fall':'["math145"]','unrelated':'private'});
+    'iyte-course-planner:2026-fall':'["math145"]','iyte-calendar-courses:2026-fall':'["phys301","art201-s1"]','unrelated':'private'});
   e.planner();const B=e.ctx.IYTE_BACKUP, backup=B.capture();
   assert.equal(backup.data.unrelated,undefined);B.validate(backup);
   const target=setup({unrelated:'keep',iyte_gpa_2025_p3:'{"year":2025}'});
@@ -402,7 +402,7 @@ check('full backup round trip includes every tool and ignores unrelated storage'
 check('bad backup is rejected before writes; quota failure restores existing records',()=>{
   const e=setup({iyte_grad_year:'2021',unrelated:'keep'}), B=e.ctx.IYTE_BACKUP;
   const original=JSON.stringify(Object.fromEntries(e.data));
-  for(const data of [{unrelated:'overwrite'},{iyte_gpa_2021_p1:'{"year":2021,"dynamic":{"0":{}}}'},{'iyte-course-planner-beta-plans:2026-fall':'{}'}]) {
+  for(const data of [{unrelated:'overwrite'},{iyte_gpa_2021_p1:'{"year":2021,"dynamic":{"0":{}}}'},{'iyte-course-planner-beta-plans:2026-fall':'{}'},{'iyte-calendar-courses:2026-fall':'[3]'}]) {
     assert.throws(()=>B.restore({format:'iyte-physics-tools',version:1,data}));
     assert.equal(JSON.stringify(Object.fromEntries(e.data)),original);
   }
