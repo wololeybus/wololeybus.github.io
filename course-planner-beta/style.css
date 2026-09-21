@@ -189,6 +189,21 @@ h1 {
   margin-bottom: 16px;
 }
 
+.mini-gpa { margin: 0 16px 16px; border: 1px solid var(--line); border-radius: 10px; padding: 12px; background: var(--card-soft); font-size: .8rem; }
+.mini-gpa summary { cursor: pointer; display: flex; flex-wrap: wrap; justify-content: space-between; gap: 8px; }
+.mini-gpa summary::before { content: '▸'; }
+.mini-gpa[open] summary::before { content: '▾'; }
+.mini-gpa summary strong { margin-right: auto; }
+.mini-gpa p { color: var(--muted); font-size: .75rem; line-height: 1.5; margin: 10px 0 0; }
+.mini-gpa-scroll { max-height: 230px; overflow: auto; margin-top: 10px; }
+.mini-gpa table { width: 100%; border-collapse: collapse; text-align: left; }
+.mini-gpa th, .mini-gpa td { padding: 6px 4px; border-bottom: 1px solid var(--line); }
+.mini-gpa th { font-size: .7rem; color: var(--muted); }
+.mini-gpa small { display: block; color: var(--muted); font-size: .65rem; margin-top: 3px; }
+.mini-gpa input[type=number], .mini-gpa select { width: 100%; max-width: 110px; padding: 6px; border: 1px solid var(--line); border-radius: 6px; background: var(--card); color: var(--text); font: inherit; }
+.mini-gpa input[type=checkbox] { width: 17px; height: 17px; accent-color: var(--accent); }
+.mini-gpa .gpa-excluded td:not(:first-child) { opacity: .5; }
+
 .stat {
   min-height: 94px;
   padding: 16px;
@@ -388,7 +403,7 @@ h1 {
   background: var(--danger-soft);
 }
 
-.badge.curriculum-note {
+.badge.curriculum-note, .badge.prerequisite-note {
   color: var(--text);
   border: 1px dashed var(--line-strong);
   background: transparent;
@@ -792,3 +807,5 @@ footer {
   .calendar { min-width: 0; grid-template-columns: 70px repeat(5, 1fr); }
   .event-remove { display: none; }
 }
+
+.academic-filter-help { font-size:.75rem; line-height:1.5; opacity:.75; margin:0 0 10px; }

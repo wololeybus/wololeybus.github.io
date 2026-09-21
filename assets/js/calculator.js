@@ -199,6 +199,7 @@
     updateStatus(gpa, totalCredits);
     updateStats(distribution);
     if (persist) saveState();
+    renderTargetScope();
   }
 
   function checkPrerequisites(passedCodes) {
@@ -239,42 +240,33 @@
     $('#btnUndo').style.display = 'block';
   }
 
+  function targetRows() {
+    const scope = window.IYTE_ACADEMIC.read(`iyte_gpa_target_${year}_p${profile}`);
+    return $$('#semesterContainer tbody tr').map(row => {
+      const key = row.dataset.key || `d:${row.dataset.id}`;
+      const grade = row.querySelector('.grade-select')?.value || '';
+      return {key,grade,credit:Number(row.querySelector('.credit-input')?.value || 0),
+        code:row.querySelector('.c-code')?.textContent.trim() || row.querySelector('.course-code-input')?.value || 'Ek ders',
+        name:row.querySelector('.course-name-input')?.value || row.children[1]?.textContent || '',
+        include:scope[key] ?? !grade};
+    }).filter(row => Number.isFinite(row.credit) && row.credit > 0);
+  }
+
+  function renderTargetScope() {
+    $('#targetCourses').innerHTML = targetRows().map(row => `<label style="display:flex;gap:8px;align-items:start;margin:8px 0;font-size:.8rem">
+      <input type="checkbox" data-target-key="${escapeHTML(row.key)}" ${row.include?'checked':''}>
+      <span>${escapeHTML(row.code)} · ${escapeHTML(row.name)}<br><small>Mevcut: ${escapeHTML(row.grade || 'Not yok')} · ${row.credit} kredi</small></span>
+    </label>`).join('');
+    $('#targetResult').textContent = '';
+  }
+
   function autoFillTarget() {
-    const target = Number($('#targetGPA').value);
-    if (!Number.isFinite(target) || target < 0 || target > 4) { $('#targetResult').textContent = '0,00–4,00 arasında hedef gir.'; return; }
-    const rows = $$('tbody tr');
-    let fixedPoints = 0, fixedCredits = 0;
-    const empty = [];
-    rows.forEach(row => {
-      const cr = Number(row.querySelector('.credit-input')?.value || 0);
-      const sel = row.querySelector('.grade-select');
-      if (!sel || cr <= 0) return;
-      if (sel.value) { fixedPoints += gradePoints[sel.value] * cr; fixedCredits += cr; }
-      else empty.push({ sel, cr, idx: 0 });
-    });
-    if (!empty.length) { $('#targetResult').textContent = 'Notu boş kredili ders yok.'; return; }
-    saveUndoSnapshot();
-    const allCredits = fixedCredits + empty.reduce((s,c) => s+c.cr, 0);
-    const maxPoints = fixedPoints + empty.reduce((s,c) => s + c.cr*4, 0);
-    const maxGpa = maxPoints/allCredits;
-    if (target > maxGpa + 1e-9) {
-      empty.forEach(c => c.sel.value = 'AA');
-      $('#targetResult').textContent = `Bu derslerle maksimum yaklaşık ${maxGpa.toFixed(2)}.`;
-      calculate(); return;
-    }
-    let points = fixedPoints + empty.reduce((s,c) => s + c.cr*gradePoints[gradeKeys[0]], 0);
-    const need = target * allCredits;
-    while (points + 1e-9 < need) {
-      let best = null;
-      for (const c of empty) if (c.idx < gradeKeys.length-1 && (!best || c.idx < best.idx)) best = c;
-      if (!best) break;
-      points -= best.cr * gradePoints[gradeKeys[best.idx]];
-      best.idx++;
-      points += best.cr * gradePoints[gradeKeys[best.idx]];
-    }
-    empty.forEach(c => c.sel.value = gradeKeys[c.idx]);
-    $('#targetResult').textContent = 'Boş dersler hedefe yaklaşacak şekilde dolduruldu.';
-    calculate();
+    const raw = $('#targetGPA').value, target = Number(raw);
+    if (!raw.trim() || !Number.isFinite(target) || target < 0 || target > 4) { $('#targetResult').textContent = '0,00–4,00 arasında hedef gir.'; return; }
+    const result = window.IYTE_ACADEMIC.targetPlan(targetRows(), target);
+    if (!result.suggestions.length) { $('#targetResult').textContent = 'Öneri için en az bir kredili ders seç.'; return; }
+    $('#targetResult').innerHTML = `<p>${target > result.maximum + 1e-9 ? `Bu derslerle en yüksek GNO: ${result.maximum.toFixed(2)}. Hedefe ulaşılamıyor.` : `Önerilen senaryo GNO: ${result.gpa.toFixed(2)}.`} Gerçek notlar değiştirilmedi.</p>` +
+      result.suggestions.map(row => `<div style="margin:6px 0"><strong>${escapeHTML(row.code)}</strong> · ${escapeHTML(row.name)}: ${escapeHTML(row.grade || 'Not yok')} → <strong>${row.suggested}</strong></div>`).join('');
   }
 
   function exportData() {
@@ -317,6 +309,16 @@
       $('#regChevron').textContent = $('#regBox').classList.contains('open') ? '▲' : '▼';
     });
     $('#autoFillBtn').addEventListener('click', autoFillTarget);
+    $('#targetCourses').addEventListener('change', event => {
+      const key = event.target.dataset.targetKey;
+      if (!key) return;
+      const storage = `iyte_gpa_target_${year}_p${profile}`;
+      const scope = window.IYTE_ACADEMIC.read(storage);
+      scope[key] = event.target.checked;
+      localStorage.setItem(storage, JSON.stringify(scope));
+      $('#targetResult').textContent = '';
+    });
+    $('#targetGPA').addEventListener('input', () => { $('#targetResult').textContent = ''; });
     $('#btnUndo').addEventListener('click', () => {
       if (!undoSnapshot) return;
       resetView(); applyState(undoSnapshot); undoSnapshot = null; $('#btnUndo').style.display = 'none'; saveState();
