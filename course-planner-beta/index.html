@@ -1,0 +1,179 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="color-scheme" content="light dark">
+  <meta name="description" content="İYTE Fizik ders programı oluşturucu: lisans ve lisansüstü dersleri aynı haftalık planda karşılaştır, çakışmaları gör.">
+  <title>Course Planner — Deneme | İYTE Fizik</title>
+
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="style.css">
+
+  <script>
+    (() => {
+      const saved = localStorage.getItem("site-theme");
+      const dark = window.matchMedia("(prefers-color-scheme: dark)").matches;
+      document.documentElement.dataset.theme = saved || (dark ? "dark" : "light");
+    })();
+  </script>
+</head>
+<body>
+  <div class="page">
+    <header class="topbar">
+      <a class="brand" href="../">← Araçlar</a>
+      <div class="top-actions">
+        <a class="button subtle" href="../calculator/">GPA Calculator</a>
+        <button class="theme-toggle" id="themeToggle" type="button">Tema</button>
+      </div>
+    </header>
+
+    <main>
+      <section class="hero">
+        <p class="eyebrow">Course Planner · Deneme</p>
+        <h1>Derslerini aynı masada gör.</h1>
+        <p class="hero-copy">Lisans ve lisansüstü dersleri tek ekranda karşılaştır. Dersi sürükleyip programa bırak; gerçek saatlerine otomatik yerleşsin. Çakışmalar görünür kalsın, seçimlerin tarayıcıda saklansın.</p>
+        <div class="term-line"><span class="term-dot"></span><span id="termLabel">2026–2027 Güz</span> programı yüklü</div>
+      </section>
+
+      <section class="trial-panel" aria-label="Deneme sürümü ve not bilgileri">
+        <div class="trial-heading">
+          <div>
+            <strong>Deneme sürümü</strong>
+            <p>İlk açılışta mevcut programın kopyalanır. Buradaki ders seçimlerin ayrı kaydedilir; istediğin zaman eski planlayıcıya dönebilirsin.</p>
+          </div>
+          <a class="button" href="../course-planner/">Eski planlayıcıya dön →</a>
+        </div>
+        <div class="academic-controls">
+          <label for="academicYear">Giriş yılı
+            <select id="academicYear"></select>
+          </label>
+          <label for="academicProfile">GPA profili
+            <select id="academicProfile">
+              <option value="1">Profil 1</option>
+              <option value="2">Profil 2</option>
+              <option value="3">Profil 3</option>
+            </select>
+          </label>
+          <p id="academicNote" role="status"></p>
+        </div>
+      </section>
+
+      <section class="stats" aria-label="Program özeti">
+        <article class="stat">
+          <div class="stat-label">Seçili ders</div>
+          <div class="stat-value" id="statCourses">0</div>
+          <div class="course-meta" id="statGradDetail">Lisansüstü seçili değil</div>
+        </article>
+        <article class="stat">
+          <div class="stat-label">Kampüs günü</div>
+          <div class="stat-value" id="statDays">0 gün</div>
+        </article>
+        <article class="stat">
+          <div class="stat-label">Boş günler</div>
+          <div class="stat-value" id="statFree">Pzt, Sal, Çar, Per, Cum</div>
+        </article>
+        <article class="stat">
+          <div class="stat-label">Çakışma</div>
+          <div class="stat-value" id="statConflicts">0</div>
+        </article>
+      </section>
+
+      <section class="workspace">
+        <aside class="sidebar" aria-label="Ders listesi">
+          <div class="sidebar-head">
+            <div class="sidebar-title-row">
+              <h2>Dersler</h2>
+              <span class="result-count" id="resultCount"></span>
+            </div>
+            <div class="search-wrap">
+              <input class="search-input" id="searchInput" type="search" autocomplete="off" placeholder="Ders, kod veya hoca ara…" aria-label="Ders ara">
+            </div>
+            <div class="filters" aria-label="Ders filtresi">
+              <button class="filter-chip active" type="button" data-filter="all">Tümü</button>
+              <button class="filter-chip" type="button" data-filter="1">1. sınıf</button>
+              <button class="filter-chip" type="button" data-filter="2">2. sınıf</button>
+              <button class="filter-chip" type="button" data-filter="3">3. sınıf</button>
+              <button class="filter-chip" type="button" data-filter="4">4. sınıf</button>
+              <button class="filter-chip" type="button" data-filter="technical">
+  Teknik seçmeli
+</button>
+<button class="filter-chip" type="button" data-filter="social">
+  Sosyal seçmeli
+</button>
+            </div>
+          </div>
+
+          <div class="course-list" id="courseList"></div>
+          <div class="drag-hint">Masaüstünde kartı sürükleyip takvimin herhangi bir yerine bırakabilirsin. Mobilde <strong>Ekle</strong> düğmesini kullan.</div>
+        </aside>
+
+        <section class="planner-panel" aria-label="Haftalık ders programı">
+          <header class="planner-head">
+            <div>
+              <h2>Haftalık Program</h2>
+              <p class="planner-subtitle"><span id="plannerTerm"></span> · Dersler sabit saatlerine yerleşir</p>
+            </div>
+            <div class="toolbar-actions">
+              <button class="button subtle" id="pngButton" type="button">PNG</button>
+              <button class="button subtle" id="printButton" type="button">Yazdır / PDF</button>
+              <button class="button danger" id="clearButton" type="button">Temizle</button>
+            </div>
+          </header>
+
+          <div class="selected-section">
+            <div class="selected-head">
+              <span>Seçili dersler</span>
+              <span id="selectedCount">0 seçili</span>
+            </div>
+            <div class="selected-list" id="selectedList"></div>
+          </div>
+
+          <div class="calendar-scroll">
+            <div class="calendar" id="calendar"></div>
+          </div>
+
+          <section class="conflicts" id="conflictsSection" hidden>
+            <div class="conflict-head">
+              <h2>Çakışmalar</h2>
+              <span class="conflict-count" id="conflictCount">0 çakışma</span>
+            </div>
+            <div class="conflict-list" id="conflictList"></div>
+          </section>
+        </section>
+      </section>
+
+      <aside class="source-note">
+        bunu yazan tosun okuyana kosun
+      </aside>
+    </main>
+
+    <footer>Şahsi kullanım için tasarlanmıştır, her dönem kendime kadar güncelliyorum herkes kullanmakta özgür fakat sorumluluk kabul etmiyorum.</footer>
+  </div>
+
+  <div class="toast" id="toast" role="status" aria-live="polite"></div>
+
+  <div class="modal-backdrop" id="modalBackdrop" aria-hidden="true">
+    <section class="modal" role="dialog" aria-modal="true" aria-labelledby="modalTitle">
+      <div class="modal-head">
+        <div>
+          <div class="modal-code" id="modalCode"></div>
+          <h3 id="modalTitle"></h3>
+        </div>
+        <button class="modal-close" id="modalClose" type="button" aria-label="Kapat">×</button>
+      </div>
+      <dl class="detail-grid" id="modalDetails"></dl>
+      <div class="detail-note" id="modalNote" hidden></div>
+    </section>
+  </div>
+
+<script src="../course-planner/data-2026-fall.js"></script>
+<script src="../course-planner/social-electives-2026-fall.js"></script>
+<script src="../assets/js/curricula.js"></script>
+<script src="../assets/js/curricula-2026.js"></script>
+<script src="course-metadata.js"></script>
+<script src="app.js"></script>
+</body>
+</html>
