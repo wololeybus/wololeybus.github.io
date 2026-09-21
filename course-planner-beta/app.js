@@ -186,6 +186,8 @@
   const PASSING_GRADES =
     new Set(["AA", "BA", "BB", "CB", "CC", "DC", "DD"]);
 
+  const FAILED_GRADES = new Set(["FD", "FF"]);
+
   function normalizeCourseCode(value) {
     return window.IYTE_COURSE_METADATA?.normalizeCode(value) ||
       String(value || "")
@@ -236,7 +238,11 @@
       const normalizedCode = normalizeCourseCode(code);
       if (normalizedCode) statuses.set(normalizedCode, status);
       const normalizedName = normalizeCourseName(name);
-      if (normalizedName) statuses.set(`name:${normalizedName}`, status);
+      // Named elective slots can match by name; distinct real codes must not
+      // share a grade just because their undergraduate/graduate titles match.
+      if (normalizedName && (!normalizedCode || /^(ELS|ELT)/.test(normalizedCode))) {
+        statuses.set(`name:${normalizedName}`, status);
+      }
     };
 
     curriculum.semesters.forEach((semester, semesterIndex) => {
@@ -262,6 +268,17 @@
     return academicStatus.get(normalizeCourseCode(course.code)) ||
       academicStatus.get(`name:${normalizeCourseName(course.name)}`) ||
       (course.nameEn && academicStatus.get(`name:${normalizeCourseName(course.nameEn)}`)) || null;
+  }
+
+  function curriculumNoteFor(course) {
+    if (course.socialElective || course.technicalElective || course.level === "graduate") return "";
+    const curriculum = window.CURRICULA?.[String(academicContext.year)];
+    if (!curriculum) return "";
+    const code = normalizeCourseCode(course.code);
+    const required = curriculum.semesters.some(semester =>
+      semester.courses.some(item => normalizeCourseCode(item.code) === code)
+    );
+    return required ? "" : `${academicContext.year} müfredatında zorunlu değil`;
   }
 
   const $ =
@@ -807,6 +824,9 @@
               );
 
             const academic = statusFor(course);
+            const failed = FAILED_GRADES.has(academic?.grade);
+            const completed = Boolean(academic?.completed) && !failed;
+            const curriculumNote = curriculumNoteFor(course);
 
             const colors =
               courseColor(
@@ -824,14 +844,22 @@
                 ? `<span class="badge grade">Son not: ${escapeHtml(academic.grade)}</span>`
                 : "",
 
-              academic?.completed
+              failed
+                ? `<span class="badge failed">✗ Başarısız</span>`
+                : "",
+
+              completed
                 ? `<span class="badge completed">✓ Tamamlandı</span>`
+                : "",
+
+              curriculumNote
+                ? `<span class="badge curriculum-note">${escapeHtml(curriculumNote)}</span>`
                 : ""
             ].join("");
 
             return `
               <article
-                class="course-card ${isSelected ? "selected" : ""} ${academic?.completed ? "completed" : ""}"
+                class="course-card ${isSelected ? "selected" : ""} ${completed ? "completed" : ""} ${failed ? "failed" : ""}"
                 draggable="true"
                 data-course-id="${course.id}"
                 style="border-left:4px solid ${colors.accent}"
